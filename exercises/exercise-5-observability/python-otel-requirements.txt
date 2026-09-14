@@ -1,0 +1,4 @@
+# Add to exercise-3-travel-agent-python/pyproject.toml [project.optional-dependencies] otel section
+opentelemetry-sdk>=1.25.0
+opentelemetry-exporter-otlp>=1.25.0
+opentelemetry-instrumentation-httpx>=0.46b0

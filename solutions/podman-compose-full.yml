@@ -1,0 +1,126 @@
+version: "3.8"
+
+# Full DevConf Concierge system — all agents + infrastructure.
+# Use this to demo the complete system or as a reference for participants.
+#
+# Usage:
+#   First, build all Java agents:
+#     cd exercises/exercise-1-session-agent && mvn package -DskipTests
+#     cd exercises/exercise-2a-spring-boot && mvn package -DskipTests
+#     cd exercises/exercise-4-concierge && mvn package -DskipTests
+#
+#   Then run:
+#     podman-compose -f solutions/podman-compose-full.yml up -d
+
+services:
+  # ============================================================
+  # Infrastructure
+  # ============================================================
+
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    container_name: devconf-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama-pull:
+    image: docker.io/ollama/ollama:latest
+    container_name: devconf-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["ollama", "pull", "mistral"]
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    restart: "no"
+
+  jaeger:
+    image: docker.io/jaegertracing/all-in-one:latest
+    container_name: devconf-jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+  # ============================================================
+  # Agents
+  # ============================================================
+
+  session-agent-quarkus:
+    build:
+      context: ../exercises/exercise-1-session-agent
+      dockerfile: src/main/docker/Dockerfile.jvm
+    container_name: devconf-session-quarkus
+    ports:
+      - "8080:8080"
+    environment:
+      - QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL=http://ollama:11434
+      - QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - SESSION_DATA_PATH=/app/data/sessions.json
+    volumes:
+      - ../conference-data:/app/data:ro
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  session-agent-spring:
+    build:
+      context: ../exercises/exercise-2a-spring-boot
+    container_name: devconf-session-spring
+    ports:
+      - "8081:8081"
+    environment:
+      - LANGCHAIN4J_OLLAMA_CHAT_MODEL_BASE_URL=http://ollama:11434
+      - MANAGEMENT_OTLP_TRACING_ENDPOINT=http://jaeger:4317
+      - SESSION_DATA_PATH=/app/data/sessions.json
+    volumes:
+      - ../conference-data:/app/data:ro
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  travel-agent-python:
+    build:
+      context: ../exercises/exercise-3-travel-agent-python
+    container_name: devconf-travel-python
+    ports:
+      - "9000:9000"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=Travel Tips Agent (Python)
+
+  concierge-agent:
+    build:
+      context: ../exercises/exercise-4-concierge
+      dockerfile: src/main/docker/Dockerfile.jvm
+    container_name: devconf-concierge
+    ports:
+      - "8090:8090"
+    environment:
+      - QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL=http://ollama:11434
+      - QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jaeger:4317
+      - CONCIERGE_AGENT_URLS=http://session-agent-quarkus:8080,http://travel-agent-python:9000
+    depends_on:
+      - session-agent-quarkus
+      - travel-agent-python
+      ollama:
+        condition: service_healthy
+
+volumes:
+  ollama-data:

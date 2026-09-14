@@ -1,0 +1,27 @@
+# Java build output
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.classpath
+.project
+.settings/
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Podman/Docker
+.podman/
