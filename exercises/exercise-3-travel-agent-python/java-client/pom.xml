@@ -17,7 +17,7 @@
     </properties>
 
     <dependencies>
-        <!-- A2A Java SDK — client + JSON-RPC transport -->
+        <!-- A2A Java SDK — client + REST transport -->
         <dependency>
             <groupId>org.a2aproject.sdk</groupId>
             <artifactId>a2a-java-sdk-client</artifactId>
@@ -25,7 +25,7 @@
         </dependency>
         <dependency>
             <groupId>org.a2aproject.sdk</groupId>
-            <artifactId>a2a-java-sdk-client-transport-jsonrpc</artifactId>
+            <artifactId>a2a-java-sdk-client-transport-rest</artifactId>
             <version>${a2a-sdk.version}</version>
         </dependency>
     </dependencies>

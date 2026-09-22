@@ -5,7 +5,8 @@ import org.a2aproject.sdk.client.Client;
 import org.a2aproject.sdk.client.ClientEvent;
 import org.a2aproject.sdk.client.MessageEvent;
 import org.a2aproject.sdk.client.TaskEvent;
-import org.a2aproject.sdk.client.transport.jsonrpc.JSONRPCTransport;
+import org.a2aproject.sdk.client.transport.rest.RestTransport;
+import org.a2aproject.sdk.client.transport.rest.RestTransportConfigBuilder;
 import org.a2aproject.sdk.spec.AgentCard;
 import org.a2aproject.sdk.spec.AgentSkill;
 import org.a2aproject.sdk.spec.Artifact;
@@ -51,20 +52,20 @@ public class TravelAgentClient {
 
         // Step 2: Build the A2A client from the AgentCard
         Client client = Client.builder(card)
-                .withTransport(JSONRPCTransport.class, new org.a2aproject.sdk.client.transport.jsonrpc.JSONRPCTransportConfigBuilder())
+                .withTransport(RestTransport.class, new RestTransportConfigBuilder())
                 .build();
 
         // Step 3: Send transit query (Maya's scenario)
-        System.out.println("\n2. Sending transit query: 'How do I get from the airport to the venue quickly?'");
-        sendAndPrint(client, "How do I get from the airport to the venue quickly?");
+        System.out.println("\n2. Sending transit query: 'How do I get from Brussels Airport to Kinepolis Antwerp?'");
+        sendAndPrint(client, "How do I get from Brussels Airport to Kinepolis Antwerp?");
 
         // Step 4: Send flight status query
-        System.out.println("\n3. Sending flight query: 'What is the status of flight UA 1742?'");
-        sendAndPrint(client, "What is the status of flight UA 1742?");
+        System.out.println("\n3. Sending flight query: 'What is the status of flight UA 998?'");
+        sendAndPrint(client, "What is the status of flight UA 998?");
 
         // Step 5: Send receipt extraction
-        System.out.println("\n4. Sending receipt extraction: 'Log my taxi receipt for $42.50'");
-        sendAndPrint(client, "Log my taxi receipt for $42.50");
+        System.out.println("\n4. Sending receipt extraction: 'Log my taxi receipt for €65'");
+        sendAndPrint(client, "Log my taxi receipt for €65");
 
         client.close();
 

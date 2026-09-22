@@ -1,6 +1,6 @@
 # Exercise 3: Cross-Language — The Travel & Logistics Agent (15 min)
 
-> _"Maya's flight was delayed by two hours. She opens her DevSphere app and types: 'How do I get to the venue quickly?' The Travel & Logistics Agent — written in Python — compares rideshare (15 min, $35) vs the disrupted airport express (45 min, $12) and recommends the rideshare. Language doesn't matter — A2A is a wire protocol."_
+> _"Maya's flight was delayed by two hours. She opens her DevSphere app and types: 'How do I get to the venue quickly?' The Travel & Logistics Agent — written in Python — compares a Bolt rideshare (35 min, €45) vs the disrupted NMBS train (55 min, €12) and recommends the rideshare. Language doesn't matter — A2A is a wire protocol."_
 
 ## Overview
 
@@ -41,7 +41,7 @@ Take a look at `pyproject.toml` to see what we're pulling in:
 ```toml
 [project]
 dependencies = [
-    "a2a-sdk>=0.2.0",      # The official A2A Python SDK
+    "a2a-sdk[http-server]>=0.2.0",  # The official A2A Python SDK (with Starlette HTTP server)
     "uvicorn>=0.30.0",      # ASGI server to host our agent
     "httpx>=0.27.0",        # HTTP client for cross-agent calls
 ]
@@ -63,20 +63,20 @@ The agent has an expanded knowledge base covering Maya's full travel lifecycle:
 TRAVEL_DATA = {
     "flights": [
         {
-            "flight": "UA 1742", "origin": "SFO", "destination": "PRG",
-            "scheduled_arrival": "06:15", "actual_arrival": "08:20",
+            "flight": "UA 998", "origin": "EWR", "destination": "BRU",
+            "scheduled_arrival": "06:30", "actual_arrival": "08:35",
             "delay_minutes": 125, "status": "DELAYED",
-            "gate": "B22", "terminal": "Terminal 2",
-            "note": "Delayed due to late-arriving aircraft from LAX.",
+            "gate": "B44", "terminal": "Terminal A",
+            "note": "Delayed due to late-arriving aircraft from Chicago.",
         },
         ...
     ],
     "transit": {
         "options": [
-            {"mode": "Rideshare (Bolt/Uber)", "duration_minutes": 15, "cost": "$35",
+            {"mode": "Rideshare (Bolt/Uber)", "duration_minutes": 35, "cost": "€45",
              "disruption": None, ...},
-            {"mode": "Airport Express Train (AE)", "duration_minutes": 30, "cost": "$12",
-             "disruption": "Signal fault — estimated 45 min today.", ...},
+            {"mode": "Train (Brussels Airport → Antwerp-Centraal)", "duration_minutes": 35, "cost": "€12",
+             "disruption": "Track works — estimated 55 min today.", ...},
             ...
         ]
     },
@@ -94,15 +94,15 @@ The `get_transit_options()` function compares all available modes and factors in
 
 ```python
 def get_transit_options(query: str) -> str:
-    lines = ["**Transit options from the airport to the convention center:**\n"]
+    lines = ["**Transit options from Brussels Airport (BRU) to Kinepolis Antwerp:**\n"]
     best_option = None
     best_time = 999
 
     for opt in TRAVEL_DATA["transit"]["options"]:
         effective_time = opt["duration_minutes"]
         if opt["disruption"]:
-            if "45 min" in opt["disruption"]:
-                effective_time = 45  # Adjust for disruption
+            if "55 min" in opt["disruption"]:
+                effective_time = 55  # Adjust for disruption
 
         if effective_time < best_time:
             best_time = effective_time
@@ -112,7 +112,7 @@ def get_transit_options(query: str) -> str:
     lines.append(f"Recommendation: {best_option} is the fastest option today (~{best_time} min).")
 ```
 
-This is what makes Maya's scenario work: the train is normally 30 minutes, but today's signal fault bumps it to 45 minutes — so the rideshare at 15 minutes wins.
+This is what makes Maya's scenario work: the NMBS train is normally 35 minutes, but today's track works between Mechelen and Antwerp bump it to 55 minutes — so the Bolt rideshare at 35 minutes wins.
 
 ### Receipt Extraction (Key for Exercise 5)
 
@@ -122,15 +122,15 @@ The `extract_receipt()` function simulates extracting fare details from a descri
 def extract_receipt(query: str) -> str:
     # Parse vendor type from keywords
     if any(w in query_lower for w in ["taxi", "cab"]):
-        vendor = "City Taxi Co."
-        amount = "42.50"
+        vendor = "Antwerp Taxi Service"
+        amount = "65.00"
         category = "ground_transportation"
     ...
 
     receipt = {
         "vendor": vendor,
         "amount": amount,
-        "currency": "USD",
+        "currency": "EUR",
         "date": date,
         "category": category,
         "status": "pending_review",
@@ -139,31 +139,35 @@ def extract_receipt(query: str) -> str:
 
 This structured payload is exactly what the Expense & Compliance Agent (Exercise 5) will consume for audit-ready processing — demonstrating **cross-agent, cross-language data handoff**.
 
-### AgentExecution (Python equivalent of AgentExecutor)
+### AgentExecutor (Python equivalent of the Java AgentExecutor)
 
-The `TravelAgentExecution` class implements the A2A message handler — the Python equivalent of the `AgentExecutor` you built in Java:
+The `TravelAgentExecutor` class implements the A2A message handler — the Python equivalent of the `AgentExecutor` you built in Java:
 
 ```python
-class TravelAgentExecution(AgentExecution):
-    async def execute(self, context: RequestContext, event_queue) -> None:
-        user_message = ""
-        for part in context.message.parts:
-            if isinstance(part.root, TextPart):
-                user_message = part.root.text
-                break
+class TravelAgentExecutor(AgentExecutor):
+    async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
+        user_message = context.get_user_input()
+        if not user_message:
+            user_message = "general"
 
         response_text = answer_query(user_message)
+
         await event_queue.enqueue_event(
-            context.build_success_response(
-                parts=[Part(root=TextPart(text=response_text))]
+            Message(
+                role=Role.ROLE_AGENT,
+                parts=[Part(text=response_text)],
+                message_id=str(uuid.uuid4()),
             )
         )
+
+    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
+        pass
 ```
 
 Compare this to your Java `AgentExecutor.execute(RequestContext, AgentEmitter)` — the pattern is identical:
-1. Extract text from the message parts
+1. Extract text from the message using `context.get_user_input()`
 2. Process the query
-3. Return a response with text parts
+3. Return a `Message` response with text parts via the event queue
 
 ### AgentCard — Six Skills
 
@@ -205,49 +209,39 @@ curl -s http://localhost:9000/.well-known/agent-card.json | python -m json.tool
 
 You should see the AgentCard with skills like `flight-status`, `transit-routes`, `receipt-extraction` — the same JSON structure as your Java agents.
 
-### Test Maya's scenario: transit comparison
+### Test Maya's scenario: transit comparison (REST transport)
 
 ```bash
-curl -s -X POST http://localhost:9000/ \
+curl -s -X POST http://localhost:9000/message:send \
   -H "Content-Type: application/json" \
   -H "A2A-Version: 1.0" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "My flight was delayed. How do I get to the venue quickly?"}]
-      }
-    },
-    "id": "test-1"
+    "message": {
+      "messageId": "msg-1",
+      "role": "ROLE_USER",
+      "parts": [{"text": "My flight was delayed. How do I get to Kinepolis Antwerp quickly?"}]
+    }
   }' | python -m json.tool
 ```
 
-You should get a response comparing all transit options, flagging the airport express disruption, and recommending the rideshare.
+You should get a response comparing all transit options, flagging the NMBS train disruption, and recommending the Bolt rideshare.
 
 ### Test receipt extraction
 
 ```bash
-curl -s -X POST http://localhost:9000/ \
+curl -s -X POST http://localhost:9000/message:send \
   -H "Content-Type: application/json" \
   -H "A2A-Version: 1.0" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "Log my taxi receipt for $42.50"}]
-      }
-    },
-    "id": "test-2"
+    "message": {
+      "messageId": "msg-1",
+      "role": "ROLE_USER",
+      "parts": [{"text": "Log my taxi receipt for €65"}]
+    }
   }' | python -m json.tool
 ```
 
-You should see a structured receipt payload with vendor, amount, date, and category — ready for the Expense & Compliance Agent.
+You should see a structured receipt payload with vendor, amount (EUR), date, and category — ready for the Expense & Compliance Agent.
 
 ---
 
@@ -357,4 +351,4 @@ Keep all three agents running — the Orchestrator in Exercise 4 will coordinate
 
 ---
 
-> **Maya's journey so far:** The Travel & Logistics Agent has told Maya that a Bolt rideshare is 15 minutes to the venue ($35), much faster than the disrupted airport express (45 min). Her estimated arrival at the convention center: 9:45 AM. This arrival time will be passed to the Schedule & Content Advisor (via the Orchestrator) to filter out sessions she's already missed.
+> **Maya's journey so far:** The Travel & Logistics Agent has told Maya that a Bolt rideshare is 35 minutes from Brussels Airport to Kinepolis Antwerp (€45), much faster than the disrupted NMBS train (55 min). Her estimated arrival at the venue: 9:45 AM. This arrival time will be passed to the Schedule & Content Advisor (via the Orchestrator) to filter out sessions she's already missed.

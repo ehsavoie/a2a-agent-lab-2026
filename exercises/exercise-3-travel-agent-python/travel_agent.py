@@ -7,223 +7,253 @@ for expense reporting.
 """
 
 import json
+import uuid
 from datetime import datetime
-from typing import Any
 
-from a2a.server.agent_execution import AgentExecution, RequestContext
-from a2a.server.apps import A2AStarletteApplication
+from a2a.server.agent_execution import AgentExecutor, RequestContext
+from a2a.server.events import EventQueue
 from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.types import AgentCard, AgentCapabilities, AgentSkill, Part, TextPart
+from a2a.server.routes import create_rest_routes, create_agent_card_routes
+from a2a.server.tasks import InMemoryTaskStore
+from a2a.types.a2a_pb2 import (
+    AgentCapabilities,
+    AgentCard,
+    AgentInterface,
+    AgentSkill,
+    Message,
+    Part,
+    Role,
+)
+from starlette.applications import Starlette
 import uvicorn
 
 
 TRAVEL_DATA = {
     "flights": [
         {
-            "flight": "UA 1742",
-            "origin": "SFO",
-            "destination": "PRG",
-            "scheduled_arrival": "06:15",
-            "actual_arrival": "08:20",
+            "flight": "UA 998",
+            "origin": "EWR",
+            "destination": "BRU",
+            "scheduled_arrival": "06:30",
+            "actual_arrival": "08:35",
             "delay_minutes": 125,
             "status": "DELAYED",
-            "gate": "B22",
-            "terminal": "Terminal 2",
-            "note": "Delayed due to late-arriving aircraft from LAX.",
+            "gate": "B44",
+            "terminal": "Terminal A",
+            "note": "Delayed due to late-arriving aircraft from Chicago.",
         },
         {
-            "flight": "LH 1394",
+            "flight": "LH 1014",
             "origin": "FRA",
-            "destination": "PRG",
-            "scheduled_arrival": "07:30",
-            "actual_arrival": "07:25",
+            "destination": "BRU",
+            "scheduled_arrival": "07:45",
+            "actual_arrival": "07:40",
             "delay_minutes": 0,
             "status": "ON TIME",
-            "gate": "A14",
-            "terminal": "Terminal 1",
+            "gate": "A22",
+            "terminal": "Terminal A",
             "note": "Arrived early.",
         },
         {
-            "flight": "BA 856",
+            "flight": "BA 392",
             "origin": "LHR",
-            "destination": "PRG",
-            "scheduled_arrival": "09:00",
-            "actual_arrival": "09:45",
+            "destination": "BRU",
+            "scheduled_arrival": "08:15",
+            "actual_arrival": "09:00",
             "delay_minutes": 45,
             "status": "DELAYED",
-            "gate": "C8",
-            "terminal": "Terminal 2",
-            "note": "Minor delay due to air traffic congestion.",
+            "gate": "A38",
+            "terminal": "Terminal A",
+            "note": "Delay due to fog at Heathrow.",
         },
         {
-            "flight": "AF 1382",
+            "flight": "AF 3234",
             "origin": "CDG",
-            "destination": "PRG",
-            "scheduled_arrival": "08:00",
-            "actual_arrival": "08:00",
+            "destination": "BRU",
+            "scheduled_arrival": "07:00",
+            "actual_arrival": "07:00",
             "delay_minutes": 0,
             "status": "ON TIME",
-            "gate": "A6",
-            "terminal": "Terminal 1",
+            "gate": "B12",
+            "terminal": "Terminal A",
             "note": "",
         },
         {
-            "flight": "DL 9014",
-            "origin": "SFO",
-            "destination": "PRG",
-            "scheduled_arrival": "07:00",
-            "actual_arrival": "07:10",
-            "delay_minutes": 10,
+            "flight": "SN 3784",
+            "origin": "VIE",
+            "destination": "BRU",
+            "scheduled_arrival": "09:10",
+            "actual_arrival": "09:15",
+            "delay_minutes": 5,
             "status": "ON TIME",
-            "gate": "A9",
-            "terminal": "Terminal 1",
-            "note": "Minor taxi delay on arrival.",
+            "gate": "A16",
+            "terminal": "Terminal A",
+            "note": "Brussels Airlines. Minor taxi delay on arrival.",
         },
         {
-            "flight": "LH 455",
-            "origin": "SFO",
-            "destination": "PRG",
-            "scheduled_arrival": "09:30",
-            "actual_arrival": "10:15",
-            "delay_minutes": 45,
+            "flight": "DL 80",
+            "origin": "JFK",
+            "destination": "BRU",
+            "scheduled_arrival": "07:15",
+            "actual_arrival": "07:50",
+            "delay_minutes": 35,
             "status": "DELAYED",
-            "gate": "B16",
-            "terminal": "Terminal 2",
-            "note": "Connection delay via Frankfurt.",
+            "gate": "B28",
+            "terminal": "Terminal A",
+            "note": "Headwind over the Atlantic caused slight delay.",
         },
         {
-            "flight": "OK 51",
-            "origin": "SFO",
-            "destination": "PRG",
-            "scheduled_arrival": "10:45",
-            "actual_arrival": "10:45",
+            "flight": "TK 1937",
+            "origin": "IST",
+            "destination": "BRU",
+            "scheduled_arrival": "10:00",
+            "actual_arrival": "10:00",
             "delay_minutes": 0,
             "status": "ON TIME",
-            "gate": "C12",
-            "terminal": "Terminal 1",
-            "note": "Czech Airlines direct flight.",
+            "gate": "B06",
+            "terminal": "Terminal A",
+            "note": "Turkish Airlines direct flight.",
         },
     ],
     "transit": {
         "options": [
             {
                 "mode": "Rideshare (Bolt/Uber)",
-                "duration_minutes": 15,
-                "cost": "$35",
+                "duration_minutes": 35,
+                "cost": "€45",
                 "availability": "Available now",
                 "disruption": None,
-                "recommendation": "Fastest option. Pickup at Terminal arrivals, Door 3.",
+                "recommendation": "Direct to Kinepolis Antwerp. Pickup at Brussels Airport arrivals level.",
             },
             {
-                "mode": "Airport Express Train (AE)",
-                "duration_minutes": 30,
-                "cost": "$12",
-                "availability": "Every 30 min",
-                "disruption": "⚠️ Signal fault between Airport and Hlavní nádraží — trains running at reduced frequency, estimated 45 min today.",
-                "recommendation": "Budget option but currently disrupted. Add 15 min buffer.",
-            },
-            {
-                "mode": "Taxi (metered)",
-                "duration_minutes": 20,
-                "cost": "$40–50",
-                "availability": "Rank outside arrivals",
-                "disruption": None,
-                "recommendation": "Reliable but more expensive than rideshare. Insist on the meter.",
-            },
-            {
-                "mode": "Hotel Shuttle",
+                "mode": "Train (Brussels Airport → Antwerp-Centraal)",
                 "duration_minutes": 35,
-                "cost": "Free (with hotel booking)",
-                "availability": "Check with your hotel",
+                "cost": "€12",
+                "availability": "Every 15 min (NMBS/SNCB)",
+                "disruption": "⚠️ Track works between Mechelen and Antwerp — trains diverted via Lier, estimated 55 min today.",
+                "recommendation": "Cheapest option but currently disrupted. Take the train to Antwerp-Centraal, then tram 2 or 6 to Kinepolis.",
+            },
+            {
+                "mode": "Taxi (fixed fare)",
+                "duration_minutes": 40,
+                "cost": "€65–75",
+                "availability": "Rank outside arrivals hall",
                 "disruption": None,
-                "recommendation": "Free if your hotel provides one, but slower due to multiple stops.",
+                "recommendation": "Fixed fare to Antwerp. Official Brussels Airport taxis only — avoid touts.",
+            },
+            {
+                "mode": "Rental car",
+                "duration_minutes": 40,
+                "cost": "€55/day",
+                "availability": "Europcar, Avis, Hertz at arrivals level -1",
+                "disruption": None,
+                "recommendation": "Take the E19 motorway to Antwerp (45 km). Free parking at Kinepolis.",
             },
         ],
-        "metro_nearest": "Vyšehrad Station — 8 minute walk to the convention center. Lines: C (Red).",
-        "parking": "Convention center parking garage: $15/day. Enter from Oak Street. Electric vehicle chargers on Level P2.",
+        "tram_to_kinepolis": "From Antwerp-Centraal: Tram 2 (direction Hoboken) or Tram 6 (direction Luchtbal), stop Groenendaallaan — 5 min walk to Kinepolis.",
+        "parking": "Kinepolis Antwerp has a large free parking lot. Address: Groenendaallaan 394, 2030 Antwerp.",
     },
     "hotels": [
         {
-            "name": "Hotel DevSphere Grand",
-            "distance": "200m (convention center attached)",
-            "price_per_night": "$189",
-            "availability": "3 rooms left",
-            "rating": 4.6,
-            "amenities": "Wi-Fi, gym, rooftop bar, conference shuttle",
-        },
-        {
-            "name": "The Coder's Inn",
-            "distance": "500m",
-            "price_per_night": "$129",
-            "availability": "Available",
-            "rating": 4.4,
-            "amenities": "Wi-Fi, co-working lounge, breakfast included",
-        },
-        {
-            "name": "Central Station Hostel",
-            "distance": "1.2km (near metro)",
-            "price_per_night": "$49",
-            "availability": "Available",
-            "rating": 4.1,
-            "amenities": "Wi-Fi, shared kitchen, locker storage",
-        },
-        {
-            "name": "Riverside Boutique Hotel",
-            "distance": "800m",
-            "price_per_night": "$159",
-            "availability": "Limited — 1 room",
+            "name": "Hotel Franq",
+            "distance": "6 km from Kinepolis (Antwerp center)",
+            "price_per_night": "€250",
+            "availability": "2 rooms left",
             "rating": 4.8,
-            "amenities": "Wi-Fi, spa, river-view rooms, organic breakfast",
+            "amenities": "Wi-Fi, Michelin-star restaurant, rooftop terrace, boutique rooms",
+        },
+        {
+            "name": "Holiday Inn Express Antwerp City-North",
+            "distance": "2 km from Kinepolis",
+            "price_per_night": "€99",
+            "availability": "Available",
+            "rating": 4.2,
+            "amenities": "Wi-Fi, breakfast included, near Ring road, free parking",
+        },
+        {
+            "name": "Hotel Lindner Antwerp",
+            "distance": "5 km from Kinepolis (city center)",
+            "price_per_night": "€140",
+            "availability": "Available",
+            "rating": 4.5,
+            "amenities": "Wi-Fi, fitness center, near Antwerp-Centraal station, bar",
+        },
+        {
+            "name": "B&B Hotel Antwerp Centre",
+            "distance": "5 km from Kinepolis",
+            "price_per_night": "€75",
+            "availability": "Available",
+            "rating": 4.0,
+            "amenities": "Wi-Fi, central location, budget-friendly, near Meir shopping street",
+        },
+        {
+            "name": "Van der Valk Hotel Antwerpen",
+            "distance": "3 km from Kinepolis",
+            "price_per_night": "€120",
+            "availability": "Limited — 1 room",
+            "rating": 4.3,
+            "amenities": "Wi-Fi, pool, sauna, free parking, restaurant, near E19",
         },
     ],
     "restaurants": [
         {
-            "name": "The Code Kitchen",
-            "cuisine": "International",
-            "distance": "200m from convention center",
-            "price": "$$",
-            "rating": 4.5,
-            "description": "Developer-themed restaurant with great lunch specials. Try the 'Merge Conflict' burger.",
-        },
-        {
-            "name": "Sakura Bytes",
-            "cuisine": "Japanese",
-            "distance": "500m from convention center",
-            "price": "$$$",
-            "rating": 4.7,
-            "description": "Authentic Japanese cuisine with private dining rooms perfect for team dinners.",
-        },
-        {
-            "name": "Pasta Pipeline",
-            "cuisine": "Italian",
-            "distance": "300m from convention center",
-            "price": "$$",
-            "rating": 4.3,
-            "description": "Fresh pasta made daily. Great vegetarian options. Popular with conference attendees.",
-        },
-        {
-            "name": "Green Thread Café",
-            "cuisine": "Vegan/Vegetarian",
-            "distance": "150m from convention center",
-            "price": "$",
+            "name": "Frites Atelier",
+            "cuisine": "Belgian / Frites",
+            "distance": "5 km (Antwerp center, Korte Gasthuisstraat)",
+            "price": "€",
             "rating": 4.6,
-            "description": "Fully plant-based café with excellent coffee and quick bites between sessions.",
+            "description": "Sergio Herman's gourmet frites concept. A must-try Belgian classic with premium toppings.",
         },
         {
-            "name": "The Overflow Pub",
-            "cuisine": "Gastropub",
-            "distance": "400m from convention center",
-            "price": "$$",
+            "name": "The Jane",
+            "cuisine": "Modern European",
+            "distance": "4 km (Antwerp, chapel setting)",
+            "price": "€€€€",
+            "rating": 4.9,
+            "description": "Michelin two-star restaurant in a converted chapel. Book well in advance for the upper room; the bar downstairs is walk-in.",
+        },
+        {
+            "name": "Balls & Glory",
+            "cuisine": "Belgian comfort food",
+            "distance": "5 km (Antwerp center, Nationalestraat)",
+            "price": "€€",
             "rating": 4.4,
-            "description": "Craft beers and hearty food. Hosts the unofficial DevSphere after-party every evening.",
+            "description": "Signature Belgian stew balls (stoofvlees, curry, veggie) with mashed potatoes. Quick and hearty.",
+        },
+        {
+            "name": "Elfde Gebod",
+            "cuisine": "Traditional Belgian",
+            "distance": "5 km (Antwerp, Torfbrug near Cathedral)",
+            "price": "€€",
+            "rating": 4.3,
+            "description": "Classic Belgian brasserie next to the Cathedral. Mussels, stoofvlees, and Belgian beers in a quirky church-themed interior.",
+        },
+        {
+            "name": "Umamido",
+            "cuisine": "Japanese Ramen",
+            "distance": "5 km (Antwerp center, Paardemarkt)",
+            "price": "€€",
+            "rating": 4.5,
+            "description": "Authentic tonkotsu ramen — a warm bowl between conference sessions. Quick service, no reservations needed.",
+        },
+        {
+            "name": "Kaffeenini",
+            "cuisine": "Café / Brunch",
+            "distance": "5 km (Antwerp, Lange Leemstraat)",
+            "price": "€",
+            "rating": 4.7,
+            "description": "Specialty coffee, avocado toast, and homemade pastries. Popular with locals for weekend brunch.",
         },
     ],
     "local_tips": [
-        "The convention center Wi-Fi password changes daily — check the info desk.",
-        "Best coffee near the venue: Green Thread Café (150m) or the lobby barista.",
-        "The rooftop terrace on the 3rd floor is open during breaks — great city views.",
-        "Power outlets are available under every other seat in the main hall.",
-        "The speaker lounge on the 2nd floor has quiet workspaces open to all attendees.",
+        "Devoxx Belgium is at Kinepolis Antwerp (Groenendaallaan 394, 2030 Antwerp) — it's a cinema complex, not the city center.",
+        "Belgian train tickets (NMBS/SNCB) are cheaper when bought via the app. A Brussels Airport supplement (€6.40) applies to all departing trains.",
+        "Antwerp-Centraal is one of the most beautiful train stations in the world — worth arriving early to admire the architecture.",
+        "Belgian beers to try: Duvel, Westmalle Tripel, Orval, De Koninck (Antwerp's local pilsner — locals call it a 'bolleke').",
+        "Tipping in Belgium is not expected — service is included. Round up for good service.",
+        "Kinepolis has free parking. If you're staying in Antwerp center, tram 2 or 6 goes directly to the venue.",
+        "For a scenic walk, stroll along the Scheldt river quays (Het Eilandje) — great views of the port and MAS museum.",
+        "The Meir is Antwerp's main shopping street, connecting Antwerp-Centraal station to the Groenplaats and Cathedral area.",
     ],
 }
 
@@ -257,7 +287,7 @@ def check_flight_status(query: str) -> str:
 
 
 def get_transit_options(query: str) -> str:
-    lines = ["**Transit options from the airport to the convention center:**\n"]
+    lines = ["**Transit options from Brussels Airport (BRU) to Kinepolis Antwerp:**\n"]
     best_option = None
     best_time = 999
 
@@ -266,8 +296,8 @@ def get_transit_options(query: str) -> str:
         disruption_note = ""
         if opt["disruption"]:
             disruption_note = f"\n  {opt['disruption']}"
-            if "45 min" in opt["disruption"]:
-                effective_time = 45
+            if "55 min" in opt["disruption"]:
+                effective_time = 55
 
         if effective_time < best_time:
             best_time = effective_time
@@ -280,8 +310,8 @@ def get_transit_options(query: str) -> str:
 
     lines.append(f"\n💡 **Recommendation:** {best_option} is the fastest option today (~{best_time} min).")
 
-    if any(w in query.lower() for w in ["metro", "station", "walk"]):
-        lines.append(f"\n🚇 Nearest metro: {TRAVEL_DATA['transit']['metro_nearest']}")
+    if any(w in query.lower() for w in ["tram", "station", "walk", "kinepolis"]):
+        lines.append(f"\n🚊 Tram to Kinepolis: {TRAVEL_DATA['transit']['tram_to_kinepolis']}")
 
     return "\n\n".join(lines)
 
@@ -345,29 +375,29 @@ def extract_receipt(query: str) -> str:
 
     vendor = "Unknown vendor"
     amount = "0.00"
-    currency = "USD"
+    currency = "EUR"
     category = "transportation"
     date = datetime.now().strftime("%Y-%m-%d")
 
     if any(w in query_lower for w in ["taxi", "cab"]):
-        vendor = "City Taxi Co."
-        amount = "42.50"
+        vendor = "Antwerp Taxi Service"
+        amount = "65.00"
         category = "ground_transportation"
     elif any(w in query_lower for w in ["uber", "lyft", "bolt", "rideshare", "ride"]):
-        vendor = "Bolt Rideshare"
-        amount = "35.00"
+        vendor = "Bolt Belgium"
+        amount = "45.00"
         category = "ground_transportation"
-    elif any(w in query_lower for w in ["train", "metro", "rail"]):
-        vendor = "Airport Express Rail"
+    elif any(w in query_lower for w in ["train", "tram", "rail", "nmbs", "sncb"]):
+        vendor = "NMBS/SNCB Belgian Railways"
         amount = "12.00"
         category = "public_transit"
     elif any(w in query_lower for w in ["hotel", "room"]):
-        vendor = "Hotel DevSphere Grand"
-        amount = "189.00"
+        vendor = "Holiday Inn Express Antwerp"
+        amount = "99.00"
         category = "lodging"
     elif any(w in query_lower for w in ["food", "restaurant", "meal", "dinner", "lunch"]):
-        vendor = "Conference Dining"
-        amount = "28.50"
+        vendor = "Balls & Glory Antwerp"
+        amount = "18.50"
         category = "meals"
 
     for word in query_lower.split():
@@ -424,9 +454,9 @@ def answer_query(query: str) -> str:
 
     if any(w in query_lower for w in ["eat", "food", "restaurant", "dinner", "lunch",
                                        "breakfast", "cuisine"]):
-        return f"Here are restaurant recommendations near the convention center:\n\n{search_restaurants(query)}"
+        return f"Here are restaurant recommendations in Antwerp:\n\n{search_restaurants(query)}"
 
-    if any(w in query_lower for w in ["tip", "advice", "know", "helpful"]):
+    if any(w in query_lower for w in ["tip", "advice", "know", "helpful", "beer", "belgian"]):
         return f"Here are some helpful tips for DevSphere attendees:\n\n{get_local_tips()}"
 
     return (
@@ -434,38 +464,46 @@ def answer_query(query: str) -> str:
         f"✈️ **Flight status:**\n{check_flight_status(query)}\n\n"
         f"🚗 **Transit options:**\n{get_transit_options(query)}\n\n"
         f"🏨 **Hotels nearby:**\n{search_hotels(query)}\n\n"
-        f"🍽️ **Restaurants nearby:**\n{search_restaurants(query)}\n\n"
+        f"🍽️ **Restaurants in Antwerp:**\n{search_restaurants(query)}\n\n"
         f"💡 **Local tips:**\n{get_local_tips()}"
     )
 
 
-class TravelAgentExecution(AgentExecution):
+class TravelAgentExecutor(AgentExecutor):
     """Handles incoming A2A messages and returns travel & logistics info."""
 
-    async def execute(self, context: RequestContext, event_queue) -> None:
-        user_message = ""
-        if context.message and context.message.parts:
-            for part in context.message.parts:
-                if isinstance(part.root, TextPart):
-                    user_message = part.root.text
-                    break
+    async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
+        user_message = context.get_user_input()
+        if not user_message:
+            user_message = "general"
 
-        response_text = answer_query(user_message) if user_message else answer_query("general")
+        response_text = answer_query(user_message)
 
         await event_queue.enqueue_event(
-            context.build_success_response(
-                parts=[Part(root=TextPart(text=response_text))]
+            Message(
+                role=Role.ROLE_AGENT,
+                parts=[Part(text=response_text)],
+                message_id=str(uuid.uuid4()),
             )
         )
+
+    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
+        pass
 
 
 def build_agent_card() -> AgentCard:
     return AgentCard(
         name="Travel & Logistics Agent",
-        description="Connects to flight APIs, local transit, and hotel systems. Handles travel logistics and receipt extraction for expense reporting.",
-        url="http://localhost:9000",
+        description="Handles travel logistics for Devoxx Belgium at Kinepolis Antwerp: flights to Brussels Airport, transit to Antwerp, hotels, restaurants, and receipt extraction for expense reporting.",
+        supported_interfaces=[
+            AgentInterface(
+                url="http://localhost:9000",
+                protocol_binding="HTTP+JSON",
+                protocol_version="1.0",
+            ),
+        ],
         version="1.0.0",
-        capabilities=AgentCapabilities(streaming=False, pushNotifications=False),
+        capabilities=AgentCapabilities(streaming=False, push_notifications=False),
         skills=[
             AgentSkill(
                 id="flight-status",
@@ -473,8 +511,8 @@ def build_agent_card() -> AgentCard:
                 description="Check flight status, delays, and gate information.",
                 tags=["flights", "delays", "gates", "arrivals"],
                 examples=[
-                    "What's the status of flight UA 1742?",
-                    "Is my flight from SFO delayed?",
+                    "What's the status of flight UA 998?",
+                    "Is my flight to Brussels delayed?",
                 ],
             ),
             AgentSkill(
@@ -483,8 +521,8 @@ def build_agent_card() -> AgentCard:
                 description="Get transit options from airport to venue with real-time disruption info.",
                 tags=["transit", "airport", "rideshare", "train", "taxi"],
                 examples=[
-                    "How do I get from the airport to the venue quickly?",
-                    "What's the fastest way to the convention center?",
+                    "How do I get from Brussels Airport to Kinepolis Antwerp?",
+                    "What's the fastest way to the venue?",
                 ],
             ),
             AgentSkill(
@@ -493,7 +531,7 @@ def build_agent_card() -> AgentCard:
                 description="Search nearby hotels with availability and pricing.",
                 tags=["hotels", "accommodation", "booking"],
                 examples=[
-                    "What hotels are near the convention center?",
+                    "What hotels are near Kinepolis Antwerp?",
                     "Find me a cheap hotel close to the venue.",
                 ],
             ),
@@ -503,8 +541,8 @@ def build_agent_card() -> AgentCard:
                 description="Extract fare details from receipt descriptions for expense reporting.",
                 tags=["receipts", "expenses", "reimbursement"],
                 examples=[
-                    "Log my taxi receipt for $42.50",
-                    "Extract my rideshare fare details",
+                    "Log my taxi receipt for €65",
+                    "Extract my Bolt rideshare fare details",
                 ],
             ),
             AgentSkill(
@@ -513,8 +551,8 @@ def build_agent_card() -> AgentCard:
                 description="Find restaurants near the convention center by cuisine, price, or dietary preference.",
                 tags=["food", "restaurants", "dining"],
                 examples=[
-                    "Where should I eat near the convention center?",
-                    "Any good Japanese restaurants nearby?",
+                    "Where should I eat in Antwerp?",
+                    "Any good restaurants near the venue?",
                 ],
             ),
             AgentSkill(
@@ -523,33 +561,32 @@ def build_agent_card() -> AgentCard:
                 description="Helpful tips for conference attendees about the venue and surroundings.",
                 tags=["tips", "venue", "wifi", "coffee"],
                 examples=[
-                    "Any tips for first-time attendees?",
-                    "Where can I find good coffee nearby?",
+                    "Any tips for Devoxx Belgium first-timers?",
+                    "What Belgian beers should I try?",
                 ],
             ),
         ],
-        defaultInputModes=["text"],
-        defaultOutputModes=["text"],
+        default_input_modes=["text"],
+        default_output_modes=["text"],
     )
 
 
 def main():
     agent_card = build_agent_card()
-    agent_execution = TravelAgentExecution()
+    agent_executor = TravelAgentExecutor()
 
     request_handler = DefaultRequestHandler(
-        agent_execution=agent_execution,
+        agent_executor=agent_executor,
+        task_store=InMemoryTaskStore(),
         agent_card=agent_card,
     )
 
-    app = A2AStarletteApplication(
-        agent_card=agent_card,
-        http_handler=request_handler,
-    )
+    routes = create_agent_card_routes(agent_card) + create_rest_routes(request_handler)
+    app = Starlette(routes=routes)
 
     print("✈️  Travel & Logistics Agent starting on http://localhost:9000")
     print("\U0001f4cb Agent Card: http://localhost:9000/.well-known/agent-card.json")
-    uvicorn.run(app.build(), host="0.0.0.0", port=9000)
+    uvicorn.run(app, host="0.0.0.0", port=9000)
 
 
 if __name__ == "__main__":

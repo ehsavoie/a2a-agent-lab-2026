@@ -1352,7 +1352,7 @@ curl -s http://localhost:8081/.well-known/agent-card.json \
 <section id="ex3-intro" class="section-anchor">
 <h2><span class="badge badge-green">Exercise 3</span> Cross-Language &mdash; The Travel &amp; Logistics Agent <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(15 min)</span></h2>
 
-<p><em>&ldquo;Maya&rsquo;s flight was delayed. She needs to get to the venue fast. The Travel Agent compares a rideshare (15 min, $35) vs the delayed airport express (45 min, $12) and recommends the rideshare. Later, it extracts her taxi receipt for expense reporting.&rdquo;</em></p>
+<p><em>&ldquo;Maya&rsquo;s flight was delayed. She needs to get from Brussels Airport to Kinepolis Antwerp fast. The Travel Agent compares a Bolt rideshare (35 min, &euro;45) vs the disrupted NMBS train (55 min, &euro;12) and recommends the rideshare. Later, it extracts her taxi receipt for expense reporting.&rdquo;</em></p>
 
 <pre><code>cd exercises/exercise-3-travel-agent-python</code></pre>
 </section>
@@ -1383,19 +1383,20 @@ uv sync</code></pre>
     <summary>Show key functions (transit comparison + receipt extraction)</summary>
     <div class="solution-body">
 <pre><code>def get_transit_options(query):
-    """Compare transit options from airport to venue."""
+    """Compare transit options from Brussels Airport to Kinepolis Antwerp."""
     options = TRAVEL_DATA["transit"]["options"]
     # Returns formatted comparison:
-    # - Rideshare: 15 min, ~$35 (recommended when train is delayed)
-    # - Airport Express Train: 30 min, $12 (currently delayed +15 min)
-    # - Taxi: 20 min, ~$45
+    # - Rideshare (Bolt/Uber): 35 min, &euro;45 (recommended when train is disrupted)
+    # - Train (NMBS): 35 min, &euro;12 (currently disrupted &mdash; 55 min today)
+    # - Taxi (fixed fare): 40 min, &euro;65&ndash;75
+    # - Rental car: 40 min, &euro;55/day
     ...
 
 def extract_receipt(query):
     """Extract structured receipt data for expense reporting."""
     # Returns JSON-like structured payload:
-    # {"vendor": "...", "amount": "...", "date": "...",
-    #  "category": "Transportation", "description": "..."}
+    # {"vendor": "...", "amount": "...", "currency": "EUR",
+    #  "date": "...", "category": "...", "status": "pending_review"}
     ...</code></pre>
     </div>
 </details>
@@ -1418,6 +1419,11 @@ def extract_receipt(query):
     </div>
 </details>
 
+<div class="callout warning">
+    <div class="callout-title">&#9888; No LLM here</div>
+    <p>Unlike the Java agents in Exercises 1 and 2, the Travel &amp; Logistics Agent does <strong>not</strong> use an LLM. It is a <strong>rule-based agent</strong> that pattern-matches keywords in queries against hardcoded travel data &mdash; no Ollama, no AI model, no LangChain. This is intentional: it shows that A2A agents don&rsquo;t need to be &ldquo;AI-powered&rdquo; to participate in the mesh. Any service that speaks the A2A protocol is a first-class citizen.</p>
+</div>
+
 <div class="callout info">
     <div class="callout-title">&#128161; Receipt extraction for cross-agent handoff</div>
     <p>The <code>receipt-extraction</code> skill outputs structured data that the Expense &amp; Compliance Agent (Exercise 5) can consume. This is the cross-language data handoff in Maya&rsquo;s scenario.</p>
@@ -1435,21 +1441,16 @@ def extract_receipt(query):
     <h4>Start the Python agent</h4>
     <pre><code>python travel_agent.py</code></pre>
 
-    <h4>Test transit comparison</h4>
-    <pre><code>curl -s -X POST http://localhost:9000/ \
+    <h4>Test transit comparison (REST transport)</h4>
+    <pre><code>curl -s -X POST http://localhost:9000/message:send \
   -H "Content-Type: application/json" \
   -H "A2A-Version: 1.0" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "My flight was delayed. How do I get to the convention center quickly?"}]
-      }
-    },
-    "id": "test-transit"
+    "message": {
+      "messageId": "msg-1",
+      "role": "ROLE_USER",
+      "parts": [{"text": "My flight was delayed. How do I get to Kinepolis Antwerp quickly?"}]
+    }
   }' | python -m json.tool</code></pre>
 
     <h4>Python &rarr; Java (interop test)</h4>
@@ -1475,7 +1476,7 @@ def extract_receipt(query):
     <summary>Show pom.xml</summary>
     <div class="solution-body">
 <pre><code>&lt;dependencies&gt;
-    &lt;!-- A2A Java SDK &mdash; client + JSON-RPC transport --&gt;
+    &lt;!-- A2A Java SDK &mdash; client + REST transport --&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.a2aproject.sdk&lt;/groupId&gt;
         &lt;artifactId&gt;a2a-java-sdk-client&lt;/artifactId&gt;
@@ -1483,7 +1484,7 @@ def extract_receipt(query):
     &lt;/dependency&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.a2aproject.sdk&lt;/groupId&gt;
-        &lt;artifactId&gt;a2a-java-sdk-client-transport-jsonrpc&lt;/artifactId&gt;
+        &lt;artifactId&gt;a2a-java-sdk-client-transport-rest&lt;/artifactId&gt;
         &lt;version&gt;${a2a-sdk.version}&lt;/version&gt;
     &lt;/dependency&gt;
 &lt;/dependencies&gt;</code></pre>
@@ -1506,8 +1507,8 @@ for (AgentSkill skill : card.skills()) {
 
 // 2. Build the A2A client from the AgentCard
 Client client = Client.builder(card)
-    .withTransport(JSONRPCTransport.class,
-        new JSONRPCTransportConfigBuilder())
+    .withTransport(RestTransport.class,
+        new RestTransportConfigBuilder())
     .build();
 
 // 3. Send a message and handle the response
@@ -1907,10 +1908,11 @@ mvn package -Pjsonrpc
 
 <pre><code>Travel Agent (Python)                    Expense Agent (WildFly)
 extract_receipt(query)         &rarr;        processReceipt(receiptData)
-  {"vendor": "Airport Taxi",               Validate: $35 &lt; $200 limit &#10003;
-   "amount": "$35.00",                     Category: Transportation &#10003;
-   "date": "2026-10-07",                   Log: EXP-001 created
-   "category": "Transportation"}           Return: audit-ready entry</code></pre>
+  {"vendor": "Bolt Belgium",               Validate: &euro;45 &lt; &euro;200 limit &#10003;
+   "amount": "45.00",                      Category: ground_transportation &#10003;
+   "currency": "EUR",                      Log: EXP-001 created
+   "date": "2026-10-07",                   Return: audit-ready entry
+   "category": "ground_transportation"}</code></pre>
 
 <div class="callout info">
     <div class="callout-title">&#128161; Cross-language handoff</div>
