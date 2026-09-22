@@ -216,7 +216,7 @@ public class ScheduleServiceProducer {
     @ConfigProperty(name = "ollama.base-url", defaultValue = "http://localhost:11434")
     String ollamaBaseUrl;
 
-    @ConfigProperty(name = "ollama.model-name", defaultValue = "granite4.1:3b")
+    @ConfigProperty(name = "ollama.model-name", defaultValue = "granite4:350m")
     String modelName;
 
     @ConfigProperty(name = "session.data.path",
@@ -430,7 +430,7 @@ session.data.path=../../conference-data/sessions.json
 
 # Ollama LLM Configuration
 ollama.base-url=http://localhost:11434
-ollama.model-name=granite4.1:3b
+ollama.model-name=granite4:350m
 
 # A2A Agent Configuration
 a2a.agent.name=Schedule & Content Advisor

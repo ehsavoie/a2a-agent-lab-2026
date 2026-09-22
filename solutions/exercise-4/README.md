@@ -18,7 +18,7 @@ The full source lives in `../../exercises/exercise-4-orchestrator/`:
 
 ## Prerequisites
 
-- Ollama running on `localhost:11434` with the `granite4.1:3b` model
+- Ollama running on `localhost:11434` with the `granite4:350m` model
 - **Schedule & Content Advisor** running on port **8080** (Exercise 1)
 - **Venue & On-Site Operations Agent** running on port **8081** (Exercise 2)
 - **Travel & Logistics Agent** running on port **9000** (Exercise 3)

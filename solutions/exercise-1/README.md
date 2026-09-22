@@ -14,7 +14,7 @@ This is the complete working **Schedule & Content Advisor** agent built with Qua
 
 ## Prerequisites
 
-- Ollama running on `localhost:11434` with the `granite4.1:3b` model pulled
+- Ollama running on `localhost:11434` with the `granite4:350m` model pulled
 - JDK 21+, Maven 3.9+
 
 ## How to Run

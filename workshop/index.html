@@ -703,7 +703,7 @@
 
 <p>This starts:</p>
 <ul>
-    <li><strong>Ollama</strong> on port <code>11434</code> &mdash; local LLM server with the <code>granite4.1:3b</code> model</li>
+    <li><strong>Ollama</strong> on port <code>11434</code> &mdash; local LLM server with the <code>granite4:350m</code> model</li>
     <li><strong>Grafana LGTM</strong> on port <code>3000</code> (Grafana UI) and <code>4317</code> (OTLP) &mdash; logs, traces, and metrics via Loki, Tempo, and Mimir</li>
 </ul>
 
@@ -711,9 +711,9 @@
 
 <pre><code>curl http://localhost:11434/api/tags</code></pre>
 
-<p>You should see <code>granite4.1:3b</code> in the model list. If not, pull it manually:</p>
+<p>You should see <code>granite4:350m</code> in the model list. If not, pull it manually:</p>
 
-<pre><code>podman exec ollama ollama pull granite4.1:3b</code></pre>
+<pre><code>podman exec ollama ollama pull granite4:350m</code></pre>
 
 <h3>2. Build the A2A Java SDK</h3>
 

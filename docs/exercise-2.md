@@ -192,7 +192,7 @@ Check `src/main/resources/application.properties`:
 server.port=8081
 
 langchain4j.ollama.chat-model.base-url=http://localhost:11434
-langchain4j.ollama.chat-model.model-name=granite4.1:3b
+langchain4j.ollama.chat-model.model-name=granite4:350m
 langchain4j.ollama.chat-model.temperature=0.7
 langchain4j.ollama.chat-model.timeout=PT60S
 

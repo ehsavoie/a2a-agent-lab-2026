@@ -204,7 +204,7 @@ podman-compose up -d
 podman logs -f devconf-ollama-pull
 
 # 4. Verify
-curl http://localhost:11434/api/tags          # Should list 'granite4.1:3b'
+curl http://localhost:11434/api/tags          # Should list 'granite4:350m'
 open http://localhost:3000                     # Grafana UI (admin/admin)
 ```
 

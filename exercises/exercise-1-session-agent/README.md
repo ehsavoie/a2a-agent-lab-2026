@@ -35,14 +35,14 @@ src/main/resources/
 
 ## Prerequisites
 
-Ollama must be running with the `granite4.1:3b` model pulled. From the repo root:
+Ollama must be running with the `granite4:350m` model pulled. From the repo root:
 
 ```bash
 podman-compose up -d
 podman logs -f devconf-ollama-pull   # Wait for "success"
 ```
 
-Verify: `curl http://localhost:11434/api/tags` should list `granite4.1:3b`.
+Verify: `curl http://localhost:11434/api/tags` should list `granite4:350m`.
 
 ## How to Run
 

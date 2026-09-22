@@ -12,7 +12,7 @@ public class ExpenseServiceProducer {
     @ConfigProperty(name = "ollama.base-url", defaultValue = "http://localhost:11434")
     String ollamaBaseUrl;
 
-    @ConfigProperty(name = "ollama.model-name", defaultValue = "granite4.1:3b")
+    @ConfigProperty(name = "ollama.model-name", defaultValue = "granite4:350m")
     String ollamaModelName;
 
     private ExpenseService expenseService;

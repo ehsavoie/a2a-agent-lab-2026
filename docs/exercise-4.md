@@ -74,7 +74,7 @@ quarkus.http.port=8090
 
 # Ollama
 quarkus.langchain4j.ollama.base-url=http://localhost:11434
-quarkus.langchain4j.ollama.chat-model.model-id=granite4.1:3b
+quarkus.langchain4j.ollama.chat-model.model-id=granite4:350m
 
 # Agent URLs for discovery
 orchestrator.agent-urls=http://localhost:8080,http://localhost:8081,http://localhost:9000,http://localhost:8082
