@@ -26,7 +26,7 @@ services:
     volumes:
       - ollama-data:/root/.ollama
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD", "ollama", "list"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -105,10 +105,14 @@ services:
       - QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://lgtm:4317
       - ORCHESTRATOR_AGENT_URLS=http://schedule-advisor:8080,http://venue-agent:8081,http://travel-agent:9000,http://expense-agent:8082
     depends_on:
-      - schedule-advisor
-      - venue-agent
-      - travel-agent
-      - expense-agent
+      schedule-advisor:
+        condition: service_started
+      venue-agent:
+        condition: service_started
+      travel-agent:
+        condition: service_started
+      expense-agent:
+        condition: service_started
       ollama:
         condition: service_healthy
 

@@ -199,14 +199,24 @@ cd a2a-agent-lab-2026
 
 # 2. Start infrastructure (Ollama + Grafana LGTM)
 podman-compose up -d
+Trying to pull docker.io/grafana/otel-lgtm:latest...
+....
+eeb859bac1adfbbdc6e7f1bfac3c84cd5b96c946a83b3f67366128c88f148975
+devconf-ollama
+devconf-lgtm
+devconf-ollama-pull
+
 
 # 3. Wait for Ollama to be ready and the model to be pulled
+#    The pull container is a one-shot container, so it exits after success.
 podman logs -f devconf-ollama-pull
 
 # 4. Verify
 curl http://localhost:11434/api/tags          # Should list 'granite4:350m'
 open http://localhost:3000                     # Grafana UI (admin/admin)
 ```
+
+To inspect the completed pull container, use `podman ps -a`.
 
 ## Exercises
 
