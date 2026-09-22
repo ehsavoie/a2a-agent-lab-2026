@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dev.devconf</groupId>
+    <artifactId>a2a-lab-solutions</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>A2A Agent Lab - Solutions</name>
+    <description>Aggregator that builds all solution code (same as exercises since this is a step-by-step lab)</description>
+
+    <modules>
+        <module>exercise-1</module>
+        <module>exercise-2</module>
+        <module>exercise-4</module>
+        <module>exercise-5</module>
+    </modules>
+</project>

@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2A Agent Lab &mdash; Building the DevSphere Concierge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #1c2128;
+            --bg-card: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border: #30363d;
+            --accent-orange: #ff6b35;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #bc8cff;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+            --code-bg: #0d1117;
+            --sidebar-width: 300px;
+            --header-height: 64px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--header-height);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            z-index: 100;
+            gap: 1rem;
+        }
+
+        .header-logo {
+            display: flex; align-items: center; gap: 0.75rem;
+            text-decoration: none; color: var(--text-primary);
+            font-weight: 700; font-size: 1.1rem; white-space: nowrap;
+        }
+
+        .header-nav {
+            display: flex; align-items: center; gap: 1.5rem; margin-left: auto;
+        }
+
+        .header-nav a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.85rem; font-weight: 500; transition: color 0.2s;
+        }
+        .header-nav a:hover { color: var(--text-primary); }
+
+        .github-link { display: flex; align-items: center; gap: 0.4rem; }
+        .github-link svg { fill: currentColor; }
+
+        .menu-toggle {
+            display: none; background: none; border: none;
+            color: var(--text-primary); cursor: pointer; padding: 0.5rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height); left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 1.5rem 0;
+            z-index: 90;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-section { margin-bottom: 0.5rem; }
+
+        .sidebar-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .sidebar-link {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.45rem 1.5rem;
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.85rem; font-weight: 400;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-link:hover {
+            background: var(--bg-tertiary); color: var(--text-primary);
+        }
+
+        .sidebar-link.active {
+            color: var(--accent-blue);
+            border-left-color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.06);
+            font-weight: 500;
+        }
+
+        .sidebar-link .step-num {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%;
+            font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+        }
+
+        .step-num.orange { background: var(--accent-orange); color: #000; }
+        .step-num.blue { background: var(--accent-blue); color: #000; }
+        .step-num.green { background: var(--accent-green); color: #000; }
+        .step-num.purple { background: var(--accent-purple); color: #000; }
+        .step-num.red { background: var(--accent-red); color: #fff; }
+
+        .sidebar-link .icon { font-size: 1rem; flex-shrink: 0; }
+
+        /* Main content */
+        .main {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            min-height: calc(100vh - var(--header-height));
+        }
+
+        .content {
+            max-width: 900px; margin: 0 auto;
+            padding: 2.5rem 3rem 4rem;
+        }
+
+        /* Hero section */
+        .hero {
+            text-align: center;
+            padding: 3rem 0 2.5rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.3rem 1rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
+            background: rgba(255, 107, 53, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            margin-bottom: 1.2rem;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem; font-weight: 900;
+            letter-spacing: -0.03em; line-height: 1.1;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 .highlight { color: var(--accent-orange); }
+
+        .hero .subtitle {
+            font-size: 1.15rem; color: var(--text-secondary);
+            max-width: 650px; margin: 0 auto 1.5rem; line-height: 1.5;
+        }
+
+        /* Section headers */
+        .section-anchor { scroll-margin-top: calc(var(--header-height) + 1.5rem); }
+
+        h2 {
+            font-size: 1.8rem; font-weight: 800;
+            letter-spacing: -0.02em; margin: 3rem 0 1rem;
+            padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+        }
+        h2:first-child { margin-top: 0; }
+
+        h3 {
+            font-size: 1.25rem; font-weight: 700;
+            margin: 2rem 0 0.75rem; color: var(--accent-blue);
+        }
+
+        h4 {
+            font-size: 1.05rem; font-weight: 600;
+            margin: 1.5rem 0 0.5rem; color: var(--accent-orange);
+        }
+
+        p { margin-bottom: 0.8rem; }
+        a { color: var(--accent-blue); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Code blocks */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 1rem 1.25rem; overflow-x: auto;
+            margin: 1rem 0 1.5rem; font-size: 0.85rem; line-height: 1.5;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85em;
+        }
+
+        :not(pre) > code {
+            background: var(--bg-card);
+            padding: 0.15em 0.4em; border-radius: 4px;
+            font-size: 0.85em; color: var(--accent-blue);
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem; margin: 1.5rem 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 1.25rem; transition: border-color 0.2s;
+        }
+        .card:hover { border-color: var(--accent-blue); }
+
+        .card .card-icon { font-size: 1.8rem; margin-bottom: 0.6rem; }
+        .card h4 { margin: 0 0 0.4rem; color: var(--text-primary); font-size: 1rem; }
+        .card p { color: var(--text-secondary); font-size: 0.85rem; margin: 0; }
+
+        /* Callouts */
+        .callout {
+            border-radius: 8px; padding: 1rem 1.25rem;
+            margin: 1.25rem 0; border-left: 4px solid; font-size: 0.9rem;
+        }
+
+        .callout-title {
+            font-weight: 700; font-size: 0.85rem;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 0.4rem;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+
+        .callout.info { background: rgba(88, 166, 255, 0.08); border-color: var(--accent-blue); }
+        .callout.info .callout-title { color: var(--accent-blue); }
+
+        .callout.warning { background: rgba(210, 153, 34, 0.08); border-color: var(--accent-yellow); }
+        .callout.warning .callout-title { color: var(--accent-yellow); }
+
+        .callout.success { background: rgba(63, 185, 80, 0.08); border-color: var(--accent-green); }
+        .callout.success .callout-title { color: var(--accent-green); }
+
+        .callout.danger { background: rgba(248, 81, 73, 0.08); border-color: var(--accent-red); }
+        .callout.danger .callout-title { color: var(--accent-red); }
+
+        .callout.tip { background: rgba(188, 140, 255, 0.08); border-color: var(--accent-purple); }
+        .callout.tip .callout-title { color: var(--accent-purple); }
+
+        /* Lists */
+        ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.35rem; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.9rem; }
+        th, td { padding: 0.6rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th {
+            background: var(--bg-tertiary); font-weight: 600;
+            font-size: 0.8rem; text-transform: uppercase;
+            letter-spacing: 0.04em; color: var(--text-secondary);
+        }
+        tr:hover td { background: rgba(88, 166, 255, 0.04); }
+
+        /* Step boxes */
+        .step-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 1.5rem; margin: 1.5rem 0; position: relative;
+        }
+
+        .step-box .step-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .step-box .step-number {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 30px; height: 30px; border-radius: 50%;
+            font-size: 0.85rem; font-weight: 700;
+            background: var(--accent-orange); color: #000; flex-shrink: 0;
+        }
+
+        .step-box .step-title { font-size: 1.1rem; font-weight: 700; }
+
+        /* Architecture diagram */
+        .arch-diagram {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 2rem; margin: 1.5rem 0; text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem; line-height: 1.8; overflow-x: auto;
+        }
+
+        .arch-diagram pre {
+            background: transparent;
+            border: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+            display: inline-block;
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 2rem; margin: 1.5rem 0; }
+        .timeline::before {
+            content: ''; position: absolute; left: 9px; top: 0; bottom: 0;
+            width: 2px; background: var(--border);
+        }
+        .timeline-item { position: relative; padding: 0.5rem 0 1.5rem 1.5rem; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -2rem; top: 0.65rem;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: var(--accent-orange); border: 2px solid var(--bg-primary);
+        }
+        .timeline-item.blue::before { background: var(--accent-blue); }
+        .timeline-item.green::before { background: var(--accent-green); }
+        .timeline-item.purple::before { background: var(--accent-purple); }
+        .timeline-item.red::before { background: var(--accent-red); }
+
+        .timeline-item strong { color: var(--text-primary); }
+        .timeline-item p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+
+        /* Checklist */
+        .checklist { list-style: none; margin-left: 0; padding: 0; }
+        .checklist li { padding: 0.4rem 0; padding-left: 1.8rem; position: relative; }
+        .checklist li::before {
+            content: '\2713'; position: absolute; left: 0;
+            color: var(--accent-green); font-weight: 700;
+        }
+
+        /* Compare grid */
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .compare-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem;
+        }
+        .compare-box h4 { margin-top: 0; }
+
+        /* Collapsible solution blocks */
+        details.solution {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border); border-radius: 8px;
+            margin: 1rem 0; overflow: hidden;
+        }
+
+        details.solution > summary {
+            padding: 0.7rem 1.1rem; cursor: pointer;
+            font-weight: 600; font-size: 0.9rem;
+            color: var(--accent-blue); list-style: none;
+            display: flex; align-items: center; gap: 0.5rem;
+            user-select: none; transition: background 0.15s;
+        }
+        details.solution > summary:hover { background: rgba(88, 166, 255, 0.08); }
+        details.solution > summary::before {
+            content: '\25b6'; font-size: 0.7rem; transition: transform 0.2s;
+        }
+        details.solution[open] > summary::before { transform: rotate(90deg); }
+        details.solution > summary::-webkit-details-marker { display: none; }
+        details.solution > .solution-body { padding: 0 1.1rem 1rem; }
+        details.solution > .solution-body > pre:first-child,
+        details.solution > .solution-body > h4:first-child { margin-top: 0; }
+
+        /* Badge */
+        .badge {
+            display: inline-block; padding: 0.2em 0.7em;
+            border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+        }
+        .badge-orange { background: var(--accent-orange); color: #000; }
+        .badge-blue { background: var(--accent-blue); color: #000; }
+        .badge-green { background: var(--accent-green); color: #000; }
+        .badge-purple { background: var(--accent-purple); color: #000; }
+        .badge-red { background: var(--accent-red); color: #fff; }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem 3rem; text-align: center;
+            color: var(--text-muted); font-size: 0.8rem;
+        }
+        .footer a { color: var(--text-secondary); }
+
+        /* Responsive */
+        @media (max-width: 960px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .content { padding: 2rem 1.5rem 3rem; }
+            .menu-toggle { display: block; }
+            .hero h1 { font-size: 2rem; }
+            .compare-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* Print styles */
+        @media print {
+            @page { size: A4; margin: 18mm 15mm; }
+            :root {
+                --bg-primary: #fff; --bg-secondary: #f6f8fa; --bg-tertiary: #f0f2f5;
+                --bg-card: #f6f8fa; --text-primary: #1f2328; --text-secondary: #59636e;
+                --text-muted: #818b98; --border: #d1d9e0; --code-bg: #f6f8fa;
+            }
+            html { scroll-behavior: auto; }
+            body { background: #fff; color: #1f2328; font-size: 10.5pt; line-height: 1.5; }
+            .header, .sidebar, .menu-toggle { display: none !important; }
+            .main { margin-left: 0 !important; margin-top: 0 !important; min-height: auto; }
+            .content { max-width: 100%; padding: 0; }
+            .step-box, .callout, .compare-grid, table { break-inside: avoid; page-break-inside: avoid; }
+            pre { break-inside: avoid; page-break-inside: avoid; }
+            h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+            pre, code { background: #f6f8fa !important; color: #1f2328 !important; border: 1px solid #d1d9e0; font-size: 9pt; }
+            pre code { border: none; }
+            .callout { border: 1px solid #d1d9e0; background: #f6f8fa !important; }
+            .step-box { border: 1px solid #d1d9e0; background: #fff !important; }
+            .step-number { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            a { color: #1f2328; text-decoration: underline; }
+            a[href^="http"]:after { content: " (" attr(href) ")"; font-size: 8pt; color: #59636e; word-break: break-all; }
+            a[href^="#"]:after, .sidebar-link:after, .header-nav a:after { content: none; }
+            .checklist li::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            details.solution { border: 1px solid #d1d9e0; background: #f6f8fa !important; }
+            details.solution > summary { display: none; }
+            details.solution > .solution-body { display: block !important; padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+    </button>
+    <a href="#" class="header-logo">
+        <span>A2A Agent Lab</span>
+    </a>
+    <nav class="header-nav">
+        <a href="#overview">Overview</a>
+        <a href="#prerequisites">Prerequisites</a>
+        <a href="#exercises">Exercises</a>
+        <a href="https://google.github.io/A2A/" class="github-link" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            A2A Spec
+        </a>
+    </nav>
+</header>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Getting started</div>
+        <a href="#overview" class="sidebar-link active">
+            <span class="icon">&#127968;</span> Overview
+        </a>
+        <a href="#prerequisites" class="sidebar-link">
+            <span class="icon">&#128736;</span> Prerequisites
+        </a>
+        <a href="#architecture" class="sidebar-link">
+            <span class="icon">&#127959;</span> Architecture
+        </a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Exercise 1 &mdash; Schedule Advisor</div>
+        <a href="#ex1-intro" class="sidebar-link">
+            <span class="step-num orange">1</span> A2A Concepts
+        </a>
+        <a href="#ex1-step1" class="sidebar-link">
+            <span class="step-num orange">2</span> ScheduleTool
+        </a>
+        <a href="#ex1-step2" class="sidebar-link">
+            <span class="step-num orange">3</span> ScheduleService
+        </a>
+        <a href="#ex1-step3" class="sidebar-link">
+            <span class="step-num orange">4</span> AgentCard Producer
+        </a>
+        <a href="#ex1-step4" class="sidebar-link">
+            <span class="step-num orange">5</span> AgentExecutor
+        </a>
+        <a href="#ex1-test" class="sidebar-link">
+            <span class="step-num orange">&#10003;</span> Test &amp; validate
+        </a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Exercise 2 &mdash; Venue Agent</div>
+        <a href="#ex2-intro" class="sidebar-link">
+            <span class="step-num blue">1</span> Overview
+        </a>
+        <a href="#ex2-step1" class="sidebar-link">
+            <span class="step-num blue">2</span> Spring Boot wiring
+        </a>
+        <a href="#ex2-step2" class="sidebar-link">
+            <span class="step-num blue">3</span> VenueTool (IoT data)
+        </a>
+        <a href="#ex2-test" class="sidebar-link">
+            <span class="step-num blue">&#10003;</span> Test &amp; validate
+        </a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Exercise 3 &mdash; Travel Agent</div>
+        <a href="#ex3-intro" class="sidebar-link">
+            <span class="step-num green">1</span> Setup
+        </a>
+        <a href="#ex3-step1" class="sidebar-link">
+            <span class="step-num green">2</span> Travel Agent code
+        </a>
+        <a href="#ex3-step2" class="sidebar-link">
+            <span class="step-num green">3</span> Python &rarr; Java interop
+        </a>
+        <a href="#ex3-step3" class="sidebar-link">
+            <span class="step-num green">4</span> Java &rarr; Python client
+        </a>
+        <a href="#ex3-test" class="sidebar-link">
+            <span class="step-num green">&#10003;</span> Test &amp; validate
+        </a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Exercise 4 &mdash; Orchestrator</div>
+        <a href="#ex4-intro" class="sidebar-link">
+            <span class="step-num purple">1</span> Orchestrator overview
+        </a>
+        <a href="#ex4-step1" class="sidebar-link">
+            <span class="step-num purple">2</span> Agent Discovery
+        </a>
+        <a href="#ex4-step2" class="sidebar-link">
+            <span class="step-num purple">3</span> Query Decomposer
+        </a>
+        <a href="#ex4-step3" class="sidebar-link">
+            <span class="step-num purple">4</span> Orchestration Loop
+        </a>
+        <a href="#ex4-test" class="sidebar-link">
+            <span class="step-num purple">&#10003;</span> Test &amp; validate
+        </a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Exercise 5 &mdash; Expense + OTel</div>
+        <a href="#ex5-intro" class="sidebar-link">
+            <span class="step-num red">1</span> Expense Agent
+        </a>
+        <a href="#ex5-step1" class="sidebar-link">
+            <span class="step-num red">2</span> Cross-Agent Handoff
+        </a>
+        <a href="#ex5-step2" class="sidebar-link">
+            <span class="step-num red">3</span> OTel Setup
+        </a>
+        <a href="#ex5-step3" class="sidebar-link">
+            <span class="step-num red">4</span> Grafana &amp; Production
+        </a>
+        <a href="#ex5-test" class="sidebar-link">
+            <span class="step-num red">&#10003;</span> Wrap-up
+        </a>
+    </div>
+
+    <div class="sidebar-section">
+        <div class="sidebar-section-title">Conclusion</div>
+        <a href="#whats-next" class="sidebar-link">
+            <span class="icon">&#128302;</span> What's next?
+        </a>
+        <a href="#troubleshooting" class="sidebar-link">
+            <span class="icon">&#128027;</span> Troubleshooting
+        </a>
+    </div>
+</nav>
+
+<!-- Main content -->
+<main class="main">
+<div class="content">
+
+<!-- ============================================================ -->
+<!-- OVERVIEW                                                      -->
+<!-- ============================================================ -->
+<section id="overview" class="section-anchor">
+<div class="hero">
+    <div class="hero-badge">2-Hour Hands-On Lab</div>
+    <h1>A2A <span class="highlight">Agent Lab</span></h1>
+    <p class="subtitle">
+        Build <strong>DevSphere</strong> &mdash; a production-grade multi-agent concierge with Java, Python, LangChain4j, Spring AI, and the A2A protocol. Five agents, three runtimes, one observable mesh.
+    </p>
+</div>
+
+<h2 id="exercises">What you will build</h2>
+
+<p>In this hands-on lab you will progressively build <strong>DevSphere</strong> &mdash; a multi-agent system that helps conference attendees with sessions, venue logistics, travel, and expense reporting. Each exercise adds a new agent to the ecosystem.</p>
+
+<div class="callout tip">
+    <div class="callout-title">&#127916; The Scenario: &ldquo;The Flight Delay &amp; Keynote Clash&rdquo;</div>
+    <p>It is 8:15 AM on Day 1. <strong>Maya</strong> lands at the airport, but her flight was delayed by two hours. She opens her DevSphere app and types:</p>
+    <p><em>&ldquo;My flight was delayed so I missed the morning shuttle. I&rsquo;m interested in agentic AI and Java agents&mdash;what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?&rdquo;</em></p>
+    <p>Every exercise you build brings one more piece of Maya&rsquo;s answer online.</p>
+</div>
+
+<div class="card-grid">
+    <div class="card">
+        <div class="card-icon">&#128218;</div>
+        <h4>Exercise 1: Schedule Advisor</h4>
+        <p>Build your first A2A agent with Quarkus &amp; LangChain4j: AgentCard, AgentExecutor, and <code>@RegisterAiService</code> tool calling.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#127970;</div>
+        <h4>Exercise 2: Venue Agent</h4>
+        <p>Spring Boot + Spring AI agent managing IoT room capacity, indoor mapping, and fast-track entry passes.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#9992;</div>
+        <h4>Exercise 3: Travel Agent</h4>
+        <p>Python A2A SDK agent for flights, transit, hotels, and receipt extraction. Cross-language Java &harr; Python.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#129504;</div>
+        <h4>Exercise 4: Orchestrator</h4>
+        <p>Quarkus Native gateway that discovers agents, decomposes queries, dispatches sub-tasks, and aggregates responses.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#128176;</div>
+        <h4>Exercise 5: Expense + OTel</h4>
+        <p>WildFly Enterprise expense agent (JPA, Kafka, multi-transport) with cross-agent handoff, plus OpenTelemetry tracing with the Grafana LGTM stack.</p>
+    </div>
+</div>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Lab format</div>
+    <p>Each exercise adds a new agent to the DevSphere mesh. The code for each exercise is in its own directory with all source files ready. Follow the steps, understand the patterns, then test.</p>
+</div>
+
+<div class="timeline">
+    <div class="timeline-item">
+        <strong>Exercise 1 &mdash; 30 min</strong>
+        <p>Schedule &amp; Content Advisor: AgentCard, AgentExecutor, LLM + <code>@RegisterAiService</code> tool calling with Quarkus</p>
+    </div>
+    <div class="timeline-item blue">
+        <strong>Exercise 2 &mdash; 20 min</strong>
+        <p>Venue &amp; On-Site Operations: Spring Boot agent with IoT room sensors and entry-pass reservation</p>
+    </div>
+    <div class="timeline-item green">
+        <strong>Exercise 3 &mdash; 15 min</strong>
+        <p>Travel &amp; Logistics Agent: Python agent with flight status, transit comparison, receipt extraction</p>
+    </div>
+    <div class="timeline-item purple">
+        <strong>Exercise 4 &mdash; 25 min</strong>
+        <p>Orchestrator &amp; Concierge: Quarkus gateway with dynamic discovery, query decomposition, multi-agent dispatch</p>
+    </div>
+    <div class="timeline-item red">
+        <strong>Exercise 5 &mdash; 20 min</strong>
+        <p>Expense &amp; Compliance Agent (WildFly Enterprise) + OpenTelemetry tracing across the entire call chain in Grafana</p>
+    </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PREREQUISITES                                                 -->
+<!-- ============================================================ -->
+<section id="prerequisites" class="section-anchor">
+<h2>Prerequisites</h2>
+
+<h3>Required software</h3>
+
+<table>
+    <thead>
+        <tr><th>Tool</th><th>Version</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><strong>JDK</strong></td><td>21+</td><td>Java development</td></tr>
+        <tr><td><strong>Maven</strong></td><td>3.9+</td><td>Build tool</td></tr>
+        <tr><td><strong>Python</strong></td><td>3.11+</td><td>Exercise 3 (Travel Agent)</td></tr>
+        <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>Ollama + Grafana LGTM infrastructure</td></tr>
+        <tr><td><strong>curl</strong></td><td>any</td><td>API testing</td></tr>
+        <tr><td><strong>IDE</strong></td><td>IntelliJ / VS Code / etc.</td><td>Code editor</td></tr>
+    </tbody>
+</table>
+
+<h3>1. Start the infrastructure</h3>
+
+<p>The lab uses Podman Compose (or Docker Compose) to run Ollama and the Grafana LGTM stack:</p>
+
+<pre><code>podman-compose up -d</code></pre>
+
+<p>This starts:</p>
+<ul>
+    <li><strong>Ollama</strong> on port <code>11434</code> &mdash; local LLM server with the <code>granite4.1:3b</code> model</li>
+    <li><strong>Grafana LGTM</strong> on port <code>3000</code> (Grafana UI) and <code>4317</code> (OTLP) &mdash; logs, traces, and metrics via Loki, Tempo, and Mimir</li>
+</ul>
+
+<p>Verify Ollama is ready:</p>
+
+<pre><code>curl http://localhost:11434/api/tags</code></pre>
+
+<p>You should see <code>granite4.1:3b</code> in the model list. If not, pull it manually:</p>
+
+<pre><code>podman exec ollama ollama pull granite4.1:3b</code></pre>
+
+<h3>2. Build the A2A Java SDK</h3>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; Important</div>
+    <p>The A2A Java SDK is not yet on Maven Central. You need to build it from source and install it locally before the exercises will compile.</p>
+</div>
+
+<pre><code>git clone https://github.com/a2aproject/a2a-java-sdk.git
+cd a2a-java-sdk
+mvn install -DskipTests</code></pre>
+
+<h3>3. Project structure</h3>
+
+<pre><code>a2a-agent-lab-2026/
+  pom.xml                              &larr; Root aggregator
+  conference-data/sessions.json        &larr; Shared conference data
+  podman-compose.yml                   &larr; Ollama + Grafana LGTM
+  exercises/                           &larr; All exercise projects
+    exercise-1-schedule-advisor/       &larr; Quarkus + A2A Java SDK
+    exercise-2-venue-agent/            &larr; Spring Boot + Spring AI
+    exercise-3-travel-agent-python/    &larr; Python A2A SDK
+    exercise-4-orchestrator/           &larr; Quarkus Native Orchestrator
+    exercise-5-expense-agent/          &larr; WildFly 41 Enterprise (JPA, Kafka)
+    exercise-5-observability/          &larr; OTel configuration snippets
+  solutions/                           &larr; Complete solutions + scripts</code></pre>
+</section>
+
+<!-- ============================================================ -->
+<!-- ARCHITECTURE                                                  -->
+<!-- ============================================================ -->
+<section id="architecture" class="section-anchor">
+<h2>Architecture</h2>
+
+<h3>A2A Protocol in 60 seconds</h3>
+
+<p>The <strong>Agent-to-Agent (A2A)</strong> protocol is an open standard for agent interoperability. Every A2A agent exposes:</p>
+
+<ul>
+    <li><strong>AgentCard</strong> at <code>/.well-known/agent-card.json</code> &mdash; machine-readable identity: name, skills, capabilities, endpoint</li>
+    <li><strong>JSON-RPC endpoint</strong> for <code>SendMessage</code> &mdash; send messages and receive Task responses</li>
+    <li><strong>Task lifecycle</strong> &mdash; <code>SUBMITTED &rarr; WORKING &rarr; COMPLETED</code> (or <code>FAILED</code>)</li>
+</ul>
+
+<h3>Final DevSphere architecture</h3>
+
+<div class="arch-diagram">
+<pre>
+                       User (Maya)
+                           |
+                +----------v-----------+
+                |  Orchestrator &amp;      |  Port 8090 (Quarkus)
+                |  Concierge           |
+                +---+------+------+---+
+                    |      |      |
+           +--------+      |      +--------+
+           |               |               |
++----------v-----+ +------v------+ +------v----------+
+| Schedule &amp;     | | Venue &amp;     | | Travel &amp;        |
+| Content Advisor| | On-Site Ops | | Logistics Agent |
+| :8080 (Quarkus)| | :8081 (SBt) | | :9000 (Python)  |
++----------------+ +-------------+ +-----------------+
+
+  +------------------+
+  | Expense &amp;        |  (standalone agent,
+  | Compliance       |   not orchestrated)
+  | :8082 (WF Ent.)  |
+  +------------------+
+
+All agents: AgentCard + JSON-RPC + A2A SDK
+All traces: OpenTelemetry &rarr; Grafana/Tempo (:3000)
+</pre>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- EXERCISE 1: SCHEDULE & CONTENT ADVISOR                        -->
+<!-- ============================================================ -->
+<section id="ex1-intro" class="section-anchor">
+<h2><span class="badge badge-orange">Exercise 1</span> Your First A2A Agent &mdash; The Schedule &amp; Content Advisor <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(30 min)</span></h2>
+
+<p><em>&ldquo;Maya needs an agent that answers questions about sessions: &lsquo;What talks about agentic AI are on October 7?&rsquo;, &lsquo;I&rsquo;m arriving at 9:45 &mdash; what can I still catch?&rsquo;, &lsquo;What sessions is Mario Fusco speaking at.&rsquo;&rdquo;</em></p>
+
+<p>In this exercise you will build a fully functional A2A agent using <strong>Quarkus</strong> with the <strong>A2A Java SDK reference implementation</strong> and <strong>Quarkus LangChain4j</strong> (<code>@RegisterAiService</code>). By the end, your agent will advertise its capabilities via an AgentCard, accept questions via <code>SendMessage</code>, use an LLM with tool calling to search the real conference schedule, and return structured results.</p>
+
+<h3>A2A Concepts Primer</h3>
+
+<div class="card-grid">
+    <div class="card">
+        <div class="card-icon">&#127380;</div>
+        <h4>AgentCard</h4>
+        <p>JSON at <code>/.well-known/agent-card.json</code> &mdash; identity, skills, capabilities, endpoint URL.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#9881;</div>
+        <h4>AgentExecutor</h4>
+        <p>Handler that receives A2A messages and produces responses using the emitter pattern.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#128257;</div>
+        <h4>Task Lifecycle</h4>
+        <p><code>SUBMITTED &rarr; WORKING &rarr; COMPLETED / FAILED</code> with artifacts attached.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#128172;</div>
+        <h4>Message &amp; Parts</h4>
+        <p>Messages carry <code>role</code> (user/agent) and typed <code>Part</code> objects: TextPart, FilePart, DataPart.</p>
+    </div>
+</div>
+
+<pre><code>cd exercises/exercise-1-schedule-advisor</code></pre>
+</section>
+
+<!-- Step 1: ScheduleTool -->
+<section id="ex1-step1" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-orange);">1</span>
+        <span class="step-title">Build the ScheduleTool</span>
+    </div>
+    <p>The <code>ScheduleTool</code> is an <code>@ApplicationScoped</code> CDI bean that gives the LLM access to the real conference data. LangChain4j&rsquo;s <code>@Tool</code> annotation exposes methods as callable tools that the model can invoke.</p>
+    <p>Open <code>src/main/java/dev/devconf/schedule/ScheduleTool.java</code>:</p>
+</div>
+
+<details class="solution">
+    <summary>Show ScheduleTool.java</summary>
+    <div class="solution-body">
+<pre><code>@ApplicationScoped
+public class ScheduleTool {
+
+    @ConfigProperty(name = "session.data.path")
+    String sessionDataPath;
+
+    private List&lt;Session&gt; sessions;
+
+    @PostConstruct
+    void init() {
+        ObjectMapper mapper = new ObjectMapper();
+        Path path = Path.of(sessionDataPath);
+        sessions = mapper.readValue(path.toFile(), new TypeReference&lt;&gt;() {});
+    }
+
+    @Tool("Search conference sessions by keyword, track, speaker name, or tag.")
+    public String searchSessions(String query) {
+        String q = query.toLowerCase();
+        List&lt;Session&gt; matches = sessions.stream()
+                .filter(s -&gt; s.title().toLowerCase().contains(q)
+                        || s.track().toLowerCase().contains(q)
+                        || s.speaker().toLowerCase().contains(q)
+                        || s.description().toLowerCase().contains(q)
+                        || s.tags().stream().anyMatch(t -&gt; t.contains(q)))
+                .toList();
+        // format and return results...
+    }
+
+    @Tool("List all available conference tracks.")
+    public String listTracks() { ... }
+
+    @Tool("Get the schedule for a specific date (YYYY-MM-DD).")
+    public String getScheduleByDate(String date) { ... }
+
+    @Tool("Filter sessions starting at or after a given time on a date.")
+    public String filterSessionsAfterTime(String date, String time) { ... }
+
+    @Tool("Get speaker information by name.")
+    public String getSpeakerInfo(String speakerName) { ... }
+
+    public record Session(
+        String id, String title, String speaker, String track,
+        String room, String date, String time, int duration,
+        String description, List&lt;String&gt; tags
+    ) {}
+}</code></pre>
+    </div>
+</details>
+
+<div class="callout tip">
+    <div class="callout-title">&#128161; Key tool: filterSessionsAfterTime</div>
+    <p>Maya arrives at 9:45 AM. This tool lets the LLM exclude sessions she already missed, finding talks starting at 10:15 or later that match her interests.</p>
+</div>
+</section>
+
+<!-- Step 2: ScheduleService -->
+<section id="ex1-step2" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-orange);">2</span>
+        <span class="step-title">Build the ScheduleService</span>
+    </div>
+    <p>The <code>ScheduleService</code> is a Quarkus LangChain4j <strong>AI Service</strong> &mdash; an interface annotated with <code>@RegisterAiService</code> that Quarkus automatically wires to the LLM and tools.</p>
+</div>
+
+<details class="solution">
+    <summary>Show ScheduleService.java</summary>
+    <div class="solution-body">
+<pre><code>@RegisterAiService(tools = ScheduleTool.class)
+public interface ScheduleService {
+    @SystemMessage("""
+            You are the DevConf 2026 Schedule &amp; Content Advisor.
+            You deep-scan the session catalog, speaker bios, and tracks.
+            If the attendee mentions arriving late, use filterSessionsAfterTime.
+            Always use your search tools rather than making up information.
+            """)
+    String chat(@UserMessage String userMessage);
+}</code></pre>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Quarkus LangChain4j pattern</div>
+    <p><code>@RegisterAiService(tools = ScheduleTool.class)</code> tells Quarkus to auto-wire the LLM (configured in <code>application.properties</code>) with the schedule tools. No manual <code>AiServices.builder()</code> needed &mdash; Quarkus handles the CDI plumbing.</p>
+</div>
+</section>
+
+<!-- Step 3: AgentCard Producer -->
+<section id="ex1-step3" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-orange);">3</span>
+        <span class="step-title">Implement the AgentCard Producer</span>
+    </div>
+    <p>The AgentCard is how your agent introduces itself to the A2A world. It is served at <code>/.well-known/agent-card.json</code> and tells other agents what you can do.</p>
+</div>
+
+<details class="solution">
+    <summary>Show ScheduleAgentCardProducer.java</summary>
+    <div class="solution-body">
+<pre><code>@ApplicationScoped
+public class ScheduleAgentCardProducer {
+
+    @Produces
+    @PublicAgentCard
+    public AgentCard agentCard() {
+        return AgentCard.builder()
+                .name("Schedule &amp; Content Advisor")
+                .description("Deep-scans the DevConf session catalog...")
+                .version("1.0.0")
+                .skills(List.of(
+                    AgentSkill.builder()
+                        .id("session-search")
+                        .name("Session Search")
+                        .description("Search sessions by topic, speaker, or track.")
+                        .build(),
+                    AgentSkill.builder()
+                        .id("session-recommend")
+                        .name("Session Recommendations")
+                        .description("Personalized recommendations based on interests.")
+                        .build(),
+                    AgentSkill.builder()
+                        .id("speaker-info")
+                        .name("Speaker Information")
+                        .description("Get speaker bios and session history.")
+                        .build()
+                ))
+                .build();
+    }
+}</code></pre>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; CDI pattern</div>
+    <p><code>@Produces</code> makes this a CDI producer method. <code>@PublicAgentCard</code> is an SDK qualifier that tells the A2A Jakarta transport to serve this card at <code>/.well-known/agent-card.json</code> automatically.</p>
+</div>
+</section>
+
+<!-- Step 4: AgentExecutor -->
+<section id="ex1-step4" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-orange);">4</span>
+        <span class="step-title">Implement the AgentExecutor</span>
+    </div>
+    <p>The <code>AgentExecutor</code> receives incoming A2A messages and produces responses through the emitter pattern.</p>
+</div>
+
+<details class="solution">
+    <summary>Show ScheduleAgentExecutorProducer.java</summary>
+    <div class="solution-body">
+<pre><code>@ApplicationScoped
+public class ScheduleAgentExecutorProducer {
+
+    @Inject
+    ScheduleService scheduleService;
+
+    @Produces
+    public AgentExecutor agentExecutor() {
+        return new AgentExecutor() {
+            @Override
+            public void execute(RequestContext context, AgentEmitter emitter) {
+                String userText = extractText(context.getMessage());
+
+                emitter.startWork(emitter.messageBuilder()
+                    .parts(List.of(new TextPart("Scanning the schedule...")))
+                    .build());
+
+                try {
+                    String response = scheduleService.chat(userText);
+                    emitter.addArtifact(List.of(new TextPart(response)));
+                    emitter.complete();
+                } catch (Exception e) {
+                    emitter.updateStatus(TaskState.TASK_STATE_FAILED,
+                        emitter.messageBuilder()
+                            .parts(List.of(new TextPart("Error: " + e.getMessage())))
+                            .build());
+                }
+            }
+        };
+    }
+}</code></pre>
+    </div>
+</details>
+
+<p>The flow maps directly to the Task lifecycle:</p>
+<pre><code>Client sends SendMessage
+  &rarr; execute() called
+  &rarr; emitter.startWork()          &rarr; Task state: WORKING
+  &rarr; scheduleService.chat()       &rarr; LLM + tool calls happen
+  &rarr; emitter.addArtifact()        &rarr; Attach response content
+  &rarr; emitter.complete()           &rarr; Task state: COMPLETED
+  &rarr; Response returned to client</code></pre>
+</section>
+
+<!-- Test Exercise 1 -->
+<section id="ex1-test" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-orange);">&#10003;</span>
+        <span class="step-title">Test your agent</span>
+    </div>
+
+    <h4>Start with Quarkus dev mode</h4>
+    <pre><code>cd exercises/exercise-1-schedule-advisor
+mvn quarkus:dev</code></pre>
+
+    <h4>Fetch the AgentCard</h4>
+    <pre><code>curl -s http://localhost:8080/.well-known/agent-card.json | jq .</code></pre>
+
+    <h4>Send a message</h4>
+    <pre><code>curl -s -X POST http://localhost:8080/ \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "SendMessage",
+    "params": {
+      "message": {
+        "messageId": "msg-1",
+        "role": "ROLE_USER",
+        "parts": [{"text": "What sessions about agentic AI are available on October 7?"}]
+      }
+    },
+    "id": "test-1"
+  }' | jq .</code></pre>
+
+    <h4>Maya&rsquo;s late-arrival scenario</h4>
+    <pre><code>curl -s -X POST http://localhost:8080/ \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "SendMessage",
+    "params": {
+      "message": {
+        "messageId": "msg-1",
+        "role": "ROLE_USER",
+        "parts": [{"text": "I am arriving at 9:45 on 2026-10-07 and interested in agentic AI and Java agents. What can I still attend today?"}]
+      }
+    },
+    "id": "test-maya"
+  }' | jq .result.task.artifacts[0].parts[0].text</code></pre>
+
+    <h4>Polling with GetTask (if the agent is still working)</h4>
+    <p>If the <code>SendMessage</code> response shows <code>"state": "TASK_STATE_WORKING"</code>, the agent is still processing. Copy the <code>task.id</code> from the response and poll with <code>GetTask</code> until it reaches <code>TASK_STATE_COMPLETED</code>:</p>
+    <pre><code># Replace TASK_ID with the task id from the SendMessage response
+# (found at .result.task.id in the JSON output)
+curl -s -X POST http://localhost:8080/ \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "GetTask",
+    "params": {
+      "id": "TASK_ID",
+      "historyLength": 10
+    },
+    "id": "get-task-1"
+  }' | jq .</code></pre>
+
+    <div class="callout tip">
+        <div class="callout-title">&#128161; historyLength</div>
+        <p>The <code>historyLength</code> parameter tells the agent how many previous messages to include in the response. Set it to <code>10</code> to see the full conversation history including intermediate tool calls.</p>
+    </div>
+</div>
+
+<h3>Checkpoint</h3>
+
+<ul class="checklist">
+    <li>A running Quarkus application on port 8080</li>
+    <li>An AgentCard served at <code>/.well-known/agent-card.json</code> with three skills</li>
+    <li>A working <code>SendMessage</code> endpoint that answers session questions</li>
+    <li>The LLM using tool calling to search real conference data</li>
+</ul>
+
+<div class="callout success">
+    <div class="callout-title">&#9989; Congratulations</div>
+    <p><strong>You&rsquo;ve built your first A2A agent.</strong> It speaks a standard protocol that any A2A client &mdash; in any language, on any framework &mdash; can talk to.</p>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- EXERCISE 2: VENUE & ON-SITE OPERATIONS AGENT                  -->
+<!-- ============================================================ -->
+<section id="ex2-intro" class="section-anchor">
+<h2><span class="badge badge-blue">Exercise 2</span> Venue &amp; On-Site Operations Agent <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(20 min)</span></h2>
+
+<p><em>&ldquo;Maya arrives at the venue. The 10:15 talk on vector indexing is in Hall B &mdash; but is there still room? She asks: &lsquo;Is Hall B full? Can I get a fast-track entry pass?&rsquo;&rdquo;</em></p>
+
+<p>In this exercise you build a <strong>Spring Boot + LangChain4j</strong> agent that manages real-time venue information including IoT room capacity sensors, indoor navigation, and catering queue tracking.</p>
+
+<table>
+    <thead>
+        <tr><th>Runtime</th><th>Framework</th><th>Transport</th><th>DI Style</th><th>Port</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Quarkus</td><td>A2A Java SDK + LangChain4j</td><td>JSON-RPC</td><td><code>@Produces</code> / <code>@RegisterAiService</code></td><td>8080</td></tr>
+        <tr><td><strong>Spring Boot</strong></td><td><strong><a href="https://github.com/Sh1bari/spring-a2a" target="_blank">spring-a2a</a> + LangChain4j</strong></td><td><strong>REST</strong></td><td><code>@Bean</code></td><td><strong>8081</strong></td></tr>
+    </tbody>
+</table>
+
+<pre><code>cd exercises/exercise-2-venue-agent</code></pre>
+</section>
+
+<!-- Step 1: Spring Boot wiring -->
+<section id="ex2-step1" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-blue);">1</span>
+        <span class="step-title">Spring Boot wiring &mdash; compare with Java A2A SDK</span>
+    </div>
+    <p>The Venue Agent uses the same A2A protocol as the Schedule Advisor, but with Spring Boot and <a href="https://github.com/Sh1bari/spring-a2a" target="_blank">spring-a2a</a> instead of the Java A2A SDK Quarkus extension.</p>
+</div>
+
+<div class="compare-grid">
+    <div class="compare-box">
+        <h4>Quarkus (Exercise 1)</h4>
+        <ul>
+            <li><code>@ApplicationScoped</code></li>
+            <li><code>@Produces</code> methods</li>
+            <li><code>@RegisterAiService</code> (auto-wired)</li>
+            <li><code>@ConfigProperty</code> (MicroProfile)</li>
+        </ul>
+    </div>
+    <div class="compare-box">
+        <h4>Spring Boot (Exercise 2)</h4>
+        <ul>
+            <li><code>@Component</code></li>
+            <li><code>@Bean</code> in <code>@Configuration</code></li>
+            <li><code>AiServices.builder()</code> + manual <code>AgentExecutor</code></li>
+            <li><code>@Value</code></li>
+        </ul>
+    </div>
+</div>
+
+<details class="solution">
+    <summary>Show VenueAgentConfig.java (Spring Boot wiring)</summary>
+    <div class="solution-body">
+<pre><code>@Configuration
+public class VenueAgentConfig {
+
+    @Bean
+    public VenueService venueService(ChatModel model,
+                                      VenueTool venueTool) {
+        return AiServices.builder(VenueService.class)
+                .chatModel(model)
+                .tools(venueTool)
+                .build();
+    }
+
+    @Bean
+    public AgentCard agentCard() {
+        return AgentCard.builder()
+                .name("Venue &amp; On-Site Operations Agent")
+                .version("1.0.0")
+                .supportedInterfaces(List.of(
+                    new AgentInterface(
+                        TransportProtocol.HTTP_JSON.asString(),
+                        "http://localhost:8081")))
+                .capabilities(AgentCapabilities.builder()
+                        .streaming(false)
+                        .pushNotifications(false).build())
+                .skills(List.of(
+                    AgentSkill.builder().id("room-capacity")
+                        .name("Room Capacity").build(),
+                    AgentSkill.builder().id("indoor-map")
+                        .name("Indoor Map").build(),
+                    AgentSkill.builder().id("catering-queue")
+                        .name("Catering Queue").build(),
+                    AgentSkill.builder().id("entry-pass")
+                        .name("Entry Pass").build()
+                ))
+                .build();
+    }
+
+    @Bean
+    public AgentExecutor agentExecutor(VenueService venueService) {
+        return new AgentExecutor() {
+            @Override
+            public void execute(RequestContext ctx, AgentEmitter emitter) {
+                String userText = extractText(ctx.getMessage());
+                emitter.startWork();
+                String response = venueService.chat(userText);
+                emitter.addArtifact(
+                    List.of(new TextPart(response)),
+                    null, "response", null);
+                emitter.complete();
+            }
+        };
+    }
+}</code></pre>
+    </div>
+</details>
+</section>
+
+<!-- Step 2: VenueTool -->
+<section id="ex2-step2" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-blue);">2</span>
+        <span class="step-title">VenueTool &mdash; IoT sensor data</span>
+    </div>
+    <p>The <code>VenueTool</code> uses LangChain4j&rsquo;s <code>@Tool</code> annotation to expose venue operations as LLM-callable tools. IoT sensor data is hardcoded for the lab.</p>
+</div>
+
+<details class="solution">
+    <summary>Show VenueTool.java (key methods)</summary>
+    <div class="solution-body">
+<pre><code>@Component
+public class VenueTool {
+
+    // Hardcoded IoT sensor readings
+    private static final Map&lt;String, int[]&gt; ROOMS = Map.of(
+        "Main Hall A", new int[]{2000, 85},  // capacity, occupancy%
+        "Hall B",      new int[]{500,  60},
+        "Room 201",    new int[]{150,  72},
+        "Room 301",    new int[]{200,  45},
+        "Room 401",    new int[]{120,  90},
+        "Room 102",    new int[]{180,  55},
+        "Lab Room B",  new int[]{60,   40}
+    );
+
+    @Tool("Check real-time room capacity from IoT sensors.")
+    public String checkRoomCapacity(
+            @P("The room name") String roomName) { ... }
+
+    @Tool("Get walking directions between venue locations.")
+    public String getIndoorDirections(
+            @P("Starting location") String from,
+            @P("Destination") String to) { ... }
+
+    @Tool("Check catering station queue lengths.")
+    public String getCateringStatus() { ... }
+
+    @Tool("Reserve a fast-track entry pass for a room.")
+    public String reserveEntryPass(
+            @P("Attendee name") String attendeeName,
+            @P("Room name") String roomName) { ... }
+}</code></pre>
+    </div>
+</details>
+
+<div class="callout tip">
+    <div class="callout-title">&#128161; Maya&rsquo;s entry pass</div>
+    <p>The <code>reserveEntryPass</code> tool lets Maya bypass the queue. When the Orchestrator dispatches her request, the Venue Agent checks Hall B is at 60% capacity and confirms a fast-track entry pass.</p>
+</div>
+</section>
+
+<!-- Test Exercise 2 -->
+<section id="ex2-test" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-blue);">&#10003;</span>
+        <span class="step-title">Test the Venue Agent</span>
+    </div>
+
+    <h4>Start the agent</h4>
+    <pre><code>cd exercises/exercise-2-venue-agent
+mvn spring-boot:run</code></pre>
+
+    <h4>Check room capacity (REST transport)</h4>
+    <pre><code>curl -s -X POST http://localhost:8081/message:send \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "message": {
+      "messageId": "msg-1",
+      "role": "ROLE_USER",
+      "parts": [{"text": "Is Hall B full? Can I get a fast-track entry pass for Maya?"}]
+    }
+  }' | jq .</code></pre>
+
+    <h4>Retrieve a task by ID (REST GetTask)</h4>
+    <pre><code># Replace &lt;taskId&gt; with the taskId from the SendMessage response
+curl -s http://localhost:8081/tasks/&lt;taskId&gt; \
+  -H "A2A-Version: 1.0" | jq .</code></pre>
+
+    <h4>Cross-runtime verification</h4>
+    <pre><code># Exercise 1 (Quarkus) — JSON-RPC transport
+curl -s http://localhost:8080/.well-known/agent-card.json \
+  | jq '{name, skills: [.skills[].id]}'
+
+# Exercise 2 (Spring Boot + spring-a2a) — REST transport
+curl -s http://localhost:8081/.well-known/agent-card.json \
+  | jq '{name, skills: [.skills[].id]}'</code></pre>
+</div>
+
+<h3>Checkpoint</h3>
+
+<ul class="checklist">
+    <li>Venue Agent running on port 8081 alongside the Schedule Advisor on 8080</li>
+    <li>Both serving AgentCards with different skills via the same A2A protocol</li>
+    <li>IoT room capacity data accessible via tool calling</li>
+</ul>
+
+<div class="callout success">
+    <div class="callout-title">&#9989; Key takeaway</div>
+    <p><strong>The AgentCard is the contract.</strong> A client that talks to the Quarkus Schedule Advisor talks to the Spring Boot Venue Agent with identical code &mdash; only the URL and skills differ.</p>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- EXERCISE 3: TRAVEL & LOGISTICS AGENT                          -->
+<!-- ============================================================ -->
+<section id="ex3-intro" class="section-anchor">
+<h2><span class="badge badge-green">Exercise 3</span> Cross-Language &mdash; The Travel &amp; Logistics Agent <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(15 min)</span></h2>
+
+<p><em>&ldquo;Maya&rsquo;s flight was delayed. She needs to get to the venue fast. The Travel Agent compares a rideshare (15 min, $35) vs the delayed airport express (45 min, $12) and recommends the rideshare. Later, it extracts her taxi receipt for expense reporting.&rdquo;</em></p>
+
+<pre><code>cd exercises/exercise-3-travel-agent-python</code></pre>
+</section>
+
+<section id="ex3-step1" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-green);">1</span>
+        <span class="step-title">Set up and explore</span>
+    </div>
+
+    <h4>Install dependencies</h4>
+    <pre><code># Option A: pip
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+# Option B: uv (faster)
+uv venv
+uv sync</code></pre>
+</div>
+
+<h4>Agent Code Walkthrough</h4>
+
+<p>Open <code>travel_agent.py</code>. The Travel &amp; Logistics Agent handles six skill areas:</p>
+
+<details class="solution">
+    <summary>Show key functions (transit comparison + receipt extraction)</summary>
+    <div class="solution-body">
+<pre><code>def get_transit_options(query):
+    """Compare transit options from airport to venue."""
+    options = TRAVEL_DATA["transit"]["options"]
+    # Returns formatted comparison:
+    # - Rideshare: 15 min, ~$35 (recommended when train is delayed)
+    # - Airport Express Train: 30 min, $12 (currently delayed +15 min)
+    # - Taxi: 20 min, ~$45
+    ...
+
+def extract_receipt(query):
+    """Extract structured receipt data for expense reporting."""
+    # Returns JSON-like structured payload:
+    # {"vendor": "...", "amount": "...", "date": "...",
+    #  "category": "Transportation", "description": "..."}
+    ...</code></pre>
+    </div>
+</details>
+
+<details class="solution">
+    <summary>Show AgentCard (6 skills)</summary>
+    <div class="solution-body">
+<pre><code>AgentCard(
+    name="Travel &amp; Logistics Agent",
+    skills=[
+        AgentSkill(id="flight-status", name="Flight Status", ...),
+        AgentSkill(id="transit-routes", name="Transit Routes", ...),
+        AgentSkill(id="hotel-search", name="Hotel Search", ...),
+        AgentSkill(id="receipt-extraction", name="Receipt Extraction", ...),
+        AgentSkill(id="restaurant-search", name="Restaurant Search", ...),
+        AgentSkill(id="local-tips", name="Local Tips", ...),
+    ],
+    ...
+)</code></pre>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Receipt extraction for cross-agent handoff</div>
+    <p>The <code>receipt-extraction</code> skill outputs structured data that the Expense &amp; Compliance Agent (Exercise 5) can consume. This is the cross-language data handoff in Maya&rsquo;s scenario.</p>
+</div>
+</section>
+
+<!-- Step 2: Cross-language interop -->
+<section id="ex3-step2" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-green);">2</span>
+        <span class="step-title">Cross-language interoperability</span>
+    </div>
+
+    <h4>Start the Python agent</h4>
+    <pre><code>python travel_agent.py</code></pre>
+
+    <h4>Test transit comparison</h4>
+    <pre><code>curl -s -X POST http://localhost:9000/ \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "SendMessage",
+    "params": {
+      "message": {
+        "messageId": "msg-1",
+        "role": "ROLE_USER",
+        "parts": [{"text": "My flight was delayed. How do I get to the convention center quickly?"}]
+      }
+    },
+    "id": "test-transit"
+  }' | python -m json.tool</code></pre>
+
+    <h4>Python &rarr; Java (interop test)</h4>
+    <pre><code>python test_interop.py</code></pre>
+</div>
+</section>
+
+<!-- Step 3: Java client -->
+<section id="ex3-step3" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-green);">3</span>
+        <span class="step-title">Java &rarr; Python: Build the A2A Java Client</span>
+    </div>
+    <p>Now prove the reverse direction: call the Python Travel Agent from Java using the <strong>A2A Java SDK client</strong>. The client code is identical whether the server is Java or Python &mdash; that&rsquo;s the point.</p>
+</div>
+
+<h4>Project setup</h4>
+
+<p>The Java client lives in <code>java-client/</code> inside the exercise directory. It&rsquo;s a standalone Maven project with two dependencies:</p>
+
+<details class="solution">
+    <summary>Show pom.xml</summary>
+    <div class="solution-body">
+<pre><code>&lt;dependencies&gt;
+    &lt;!-- A2A Java SDK &mdash; client + JSON-RPC transport --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.a2aproject.sdk&lt;/groupId&gt;
+        &lt;artifactId&gt;a2a-java-sdk-client&lt;/artifactId&gt;
+        &lt;version&gt;${a2a-sdk.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.a2aproject.sdk&lt;/groupId&gt;
+        &lt;artifactId&gt;a2a-java-sdk-client-transport-jsonrpc&lt;/artifactId&gt;
+        &lt;version&gt;${a2a-sdk.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+    </div>
+</details>
+
+<h4>The client code</h4>
+
+<p>Three steps: fetch the AgentCard, build a <code>Client</code>, send messages. Compare this to the Python <code>test_interop.py</code> &mdash; the pattern is the same, the language is different.</p>
+
+<details class="solution">
+    <summary>Show TravelAgentClient.java</summary>
+    <div class="solution-body">
+<pre><code>// 1. Fetch the Python agent's AgentCard
+AgentCard card = A2A.getAgentCard("http://localhost:9000");
+System.out.println("Agent: " + card.name());
+for (AgentSkill skill : card.skills()) {
+    System.out.println("  - " + skill.name() + ": " + skill.description());
+}
+
+// 2. Build the A2A client from the AgentCard
+Client client = Client.builder(card)
+    .withTransport(JSONRPCTransport.class,
+        new JSONRPCTransportConfigBuilder())
+    .build();
+
+// 3. Send a message and handle the response
+Message message = A2A.toUserMessage(
+    "How do I get from the airport to the venue quickly?");
+CountDownLatch latch = new CountDownLatch(1);
+
+client.sendMessage(message,
+    List.of((ClientEvent event, AgentCard ac) -&gt; {
+        if (event instanceof TaskEvent taskEvent) {
+            var task = taskEvent.getTask();
+            for (Artifact artifact : task.artifacts()) {
+                for (Part&lt;?&gt; part : artifact.parts()) {
+                    if (part instanceof TextPart tp) {
+                        System.out.println(tp.text());
+                    }
+                }
+            }
+        }
+        latch.countDown();
+    }),
+    error -&gt; System.err.println("Error: " + error.getMessage())
+);
+
+latch.await(30, TimeUnit.SECONDS);
+client.close();</code></pre>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Key insight</div>
+    <p>The Java client uses the exact same <code>A2A.getAgentCard()</code> / <code>Client.builder(card)</code> / <code>client.sendMessage()</code> API it would use to call a Java agent. It doesn&rsquo;t know or care that the server is Python.</p>
+</div>
+
+<h4>Run it</h4>
+<pre><code>cd exercises/exercise-3-travel-agent-python/java-client
+mvn compile exec:java</code></pre>
+
+<p>You should see output like:</p>
+<pre><code>==========================================================
+Java &rarr; Python A2A Interop Client
+==========================================================
+
+1. Fetching Python Travel Agent's AgentCard...
+   Agent: Travel &amp; Logistics Agent
+   Skills:
+     - Flight Status: Check flight status, delays, and gate information.
+     - Transit Routes: Get transit options from airport to venue...
+     ...
+
+2. Sending transit query: 'How do I get from the airport to the venue quickly?'
+   Response:
+   Here are your transit options:
+   ...
+
+&#10003; Java &rarr; Python A2A interop successful!</code></pre>
+</section>
+
+<!-- Test Exercise 3 -->
+<section id="ex3-test" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-green);">&#10003;</span>
+        <span class="step-title">Checkpoint</span>
+    </div>
+</div>
+
+<ul class="checklist">
+    <li>Python Travel &amp; Logistics Agent running on port 9000</li>
+    <li>Java &rarr; Python communication via the A2A Java SDK client</li>
+    <li>Python &rarr; Java communication via <code>test_interop.py</code></li>
+    <li>Transit comparison and receipt extraction working</li>
+</ul>
+
+<table>
+    <thead>
+        <tr><th>Agent</th><th>Language</th><th>Framework</th><th>Port</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Schedule &amp; Content Advisor</td><td>Java</td><td>Quarkus + A2A Java SDK</td><td>8080</td></tr>
+        <tr><td>Venue &amp; On-Site Operations</td><td>Java</td><td>Spring Boot</td><td>8081</td></tr>
+        <tr><td><strong>Travel &amp; Logistics</strong></td><td><strong>Python</strong></td><td><strong>A2A Python SDK</strong></td><td><strong>9000</strong></td></tr>
+    </tbody>
+</table>
+
+<div class="callout success">
+    <div class="callout-title">&#9989; Key takeaway</div>
+    <p><strong>A2A is a wire protocol.</strong> Any language that speaks JSON-RPC over HTTP can participate in the mesh. Keep all three agents running for Exercise 4.</p>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- EXERCISE 4: ORCHESTRATOR & CONCIERGE                          -->
+<!-- ============================================================ -->
+<section id="ex4-intro" class="section-anchor">
+<h2><span class="badge badge-purple">Exercise 4</span> The Orchestrator &amp; Concierge <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(25 min)</span></h2>
+
+<p><em>&ldquo;Maya types: &lsquo;My flight was delayed so I missed the morning shuttle. I&rsquo;m interested in agentic AI and Java agents&mdash;what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?&rsquo; No single agent can answer this. You need an orchestrator.&rdquo;</em></p>
+
+<div class="arch-diagram">
+<pre>
+                +-------------------------------+
+  User query -&gt; |   Orchestrator &amp; Concierge    |
+                |   (Quarkus Native) :8090      |
+                |                               |
+                |  1. QueryDecomposer (LLM)     |
+                |     "sessions + travel +      |
+                |      venue + expense" &rarr;       |
+                |       SubTask[schedule]        |
+                |       SubTask[travel]          |
+                |       SubTask[venue]           |
+                |                               |
+                |  2. Dispatch via A2A          |
+                |  +--------+ +------+ +-----+ |
+                |  |Schedule| |Travel| |Venue| |
+                |  |:8080   | |:9000 | |:8081| |
+                |  +--------+ +------+ +-----+ |
+                |                               |
+                |  3. ResponseAggregator (LLM)  |
+                |     Combine into one answer   |
+                +---------------+---------------+
+                                |
+                Final answer &lt;--+
+</pre>
+</div>
+
+<pre><code>cd exercises/exercise-4-orchestrator</code></pre>
+</section>
+
+<!-- Step 1: Agent Discovery -->
+<section id="ex4-step1" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-purple);">1</span>
+        <span class="step-title">Agent Discovery Service</span>
+    </div>
+    <p>At startup, the Orchestrator fetches and caches the AgentCard from each known agent URL.</p>
+</div>
+
+<details class="solution">
+    <summary>Show AgentDiscoveryService.java</summary>
+    <div class="solution-body">
+<pre><code>@ApplicationScoped
+public class AgentDiscoveryService {
+
+    @ConfigProperty(name = "orchestrator.agent-urls")
+    List&lt;String&gt; agentUrls;
+
+    private final Map&lt;String, AgentInfo&gt; registry = new LinkedHashMap&lt;&gt;();
+
+    public record AgentInfo(String name, String url,
+                            List&lt;String&gt; skills, String description) {}
+
+    @PostConstruct
+    void discoverAgents() {
+        for (String baseUrl : agentUrls) {
+            String cardUrl = baseUrl + "/.well-known/agent-card.json";
+            // Fetch AgentCard, parse name + skills, store in registry
+            ...
+        }
+    }
+
+    public String buildSkillsSummary() {
+        return registry.values().stream()
+            .map(a -&gt; "Agent \"" + a.name() + "\" &mdash; " + a.description()
+                    + "\n  Skills: " + String.join("; ", a.skills()))
+            .collect(Collectors.joining("\n\n"));
+    }
+}</code></pre>
+    </div>
+</details>
+</section>
+
+<!-- Step 2: Query Decomposer -->
+<section id="ex4-step2" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-purple);">2</span>
+        <span class="step-title">Query Decomposer + Response Aggregator</span>
+    </div>
+    <p>Two LangChain4j AI Services: one splits queries into sub-tasks, the other combines the results.</p>
+</div>
+
+<details class="solution">
+    <summary>Show QueryDecomposer.java + ResponseAggregator.java</summary>
+    <div class="solution-body">
+<pre><code>@RegisterAiService
+public interface QueryDecomposer {
+    @SystemMessage("""
+        You decompose complex user queries into sub-tasks.
+        Available agents:
+        {{agentsSummary}}
+
+        Return ONLY a JSON array:
+        [{"agentName": "...", "query": "..."}]
+        """)
+    String decompose(@UserMessage String query,
+                     @V("agentsSummary") String agentsSummary);
+}
+
+@RegisterAiService
+public interface ResponseAggregator {
+    @SystemMessage("""
+        You synthesize responses from multiple specialist agents
+        into a single coherent answer for a conference attendee.
+        Organize logically. Maintain a friendly tone.
+        """)
+    String aggregate(@UserMessage String combinedResponses);
+}
+
+public record SubTask(String agentName, String query) {}</code></pre>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Dynamic routing</div>
+    <p>The system message includes the list of available agent skills. Add a new agent to the mesh and the Orchestrator automatically learns to route to it &mdash; no code changes needed.</p>
+</div>
+</section>
+
+<!-- Step 3: Orchestration Loop -->
+<section id="ex4-step3" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-purple);">3</span>
+        <span class="step-title">The Orchestration Loop</span>
+    </div>
+    <p>The <code>OrchestratorAgentExecutorProducer</code> ties everything together: decompose &rarr; dispatch &rarr; aggregate.</p>
+</div>
+
+<details class="solution">
+    <summary>Show Orchestration Loop (key sections)</summary>
+    <div class="solution-body">
+<pre><code>@Override
+public void execute(RequestContext context, AgentEmitter emitter) {
+    String userText = extractText(context.getMessage());
+
+    emitter.startWork(emitter.messageBuilder()
+        .parts(List.of(new TextPart("Coordinating specialist agents...")))
+        .build());
+
+    // 1. Decompose the query
+    String skillsSummary = discoveryService.buildSkillsSummary();
+    String decomposedJson = queryDecomposer.decompose(userText, skillsSummary);
+    List&lt;SubTask&gt; subTasks = parseSubTasks(decomposedJson);
+
+    // 2. Dispatch to each agent via A2A
+    List&lt;String&gt; agentResponses = new ArrayList&lt;&gt;();
+    for (SubTask subTask : subTasks) {
+        var agentInfo = discoveryService.getAgentByName(subTask.agentName());
+        String response = dispatchToAgent(agentInfo.url(), subTask.query());
+        agentResponses.add("=== " + subTask.agentName() + " ===\n" + response);
+    }
+
+    // 3. Aggregate all responses
+    String combined = "Original question: " + userText + "\n\n"
+            + String.join("\n\n", agentResponses);
+    String finalAnswer = responseAggregator.aggregate(combined);
+
+    emitter.addArtifact(List.of(new TextPart(finalAnswer)));
+    emitter.complete();
+}</code></pre>
+    </div>
+</details>
+</section>
+
+<!-- Test Exercise 4 -->
+<section id="ex4-test" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-purple);">&#10003;</span>
+        <span class="step-title">Test the Orchestrator</span>
+    </div>
+
+    <h4>Make sure these agents are running</h4>
+    <table>
+        <thead><tr><th>Terminal</th><th>Agent</th><th>Port</th></tr></thead>
+        <tbody>
+            <tr><td>Tab 1</td><td>Schedule &amp; Content Advisor (Quarkus)</td><td>8080</td></tr>
+            <tr><td>Tab 2</td><td>Venue &amp; On-Site Operations (Spring Boot)</td><td>8081</td></tr>
+            <tr><td>Tab 3</td><td>Travel &amp; Logistics (Python)</td><td>9000</td></tr>
+            <tr><td>Tab 4</td><td><strong>Orchestrator &amp; Concierge (Quarkus)</strong></td><td><strong>8090</strong></td></tr>
+        </tbody>
+    </table>
+
+    <h4>Start the Orchestrator</h4>
+    <pre><code>cd exercises/exercise-4-orchestrator
+mvn quarkus:dev</code></pre>
+
+    <h4>Send Maya&rsquo;s full scenario</h4>
+    <pre><code>curl -s -X POST http://localhost:8090/ \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "SendMessage",
+    "params": {
+      "message": {
+        "messageId": "msg-1",
+        "role": "ROLE_USER",
+        "parts": [{"text": "My flight was delayed so I missed the morning shuttle. I'\''m interested in agentic AI and Java agents—what talks should I catch today, and how do I get to the venue quickly?"}]
+      }
+    },
+    "id": "test-maya"
+  }' | jq .</code></pre>
+</div>
+
+<h3>Checkpoint</h3>
+
+<ul class="checklist">
+    <li>Orchestrator running on port 8090</li>
+    <li>Dynamic agent discovery via AgentCard fetching</li>
+    <li>LLM-powered query decomposition into targeted sub-tasks</li>
+    <li>Multi-agent dispatch and response aggregation</li>
+</ul>
+
+<div class="callout success">
+    <div class="callout-title">&#9989; Key takeaway</div>
+    <p><strong>A2A as a coordination protocol:</strong> the Orchestrator doesn&rsquo;t know how any agent is implemented &mdash; it only knows what each agent can do (from the AgentCard) and how to talk to it (via JSON-RPC).</p>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- EXERCISE 5: EXPENSE & COMPLIANCE + OBSERVABILITY              -->
+<!-- ============================================================ -->
+<section id="ex5-intro" class="section-anchor">
+<h2><span class="badge badge-red">Exercise 5</span> Expense &amp; Compliance + Enterprise Observability <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(20 min)</span></h2>
+
+<p><em>&ldquo;Maya uploads her taxi receipt photo. The Travel Agent extracts the fare details and the Expense &amp; Compliance Agent processes it into an audit-ready reimbursement entry. Meanwhile, the ops team watches the full trace in Grafana.&rdquo;</em></p>
+</section>
+
+<section id="ex5-step1" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">1</span>
+        <span class="step-title">Build the Expense &amp; Compliance Agent (Java A2A SDK)</span>
+    </div>
+    <p>A Jakarta EE enterprise agent on WildFly 41 with JPA persistence, Kafka replication, and multi-transport support that standardizes receipts into corporate audit-ready expense logs.</p>
+</div>
+
+<details class="solution">
+    <summary>Show ExpenseTool.java (key methods)</summary>
+    <div class="solution-body">
+<pre><code>public class ExpenseTool {
+
+    private final List&lt;Expense&gt; expenseLog = new ArrayList&lt;&gt;();
+
+    // Compliance rules
+    private static final double MEAL_LIMIT = 75.0;
+    private static final double TRANSPORT_LIMIT = 200.0;
+
+    @Tool("Log and validate an expense entry against compliance rules.")
+    public String logExpense(String vendor, String amount,
+                             String date, String category,
+                             String description) {
+        // Validate against per-diem limits, add to log
+        ...
+    }
+
+    @Tool("Process structured receipt data from other agents.")
+    public String processReceipt(String receiptData) {
+        // Parse vendor, amount, date from structured text
+        // Validate compliance, return audit-ready entry
+        ...
+    }
+
+    @Tool("Generate a compliance status report.")
+    public String checkComplianceStatus() { ... }
+
+    public record Expense(String id, String vendor, double amount,
+        String date, String category, String description,
+        boolean compliant, String flag) {}
+}</code></pre>
+    </div>
+</details>
+
+<h4>Build &amp; Run on port 8082</h4>
+<pre><code>cd exercises/exercise-5-expense-agent
+mvn package -Pjsonrpc
+./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2</code></pre>
+
+<pre><code>curl -s http://localhost:8082/.well-known/agent-card.json | jq .name
+# &rarr; "Expense &amp; Compliance Agent"</code></pre>
+</section>
+
+<!-- Cross-Agent Handoff -->
+<section id="ex5-step2" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">2</span>
+        <span class="step-title">Cross-Agent Data Handoff</span>
+    </div>
+    <p>The key integration point in Maya&rsquo;s scenario: the Travel Agent&rsquo;s <code>receipt-extraction</code> skill outputs structured data that the Expense Agent&rsquo;s <code>receipt-processing</code> skill consumes.</p>
+</div>
+
+<pre><code>Travel Agent (Python)                    Expense Agent (WildFly)
+extract_receipt(query)         &rarr;        processReceipt(receiptData)
+  {"vendor": "Airport Taxi",               Validate: $35 &lt; $200 limit &#10003;
+   "amount": "$35.00",                     Category: Transportation &#10003;
+   "date": "2026-10-07",                   Log: EXP-001 created
+   "category": "Transportation"}           Return: audit-ready entry</code></pre>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Cross-language handoff</div>
+    <p>Python extracts the structured data, and the user (or a client) sends it directly to the Expense Agent for validation and logging. Two runtimes, one data format &mdash; all via A2A.</p>
+</div>
+</section>
+
+<!-- OTel Setup -->
+<section id="ex5-step3" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">3</span>
+        <span class="step-title">OpenTelemetry + Grafana LGTM</span>
+    </div>
+    <p>Add tracing to all agents so you can see the full distributed call chain.</p>
+</div>
+
+<h4>Quarkus Orchestrator</h4>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;io.quarkus&lt;/groupId&gt;
+    &lt;artifactId&gt;quarkus-opentelemetry&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+<pre><code>quarkus.otel.enabled=true
+quarkus.otel.exporter.otlp.traces.endpoint=http://localhost:4317
+quarkus.otel.service.name=${a2a.agent.name}</code></pre>
+
+<h4>Spring Boot Venue Agent</h4>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
+    &lt;artifactId&gt;micrometer-tracing-bridge-otel&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+
+<h4>Python Travel Agent</h4>
+<pre><code>pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc</code></pre>
+
+<h4>Grafana Visualization</h4>
+
+<p>Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> (login: admin/admin), navigate to <strong>Explore &rarr; Tempo</strong>, and send Maya&rsquo;s full query. You should see:</p>
+
+<pre><code>DevSphere Orchestrator
+  POST / (incoming request)
+    orchestrator.execute
+      langchain4j.chat (QueryDecomposer)        &larr; LLM ~2-5s
+      POST http://localhost:8080/             &larr; Schedule Advisor
+      POST http://localhost:8081/             &larr; Venue Agent
+      POST http://localhost:9000/                &larr; Travel Agent
+      langchain4j.chat (ResponseAggregator)      &larr; LLM ~2-5s</code></pre>
+
+<h3>Distributed State &amp; Load Balancing (Discussion)</h3>
+
+<table>
+    <thead><tr><th>Approach</th><th>Pros</th><th>Cons</th></tr></thead>
+    <tbody>
+        <tr><td><strong>Sticky sessions</strong> (route by contextId)</td><td>Simple, no shared state</td><td>Uneven load, lost state on failure</td></tr>
+        <tr><td><strong>Shared state store</strong> (Redis/DB)</td><td>Any replica can serve any request</td><td>Extra latency, another dependency</td></tr>
+        <tr><td><strong>Hybrid</strong></td><td>Best of both</td><td>More complex</td></tr>
+    </tbody>
+</table>
+</section>
+
+<!-- Wrap-up -->
+<section id="ex5-test" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">&#10003;</span>
+        <span class="step-title">Checkpoint</span>
+    </div>
+</div>
+
+<ul class="checklist">
+    <li>Expense &amp; Compliance Agent running on port 8082</li>
+    <li>Cross-agent data handoff (Travel &rarr; Expense) working</li>
+    <li>OpenTelemetry tracing across all agents (Java + Python)</li>
+    <li>Grafana/Tempo visualization of the full call chain</li>
+</ul>
+
+<div class="arch-diagram">
+<pre>
++-----------------------------------------------------------+
+|                    DevSphere System                        |
+|                                                           |
+|         +--------- Orchestrator ---------+                |
+|         |          :8090 (Quarkus)       |                |
+|         |                                |                |
+|  +------v---------+ +------v------+ +---v-------------+  |
+|  | Schedule &amp;     | | Venue &amp;     | | Travel &amp;        |  |
+|  | Content Advisor| | On-Site Ops | | Logistics Agent |  |
+|  | :8080 (Quarkus)| | :8081 (SBt) | | :9000 (Python)  |  |
+|  +-----------------+ +-------------+ +-----------------+  |
+|                                                           |
+|  +------------------+                                     |
+|  | Expense &amp;        |  (standalone, not orchestrated)     |
+|  | Compliance       |                                     |
+|  | :8082 (WF Ent.)  |                                     |
+|  +------------------+                                     |
+|                                                           |
+|               +---------------+                           |
+|               | Grafana/LGTM  |  &larr; All traces here       |
+|               |    :3000      |                           |
+|               +---------------+                           |
++-----------------------------------------------------------+
+</pre>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- WHAT'S NEXT                                                   -->
+<!-- ============================================================ -->
+<section id="whats-next" class="section-anchor">
+<h2>What You Built Today</h2>
+
+<p>In two hours, you built <strong>DevSphere</strong> &mdash; a production-grade A2A agent ecosystem:</p>
+
+<div class="timeline">
+    <div class="timeline-item">
+        <strong>Exercise 1 &mdash; Schedule &amp; Content Advisor</strong>
+        <p>Your first A2A agent: AgentCard, AgentExecutor, LLM + <code>@RegisterAiService</code> tool calling with Quarkus</p>
+    </div>
+    <div class="timeline-item blue">
+        <strong>Exercise 2 &mdash; Venue &amp; On-Site Operations</strong>
+        <p>Spring Boot agent with IoT room capacity, indoor mapping, and fast-track entry passes</p>
+    </div>
+    <div class="timeline-item green">
+        <strong>Exercise 3 &mdash; Travel &amp; Logistics</strong>
+        <p>Python agent for flights, transit comparison, and receipt extraction &mdash; cross-language A2A</p>
+    </div>
+    <div class="timeline-item purple">
+        <strong>Exercise 4 &mdash; Orchestrator &amp; Concierge</strong>
+        <p>Quarkus gateway that dynamically discovers, decomposes, dispatches, and aggregates across the mesh</p>
+    </div>
+    <div class="timeline-item red">
+        <strong>Exercise 5 &mdash; Expense &amp; Compliance + Observability</strong>
+        <p>WildFly Enterprise agent (JPA, Kafka, multi-transport) with cross-agent data handoff and OpenTelemetry tracing in Grafana</p>
+    </div>
+</div>
+
+<h3>Going further</h3>
+
+<div class="card-grid">
+    <div class="card">
+        <div class="card-icon">&#128274;</div>
+        <h4>Security</h4>
+        <p>Add OAuth2/OIDC authentication to your agents using Keycloak.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#9889;</div>
+        <h4>Streaming</h4>
+        <p>Enable SSE streaming for real-time responses (<code>StreamMessage</code>).</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#128268;</div>
+        <h4>MCP Integration</h4>
+        <p>Give agents access to external tools via the Model Context Protocol.</p>
+    </div>
+    <div class="card">
+        <div class="card-icon">&#127760;</div>
+        <h4>Service Registry</h4>
+        <p>Replace hardcoded URLs with Consul or Kubernetes service discovery.</p>
+    </div>
+</div>
+
+<h3>Resources</h3>
+
+<ul>
+    <li><a href="https://google.github.io/A2A/" target="_blank">A2A Protocol Specification</a></li>
+    <li><a href="https://github.com/a2aproject/a2a-java-sdk" target="_blank">A2A Java SDK</a></li>
+    <li><a href="https://github.com/a2aproject/a2a-python-sdk" target="_blank">A2A Python SDK</a></li>
+    <li><a href="https://github.com/a2aproject/a2a-samples" target="_blank">A2A Samples</a></li>
+    <li><a href="https://docs.langchain4j.dev/" target="_blank">LangChain4j Documentation</a></li>
+    <li><a href="https://github.com/Sh1bari/spring-a2a" target="_blank">spring-a2a (Spring Boot A2A support)</a></li>
+</ul>
+</section>
+
+
+<!-- ============================================================ -->
+<!-- TROUBLESHOOTING                                               -->
+<!-- ============================================================ -->
+<section id="troubleshooting" class="section-anchor">
+<h2>Troubleshooting</h2>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; Connection refused on Ollama</div>
+    <p>Make sure <code>podman-compose up -d</code> is running and the model has been pulled. Check with: <code>curl http://localhost:11434/api/tags</code></p>
+</div>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; Empty or slow responses</div>
+    <p>The first LLM call can be slow while Ollama loads the model into memory. Increase the timeout if needed.</p>
+</div>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; "No sessions found"</div>
+    <p>Verify that <code>session.data.path</code> in <code>application.properties</code> points correctly to <code>conference-data/sessions.json</code> relative to the project directory.</p>
+</div>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; A2A SDK not found</div>
+    <p>The A2A Java SDK is not on Maven Central. Build it from source: <code>git clone https://github.com/a2aproject/a2a-java-sdk.git &amp;&amp; cd a2a-java-sdk &amp;&amp; mvn install -DskipTests</code></p>
+</div>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; Python agent won't start</div>
+    <p>Make sure you activated the virtual environment (<code>source .venv/bin/activate</code>) and installed dependencies (<code>pip install -e .</code>). Python 3.11+ is required.</p>
+</div>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; Port conflict</div>
+    <p>If port 8080 is already in use, check that no other agent or service is running on that port. The Schedule Advisor (Quarkus) runs on 8080 and the Expense Agent (WildFly) uses <code>-Djboss.socket.binding.port-offset=2</code> to run on 8082.</p>
+</div>
+</section>
+
+</div><!-- /content -->
+
+<footer class="footer">
+    <p>
+        A2A Agent Lab &mdash;
+        <a href="https://google.github.io/A2A/">A2A Protocol</a> &mdash;
+        <a href="https://github.com/a2aproject/a2a-java-sdk">A2A Java SDK</a> &mdash;
+        <a href="https://docs.langchain4j.dev/">LangChain4j</a>
+    </p>
+</footer>
+</main>
+
+<script>
+// Sidebar active link tracking
+const sidebarLinks = document.querySelectorAll('.sidebar-link');
+const sections = document.querySelectorAll('.section-anchor');
+
+function updateActiveLink() {
+    let current = '';
+    const scrollPos = window.scrollY + 100;
+
+    sections.forEach(section => {
+        if (section.offsetTop <= scrollPos) {
+            current = section.id;
+        }
+    });
+
+    sidebarLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('active');
+        }
+    });
+}
+
+window.addEventListener('scroll', updateActiveLink);
+window.addEventListener('load', updateActiveLink);
+
+// Close mobile sidebar on link click
+sidebarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 960) {
+            document.querySelector('.sidebar').classList.remove('open');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

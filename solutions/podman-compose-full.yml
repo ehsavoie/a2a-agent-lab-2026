@@ -1,0 +1,129 @@
+version: "3.8"
+
+# Full DevSphere system — all agents + infrastructure.
+# Use this to demo the complete system or as a reference for participants.
+#
+# Usage:
+#   First, build all Java agents:
+#     cd exercises/exercise-1-schedule-advisor && mvn package -DskipTests
+#     cd exercises/exercise-2-venue-agent && mvn package -DskipTests
+#     cd exercises/exercise-4-orchestrator && mvn package -DskipTests
+#     cd exercises/exercise-5-expense-agent && mvn package -DskipTests
+#
+#   Then run:
+#     podman-compose -f solutions/podman-compose-full.yml up -d
+
+services:
+  # ============================================================
+  # Infrastructure
+  # ============================================================
+
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    container_name: devconf-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama-pull:
+    image: docker.io/ollama/ollama:latest
+    container_name: devconf-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["ollama", "pull", "granite4.1:3b"]
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    restart: "no"
+
+  lgtm:
+    image: docker.io/grafana/otel-lgtm:latest
+    container_name: devconf-lgtm
+    ports:
+      - "3000:3000"     # Grafana UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  # ============================================================
+  # Agents
+  # ============================================================
+
+  schedule-advisor:
+    build:
+      context: ../exercises/exercise-1-schedule-advisor
+    container_name: devconf-schedule-advisor
+    ports:
+      - "8080:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - SESSION_DATA_PATH=/app/data/sessions.json
+    volumes:
+      - ../conference-data:/app/data:ro
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  venue-agent:
+    build:
+      context: ../exercises/exercise-2-venue-agent
+    container_name: devconf-venue-agent
+    ports:
+      - "8081:8081"
+    environment:
+      - LANGCHAIN4J_OLLAMA_CHAT_MODEL_BASE_URL=http://ollama:11434
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  travel-agent:
+    build:
+      context: ../exercises/exercise-3-travel-agent-python
+    container_name: devconf-travel-agent
+    ports:
+      - "9000:9000"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://lgtm:4317
+      - OTEL_SERVICE_NAME=Travel & Logistics Agent (Python)
+
+  orchestrator:
+    build:
+      context: ../exercises/exercise-4-orchestrator
+      dockerfile: src/main/docker/Dockerfile.jvm
+    container_name: devconf-orchestrator
+    ports:
+      - "8090:8090"
+    environment:
+      - QUARKUS_LANGCHAIN4J_OLLAMA_BASE_URL=http://ollama:11434
+      - QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://lgtm:4317
+      - ORCHESTRATOR_AGENT_URLS=http://schedule-advisor:8080,http://venue-agent:8081,http://travel-agent:9000,http://expense-agent:8082
+    depends_on:
+      - schedule-advisor
+      - venue-agent
+      - travel-agent
+      - expense-agent
+      ollama:
+        condition: service_healthy
+
+  expense-agent:
+    build:
+      context: ../exercises/exercise-5-expense-agent
+    container_name: devconf-expense-agent
+    ports:
+      - "8082:8082"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - JBOSS_SOCKET_BINDING_PORT_OFFSET=2
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+volumes:
+  ollama-data:

@@ -1,0 +1,15 @@
+<!-- Add these dependencies to exercise-2a-spring-boot/pom.xml -->
+
+<!-- Spring Boot Actuator + OTel -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-otel</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-otlp</artifactId>
+</dependency>

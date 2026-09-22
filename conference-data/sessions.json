@@ -1,0 +1,3656 @@
+[
+  {
+    "id": "DVX-17763",
+    "title": "Solving Multimodal and Long-Context Challenges",
+    "speaker": "Laurent Picard",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-05",
+    "time": "09:30",
+    "duration": 180,
+    "level": "All",
+    "description": "This deep-dive explores extending LLMs with multimodal and long-context capabilities to solve real-world tasks. It presents step-by-step Python notebook solutions for video transcription with speaker identification, large-scale knowledge graph generation, image automation, and visual object detec...",
+    "tags": [
+      "long-context",
+      "knowledge graphs",
+      "large language models",
+      "multimodal"
+    ]
+  },
+  {
+    "id": "DVX-17786",
+    "title": "Agent Loops, Decoded: Fundamentals to Agentic Patterns in Spring AI",
+    "speaker": "Christian Tzolov",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 3",
+    "date": "2026-10-05",
+    "time": "09:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This talk introduces Spring AI agents as context orchestrators, starting with ChatClient, memory, Advisors, RAG, Tool Calling, and MCP. It then builds advanced agent patterns: tool discovery, evaluation loops, explainable agents, planning, user questioning, subagents, and agent-to-agent integrati...",
+    "tags": [
+      "toolcalling",
+      "spring ai",
+      "rag",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-10020",
+    "title": "From AI to Agent: A Field Guide to Agentic Patterns in LangChain4j",
+    "speaker": "Loïc Magnette",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-05",
+    "time": "09:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This talk shows how to evolve a Java AI app from simple LLM calls into controllable agentic systems. It covers sequential, loop, parallel, and conditional workflows, shared state, supervisors, planners, human checkpoints, and observability—helping you decide when to use workflows versus autonomou...",
+    "tags": [
+      "observability",
+      "agentic",
+      "supervisor",
+      "workflow"
+    ]
+  },
+  {
+    "id": "DVX-23529",
+    "title": "From Autocomplete to Autopilot: How AI Is Changing the Developer Experience",
+    "speaker": "Tugdual Grall",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-05",
+    "time": "09:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This talk explores the rise of agentic workflows and context engineering in AI-assisted development. Using GitHub Copilot’s latest tools, it shows how teams delegate end-to-end tasks, from architecture scaffolding to PRs, and how developers, SREs, DevOps, and PMs shift from writing code to expres...",
+    "tags": [
+      "security",
+      "governance",
+      "copilot",
+      "automation"
+    ]
+  },
+  {
+    "id": "DVX-7006",
+    "title": "Prompt It Right: Spring Boot Testing in the AI Era",
+    "speaker": "Philip Riecks",
+    "track": "Development Practices",
+    "room": "TBA 6",
+    "date": "2026-10-05",
+    "time": "09:30",
+    "duration": 180,
+    "level": "All",
+    "description": "This 3-hour session teaches Spring Boot testing across the full testing pyramid—unit, sliced, and integration tests with Testcontainers—so you can guide AI to generate useful tests, spot misleading ones, avoid common pitfalls, and improve your test suite with practical patterns and quick wins.",
+    "tags": [
+      "testcontainers",
+      "ai",
+      "springboot",
+      "testing"
+    ]
+  },
+  {
+    "id": "DVX-17800",
+    "title": "🚀 From Java to AI: Build Your First Intelligent Agent System!",
+    "speaker": "Emmanuel Hugonnet",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 8",
+    "date": "2026-10-05",
+    "time": "09:30",
+    "duration": 180,
+    "level": "All",
+    "description": "Hands-on workshop on building production-grade AI in Java with LangChain4j. Learn CDI-based AI injection, conversational memory, function calling, declarative agent workflows, and the Supervisor Pattern. Gain practical patterns, MCP/A2A protocol knowledge, and skills to integrate robust AI agents...",
+    "tags": [
+      "java",
+      "ai",
+      "agents",
+      "langchain4j"
+    ]
+  },
+  {
+    "id": "DVX-22914",
+    "title": "Java is for Data Science, Too: Building an End-to-End ML Pipeline Without Leaving the JVM",
+    "speaker": "Sven Reimers",
+    "track": "Java Language & Platform",
+    "room": "TBA 7",
+    "date": "2026-10-05",
+    "time": "10:30",
+    "duration": 120,
+    "level": "All",
+    "description": "This practical session shows how Java can handle end-to-end data science without switching to Python. Using JTaccuino, Hardwood, dflib, DeepNetts, and a new plotting API, participants will build a complete predictive machine learning pipeline in Java, from data exploration to visualization and ne...",
+    "tags": [
+      "machinelearning",
+      "java",
+      "dataframes",
+      "deeplearning"
+    ]
+  },
+  {
+    "id": "DVX-50108",
+    "title": "Introduction to Spring AI",
+    "speaker": "Timo Salm",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-05",
+    "time": "12:40",
+    "duration": 40,
+    "level": "All",
+    "description": "Spring AI helps developers bring generative AI into Spring Boot applications. This session covers building blocks like chat, RAG, tool calling, testing, observability, and agentic AI patterns with MCP, showing how to create production-ready AI applications and agentic systems through hands-on exa...",
+    "tags": [
+      "spring ai",
+      "rag",
+      "genai",
+      "mcp"
+    ]
+  },
+  {
+    "id": "DVX-7012",
+    "title": "Destructoring is the future of Javas Encapsulation",
+    "speaker": "Richard Gross",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-05",
+    "time": "12:40",
+    "duration": 40,
+    "level": "All",
+    "description": "Project Amber’s “Derived Record/Class Creation” aims to make object deconstruction and reconstruction first-class in Java, fixing serialization’s encapsulation issues. It enables safer, more robust serialization, plus withers and broader pattern matching support for records and normal classes.",
+    "tags": [
+      "encapsulation",
+      "serialization",
+      "destructuring",
+      "records"
+    ]
+  },
+  {
+    "id": "DVX-10045",
+    "title": "Java, LEGO & AI: Teaching the Next Generation to Build, Not Just Prompt",
+    "speaker": "Eddy Vos",
+    "track": "Mind the Geek",
+    "room": "TBA 4",
+    "date": "2026-10-05",
+    "time": "12:40",
+    "duration": 40,
+    "level": "All",
+    "description": "This session shows why teaching programming still matters in the AI era, using LEGO SPIKE robots in Java-based workshops for children. It covers technical methods to control SPIKE with Java, challenges encountered, educational lessons learned, and includes live robot demos.",
+    "tags": [
+      "java",
+      "lego spike",
+      "programming education",
+      "generative ai"
+    ]
+  },
+  {
+    "id": "DVX-17765",
+    "title": "Can AI Build a Jakarta EE Runtime? The Vidocq Experiment",
+    "speaker": "Antoine Sabot-Durand",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-05",
+    "time": "13:30",
+    "duration": 180,
+    "level": "All",
+    "description": "A candid retrospective on building a Jakarta EE Core Profile and MicroProfile runtime from scratch. It covers architectural tradeoffs, JPMS-driven design changes, CDI event lessons, spec interpretation, dependency minimization, governance decisions, and what they would do differently with JDK 25 ...",
+    "tags": [
+      "cdi",
+      "jpms",
+      "microprofile",
+      "jakartaee"
+    ]
+  },
+  {
+    "id": "DVX-23524",
+    "title": "Modern Java in Practice - The Features That Matter",
+    "speaker": "Nicolai Parlog",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-05",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "A deep dive into recent Java releases, highlighting key features like pattern matching, virtual threads, structured concurrency, new APIs, performance and security improvements, plus upcoming proposals such as value types and string templates. The talk helps developers maximize modern Java and ju...",
+    "tags": [
+      "java",
+      "structuredconcurrency",
+      "patternmatching",
+      "virtualthreads"
+    ]
+  },
+  {
+    "id": "DVX-25027",
+    "title": "Codepocalypse Now: LangChain4j vs JetBrains Koog",
+    "speaker": "Viktor Gamov",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-05",
+    "time": "13:30",
+    "duration": 180,
+    "level": "All",
+    "description": "A live Java showdown builds the same AI agent twice using JetBrains Koog and LangChain4j. Across six coding rounds, the speakers compare memory, tool calling, workflows, guardrails, and observability, exposing different design philosophies. The audience votes on which framework best fits real age...",
+    "tags": [
+      "java",
+      "frameworks",
+      "ai",
+      "agent"
+    ]
+  },
+  {
+    "id": "DVX-4098",
+    "title": "From Developer to Builder: A Spec-Driven Development Deep Dive",
+    "speaker": "Simon Martinelli",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-05",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "Spec-Driven Development uses specifications, not prompts, to guide AI coding agents. This deep dive shows how to build and evolve applications by writing specs, generating code, testing against requirements, and updating specs when needs change. It covers harness design, practical use, limits, an...",
+    "tags": [
+      "brownfield projects",
+      "specifications",
+      "spec-driven development",
+      "ai coding agents"
+    ]
+  },
+  {
+    "id": "DVX-5537",
+    "title": "The Quarkus advantage: Turning build-time metaprogramming into runtime performances",
+    "speaker": "Mario Fusco",
+    "track": "Architecture & Modernization",
+    "room": "TBA 6",
+    "date": "2026-10-05",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "The talk shows how Quarkus uses build-time indexing and bytecode generation to replace reflection-heavy Java framework mechanisms, improving startup, memory, latency, and throughput. Case studies in JSON serialization, REST clients, and LangChain4j demonstrate double-digit performance gains and t...",
+    "tags": [
+      "performance",
+      "reflection",
+      "quarkus",
+      "metaprogramming"
+    ]
+  },
+  {
+    "id": "DVX-22920",
+    "title": "Using Structured Concurrency and Scoped Values to Create a Virtual Threads Based Asynchronous Application",
+    "speaker": "Ana-Maria Mihalceanu",
+    "track": "Java Language & Platform",
+    "room": "TBA 7",
+    "date": "2026-10-05",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "A hands-on lab on Project Loom’s virtual threads, structured concurrency, and scoped values. It teaches building a scalable web app, parallelizing requests, passing sensitive data safely, and comparing Loom’s thread-per-request approach with reactive programming for similar throughput.",
+    "tags": [
+      "structuredconcurrency",
+      "scopedvalues",
+      "virtualthreads",
+      "loom"
+    ]
+  },
+  {
+    "id": "DVX-24229",
+    "title": "Building Autonomous AI Agents with Spring",
+    "speaker": "Timo Salm",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 8",
+    "date": "2026-10-05",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This workshop teaches building autonomous agentic AI systems with Java, Spring AI, and MCP. It covers prompting, chat memory, RAG, tool integration, and agentic patterns, plus production concerns like observability, security, and reliability. Attendees will create a multi-agent system for complex...",
+    "tags": [
+      "agentic",
+      "java",
+      "autonomous",
+      "spring"
+    ]
+  },
+  {
+    "id": "DVX-24227",
+    "title": " Expanding Vector Search Beyond Similarity",
+    "speaker": "Alina Yurenko",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-05",
+    "time": "16:50",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "This session shows how to build an e-commerce vector search app with Micronaut, LangChain4j, and GraalVM. It covers embedding generation, blending similarity with business and location data, key Micronaut features, and Native Image deployment to create smarter, practical search.",
+    "tags": [
+      "micronaut",
+      "graalvm",
+      "vector search",
+      "embeddings"
+    ]
+  },
+  {
+    "id": "DVX-7011",
+    "title": "Secure Your Coding Agent Like It’s Malware",
+    "speaker": "Richard Gross",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 3",
+    "date": "2026-10-05",
+    "time": "16:50",
+    "duration": 30,
+    "level": "All",
+    "description": "Coding agents can be easily compromised through prompt injection, file access, and tool misuse, leading to persistence or data exfiltration. Built-in sandboxes are insufficient. This talk maps key threats, explains seven defense layers, and recommends externally enforced controls like VMs and fir...",
+    "tags": [
+      "coding agents",
+      "sandbox security",
+      "prompt injection",
+      "data exfiltration"
+    ]
+  },
+  {
+    "id": "DVX-10034",
+    "title": "The day we stopped publishing Kafka event from our API...",
+    "speaker": "Virginie Zinck",
+    "track": "Architecture & Modernization",
+    "room": "TBA 4",
+    "date": "2026-10-05",
+    "time": "16:50",
+    "duration": 30,
+    "level": "All",
+    "description": "We solved database-Kafka dual writes in our Order API by adopting a simplified Outbox pattern with Debezium, using the Order table as the outbox. This removed Kafka-specific code, reduced errors, improved robustness, and enabled a looser, more extensible event-driven architecture with key Debeziu...",
+    "tags": [
+      "kafka",
+      "architecture",
+      "debezium",
+      "outbox"
+    ]
+  },
+  {
+    "id": "DVX-21654",
+    "title": "Your AI Agent Trusts Strangers. Let Me Show You.",
+    "speaker": "Elder Moraes",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-05",
+    "time": "16:50",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "This session exposes indirect prompt injection in Java AI agents, showing how poisoned content can hijack trusted inputs and trigger harmful tool actions. In 30 minutes, attendees will learn to reproduce the attack, apply effective mitigations, and build a practical threat model in LangChain4j.",
+    "tags": [
+      "agents",
+      "threat-model",
+      "mitigations",
+      "prompt-injection"
+    ]
+  },
+  {
+    "id": "DVX-5516",
+    "title": "Wiring Up the AI Mesh: Building A2A-Compliant Java Agents",
+    "speaker": "Emmanuel Hugonnet",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-05",
+    "time": "16:50",
+    "duration": 120,
+    "level": "All",
+    "description": "LangChain4j-CDI brings generative AI to Jakarta EE/MicroProfile with a CDI extension for easy AI service injection. It demonstrates building enterprise AI agents using MCP and A2A protocols, plus resilience, observability, and multi-provider configuration. Live coding shows deployment on Quarkus,...",
+    "tags": [
+      "microprofile",
+      "generativeai",
+      "jakartaee",
+      "langchain4j"
+    ]
+  },
+  {
+    "id": "DVX-20651",
+    "title": "From Install to Insight: A Hands-On GPU Lab for Java Developers",
+    "speaker": "Thanos Stratikopoulos",
+    "track": "Java Language & Platform",
+    "room": "TBA 8",
+    "date": "2026-10-05",
+    "time": "16:50",
+    "duration": 120,
+    "level": "All",
+    "description": "Hands-on lab to set up a local GPU-backed LLM in Java using GPULlama3.java, TornadoVM, and DevoxxGenie. Participants install, configure, run, profile, and debug GPU acceleration with TornadoInsight, TornadoPulse, and TornadoViz, gaining a working local inference setup and practical tooling experi...",
+    "tags": [
+      "java",
+      "tornadovm",
+      "llm",
+      "gpu"
+    ]
+  },
+  {
+    "id": "DVX-25674",
+    "title": "Docker Hardened Images - what you need to know",
+    "speaker": "Matthias Haeussler",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 2",
+    "date": "2026-10-05",
+    "time": "17:35",
+    "duration": 30,
+    "level": "All",
+    "description": "This talk introduces Docker Hardened Images (DHI) as an open-sourced, supply-chain-hardened image catalog for production containers. It highlights transparent CVE reporting, minimal base images, signed provenance, hardened Helm charts, and their role in secure, regulated workloads—plus what users...",
+    "tags": [
+      "supply-chain",
+      "containers",
+      "hardening",
+      "provenance"
+    ]
+  },
+  {
+    "id": "DVX-5507",
+    "title": "Stopping AI-Generated Architectural Drift: Deterministic Guardrails for Agentic Coding",
+    "speaker": "Sasha Podlesniuk",
+    "track": "Architecture & Modernization",
+    "room": "TBA 3",
+    "date": "2026-10-05",
+    "time": "17:35",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "This talk explains how to prevent AI-generated code from spreading architectural violations by using layered guardrails. It shows why natural-language rules fail, and how deterministic enforcement with ArchUnit, custom linters, and CI gates can stop bad patterns immediately and make higher-level ...",
+    "tags": [
+      "agentic",
+      "guardrails",
+      "linters",
+      "archunit"
+    ]
+  },
+  {
+    "id": "DVX-25652",
+    "title": "In the loop, not in the dark: staying in control in the era of dark software factories",
+    "speaker": "Alex Gavrilescu",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-05",
+    "time": "17:35",
+    "duration": 30,
+    "level": "All",
+    "description": "Groma.md is an open-source tool that maintains a live architectural blueprint of your codebase, keeping you in control while agents write code. Unlike task tracking, it shows how the system evolves in real time. The talk will demo mapping a large repository into a Groma blueprint live.",
+    "tags": [
+      "architecture",
+      "blueprint",
+      "kanban",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-23533",
+    "title": "Teaching a New Dog Old Tricks: Give the Agent a Debugger",
+    "speaker": "Anton Arhipov",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-05",
+    "time": "17:35",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "IntelliJ IDEA’s debugger tools let coding agents inspect runtime state without altering source code. Using logpoints, agents can trace behavior in running code, including compiled third-party libraries, and link output back to its origin. The debugger skill guides agents to investigate bugs more ...",
+    "tags": [
+      "debugger",
+      "logpoints",
+      "runtime",
+      "intellij"
+    ]
+  },
+  {
+    "id": "DVX-17783",
+    "title": "Building the Trusted Agent Ecosystem",
+    "speaker": "Ivan Petrov",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 2",
+    "date": "2026-10-05",
+    "time": "18:20",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "The session presents a Trusted Agent Ecosystem framework to address user trust barriers in the Agentic Web. Using Confidential Computing and Binary Transparency, it secures tools, inference, and remote agents via verifiable WebAssembly sandboxes and Confidential GPUs, enabling developers to build...",
+    "tags": [
+      "agentic",
+      "trusted",
+      "binarytransparency",
+      "confidentialcomputing"
+    ]
+  },
+  {
+    "id": "DVX-8196",
+    "title": "Testing Architecture Made Simple",
+    "speaker": "Gunter Rotsaert",
+    "track": "Architecture & Modernization",
+    "room": "TBA 3",
+    "date": "2026-10-05",
+    "time": "18:20",
+    "duration": 30,
+    "level": "All",
+    "description": "The session shows how ArchUnit turns architectural decisions into automated tests, and how Taikai extends it with ready-made rules for popular technologies. Together, they help teams enforce consistent architecture, best practices, and long-term maintainability from the start.",
+    "tags": [
+      "architecture",
+      "taikai",
+      "archunit",
+      "testing"
+    ]
+  },
+  {
+    "id": "DVX-22911",
+    "title": "One tool to rule them all: bash, a tiny LLM, and the birth of a coding agent",
+    "speaker": "Philippe Charrière",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-05",
+    "time": "18:20",
+    "duration": 30,
+    "level": "All",
+    "description": "A live demo shows how a tiny local LLM becomes a coding agent using just a bash tool and a simple loop. It explores tool calls, prompt engineering, error recovery, and why one built-in tool can outperform many servers—revealing how coding agents work under the hood.",
+    "tags": [
+      "prompt engineering",
+      "bash",
+      "coding agents",
+      "language model"
+    ]
+  },
+  {
+    "id": "DVX-13753",
+    "title": "Hi, Belgian Java Community, we want to meet you!",
+    "speaker": "Frank Delporte",
+    "track": "People, Practices & Career",
+    "room": "TBA 7",
+    "date": "2026-10-05",
+    "time": "19:00",
+    "duration": 60,
+    "level": "All",
+    "description": "An informal, interactive session introducing BeJUG, Belgium’s Java User Group. Learn how it connects Java enthusiasts, what events it runs, and how to get involved as attendee, speaker, or contributor. No slides or agenda—just networking, ideas, and community discussion for all Java lovers.",
+    "tags": [
+      "java",
+      "bejug",
+      "community",
+      "networking"
+    ]
+  },
+  {
+    "id": "DVX-16435",
+    "title": "LangChain4j Community BOF",
+    "speaker": "Dimitris Andreadis",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 8",
+    "date": "2026-10-05",
+    "time": "19:00",
+    "duration": 60,
+    "level": "All",
+    "description": "An open BOF session on LangChain4j’s evolution, adoption, challenges, and roadmap. Join community members to discuss real-world use, share feedback, ask questions, and help shape the future of this fast-growing Java framework for integrating large language models.",
+    "tags": [
+      "java",
+      "llm",
+      "langchain4j",
+      "framework"
+    ]
+  },
+  {
+    "id": "DVX-24247",
+    "title": "Building AI Agents from First Principles",
+    "speaker": "Adib Saikali",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-06",
+    "time": "09:30",
+    "duration": 180,
+    "level": "All",
+    "description": "This workshop explains agentic AI from first principles, evolving a simple request/response flow into a full plan-act-observe-decide loop. Using Spring Boot/Spring AI examples, it covers tools, planning, memory, multi-step execution, evaluation, error handling, and termination, emphasizing robust...",
+    "tags": [
+      "memory",
+      "architecture",
+      "planning",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-9752",
+    "title": "Learning modern Java the playful way",
+    "speaker": "Marit van Dijk",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-06",
+    "time": "09:30",
+    "duration": 180,
+    "level": "All",
+    "description": "This session introduces modern Java features like Structured Concurrency and Stream Gatherers, making them approachable for beginners and experienced developers alike. Marit and Piotr will explain the concepts and demonstrate how to use them in your IDE, helping you confidently start using modern...",
+    "tags": [
+      "java",
+      "structuredconcurrency",
+      "stream",
+      "ide"
+    ]
+  },
+  {
+    "id": "DVX-17751",
+    "title": "Cheaper or Better? The Strategic Choice Behind AI Adoption",
+    "speaker": "Miriam Sasse",
+    "track": "Mind the Geek",
+    "room": "TBA 4",
+    "date": "2026-10-06",
+    "time": "09:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This session examines two AI adoption strategies: efficiency gains or customer value creation. It explores how incentives, metrics, and workflows can lead teams to automate broken processes or improve outcomes. Participants will learn to distinguish cost-cutting AI from value-driven AI and ask be...",
+    "tags": [
+      "efficiency",
+      "value",
+      "ai",
+      "automation"
+    ]
+  },
+  {
+    "id": "DVX-22912",
+    "title": "Loop Engineering, beyond prompt, context, and harness engineering",
+    "speaker": "Guillaume Laforge",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-06",
+    "time": "09:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This session introduces “Loop Engineering,” where developers build automated systems that steer coding agents autonomously. It covers core primitives, loop architectures, and safety practices for creating self-driving workflows that investigate, implement, and verify code, replacing manual prompt...",
+    "tags": [
+      "codingagents",
+      "loopengineering",
+      "workflows",
+      "automation"
+    ]
+  },
+  {
+    "id": "DVX-15354",
+    "title": "Will Valhalla Fix Tony's Billion-Dollar Mistake?",
+    "speaker": "José Paumard",
+    "track": "Java Language & Platform",
+    "room": "TBA 6",
+    "date": "2026-10-06",
+    "time": "09:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "Java 28’s Valhalla project introduces preview value classes, enabling JVM optimizations like stack scalarization and heap flattening. The talk explores compatibility, revised Java semantics, nullability, construction behavior, performance, type safety, and new coding patterns, while outlining fut...",
+    "tags": [
+      "performance",
+      "valhalla",
+      "value classes",
+      "jvm"
+    ]
+  },
+  {
+    "id": "DVX-4079",
+    "title": "👩‍💻 Developing with AI: What if it were as simple as adding a library? 🧑‍💻",
+    "speaker": "Stéphane Philippart",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-06",
+    "time": "09:30",
+    "duration": 180,
+    "level": "All",
+    "description": "Workshop on integrating generative AI into Java applications using tools like LangChain4j and Quarkus. Covers prompt engineering, RAG, tool calling (MCP), and agents, with a ready-to-use EasyLab environment for hands-on learning.",
+    "tags": [
+      "artificial intelligence",
+      "java",
+      "langchain4j",
+      "generative ai"
+    ]
+  },
+  {
+    "id": "DVX-10022",
+    "title": "From code to control: master deployments with Feature Flagging and OpenFeature",
+    "speaker": "Alexandre Touret",
+    "track": "Architecture & Modernization",
+    "room": "TBA 8",
+    "date": "2026-10-06",
+    "time": "09:30",
+    "duration": 180,
+    "level": "All",
+    "description": "This workshop shows how to add a feature to a Java/Angular app using feature flags with OpenFeature. It covers safe releases, error handling, A/B testing, progressive rollouts, targeting, and observability—helping teams decouple deployment from activation and ship faster with less risk.",
+    "tags": [
+      "observability",
+      "rollouts",
+      "openfeature",
+      "feature-flagging"
+    ]
+  },
+  {
+    "id": "DVX-5526",
+    "title": "From Developer to Story Builder: Engineering a Novel, an ARG, and a Transmedia World with AI",
+    "speaker": "Raphael Semeteys",
+    "track": "Mind the Geek",
+    "room": "TBA 2",
+    "date": "2026-10-06",
+    "time": "12:40",
+    "duration": 40,
+    "level": "All",
+    "description": "A technical case study on using software-engineering practices to co-author a novel with AI. It covers context engineering, spec-driven workflows, role separation, governance to prevent drift, automated publishing, and an ARG extension, offering practical methods for managing long-running AI crea...",
+    "tags": [
+      "architecture",
+      "ai",
+      "devops",
+      "transmedia"
+    ]
+  },
+  {
+    "id": "DVX-21152",
+    "title": "Beyond system.out.println: Applying a Debugging Mindset at Scale",
+    "speaker": "Cees Bos",
+    "track": "Development Practices",
+    "room": "TBA 3",
+    "date": "2026-10-06",
+    "time": "12:40",
+    "duration": 40,
+    "level": "All",
+    "description": "This talk explores debugging elusive, intermittent failures in large microservice and distributed systems. It argues for a shift from traditional logging and local debugging to structured observability, using tools like OpenTelemetry and Grafana to uncover root causes and gain deeper system insight.",
+    "tags": [
+      "observability",
+      "debugging",
+      "grafana",
+      "opentelemetry"
+    ]
+  },
+  {
+    "id": "DVX-10016",
+    "title": "Measuring the Unmeasurable: Evaluating Generative AI in Practice",
+    "speaker": "Erin Pacquetet",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-06",
+    "time": "12:40",
+    "duration": 40,
+    "level": "Intermediate",
+    "description": "This session explores how to evaluate generative AI systems reliably despite their unpredictability. Using a RAG chatbot case study, it covers adapting metrics for accuracy, coherence, and business value; the limits of traditional and LLM-as-a-judge methods; the role of human review; and continuo...",
+    "tags": [
+      "rag",
+      "llm",
+      "generativeai",
+      "evaluation"
+    ]
+  },
+  {
+    "id": "DVX-21670",
+    "title": "Legacy JVM modernization with agentic AI: Quarkus vs Spring Boot",
+    "speaker": "Radek Kargul",
+    "track": "Architecture & Modernization",
+    "room": "TBA 2",
+    "date": "2026-10-06",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "A live modernization of a legacy Play/Akka app on Java 25: first protected by characterization tests, then translated from Scala to modern Java. The same slice is rebuilt twice—once in Quarkus, once in Spring Boot—while comparing startup, memory, DI, testability, and trade-offs.",
+    "tags": [
+      "migration",
+      "java",
+      "quarkus",
+      "spring"
+    ]
+  },
+  {
+    "id": "DVX-16439",
+    "title": "    AI Security Deep Dive, Securing Agents and AI Applications",
+    "speaker": "Brian Vermeer",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 3",
+    "date": "2026-10-06",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This session covers AI security for agentic coding and AI-powered apps, including risks like prompt injection, tool abuse, poisoned retrieval, and memory manipulation. It emphasizes practical defenses, architectural patterns, and security tooling, with live demos and real-world examples to help b...",
+    "tags": [
+      "security",
+      "guardrails",
+      "ai",
+      "promptinjection"
+    ]
+  },
+  {
+    "id": "DVX-19714",
+    "title": "Specialized AI Agents: from concept to production",
+    "speaker": "David Gageot",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-06",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "The proposal shows how to build cheaper, specialized AI agents with minimal code using Docker Agent. It covers creating disposable agents quickly, iterating to solve real business problems, adding tools, evaluating and optimizing performance, monitoring costs, and connecting multiple agents for p...",
+    "tags": [
+      "optimization",
+      "ai",
+      "agents",
+      "docker"
+    ]
+  },
+  {
+    "id": "DVX-31452",
+    "title": "Responsibly Dimming the Lights in the Software Factory",
+    "speaker": "Victor Rentea",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-06",
+    "time": "13:30",
+    "duration": 180,
+    "level": "All",
+    "description": "This talk shares how agentified engineering teams optimize code review for AI-generated code while avoiding cognitive debt and skill erosion. It outlines practical steps and milestones to progressively improve code quality, then safely reduce review intensity as confidence grows, gradually “dimmi...",
+    "tags": [
+      "cognitive debt",
+      "ai-generated code",
+      "code review",
+      "automation"
+    ]
+  },
+  {
+    "id": "DVX-8194",
+    "title": "Write Java Code Like a Seasoned Hacker: 2026 Edition",
+    "speaker": "Soroosh Khodami",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 6",
+    "date": "2026-10-06",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Advanced",
+    "description": "Hands-on session for Java developers on building secure applications in the AI era. Covers OWASP Top 10, supply chain security, SAST/SCA in CI/CD, threat modeling, monitoring and logging, secure use of AI assistants, and hardened container images, with live demos of real-world attacks and defenses.",
+    "tags": [
+      "owasp",
+      "java",
+      "security",
+      "devsecops"
+    ]
+  },
+  {
+    "id": "DVX-8190",
+    "title": "Technical Workshop on AI-Native Tooling for Java Development",
+    "speaker": "Juan Antonio Breña 🇪🇸🇪🇺",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-06",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This hands-on English workshop introduces AI-native Java Enterprise development using Skills, Agents, Commands, and MCP Servers. It covers prompt engineering, agent-driven workflows, and pipelines; automating lifecycle tasks; configuring framework-specific agents; extending capabilities with MCP ...",
+    "tags": [
+      "java",
+      "ai",
+      "agents",
+      "sdlc"
+    ]
+  },
+  {
+    "id": "DVX-23520",
+    "title": "Beyond the Chatbox: Ship On-Device AI in Your Browser",
+    "speaker": "Marcel Bagemihl",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 8",
+    "date": "2026-10-06",
+    "time": "13:30",
+    "duration": 180,
+    "level": "Intermediate",
+    "description": "This lab shows how to replace chat-style AI with real-time, on-device browser inference. Participants compare JVM backend pose estimation with in-browser WebGPU models, then build live camera overlays and measure latency. They leave with a working project, extra labs, and a framework for choosing...",
+    "tags": [
+      "webgpu",
+      "ai",
+      "browser",
+      "latency"
+    ]
+  },
+  {
+    "id": "DVX-19732",
+    "title": "Tap into the NVIDIA Ecosystem from Java with TornadoVM's Hybrid API",
+    "speaker": "Thanos Stratikopoulos",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-06",
+    "time": "16:50",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "TornadoVM’s Hybrid API lets Java developers combine GPU kernels written in Java with direct access to NVIDIA libraries like CUDA, cuBLAS, and cuFFT—without JNI. The session shows how to build high-performance AI/HPC apps in Java while preserving portability, productivity, and incremental accelera...",
+    "tags": [
+      "java",
+      "gpu",
+      "nvidia",
+      "jni"
+    ]
+  },
+  {
+    "id": "DVX-11558",
+    "title": "BootUI, the missing developer console for Spring Boot and Quarkus",
+    "speaker": "Julien Dubois",
+    "track": "Development Practices",
+    "room": "TBA 3",
+    "date": "2026-10-06",
+    "time": "16:50",
+    "duration": 30,
+    "level": "All",
+    "description": "BooUI is a developer console for Spring Boot and Quarkus that helps you monitor users in real time, diagnose and fix issues with live view and advisor panels, and analyze memory usage for production tuning. The session includes hands-on installation and use.",
+    "tags": [
+      "memory usage",
+      "quarkus",
+      "developer console",
+      "spring boot"
+    ]
+  },
+  {
+    "id": "DVX-22933",
+    "title": "30 minutes to build your first Vidocq app, the 100% European Sovereign Java stack with zero external dependencies",
+    "speaker": "Sebastien Blanc",
+    "track": "Java Language & Platform",
+    "room": "TBA 4",
+    "date": "2026-10-06",
+    "time": "16:50",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "Vidocq is an open-source, pure Java implementation of Jakarta EE Core Profile and MicroProfile with zero external dependencies, validated by 5,650 TCK tests. This live coding session will build a complete application from scratch, showcase its 15 modules, and promote this European sovereign Java ...",
+    "tags": [
+      "vidocq",
+      "vibecoding",
+      "microprofile",
+      "jakartaee"
+    ]
+  },
+  {
+    "id": "DVX-5051",
+    "title": "🧰 Dev Containers: the ultimate toolbox for developers?",
+    "speaker": "Stéphane Philippart",
+    "track": "Mind the Geek",
+    "room": "TBA 5",
+    "date": "2026-10-06",
+    "time": "16:50",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "Dev containers simplify development setup by codifying tools, frameworks, versions, and dependencies in configuration. With only Docker installed locally, developers can quickly recreate environments, avoid manual setup hassles, and manage updates consistently. This session shows how to use dev c...",
+    "tags": [
+      "dependencies",
+      "devcontainers",
+      "configuration",
+      "docker"
+    ]
+  },
+  {
+    "id": "DVX-16418",
+    "title": "Solving Distributed Transactions with the Saga Pattern and Temporal",
+    "speaker": "Andrei Sulyz",
+    "track": "Architecture & Modernization",
+    "room": "TBA 6",
+    "date": "2026-10-06",
+    "time": "16:50",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "This talk examines real-world challenges of implementing distributed transactions with Temporal. It covers pitfalls of classic Saga patterns, especially for synchronous workflows, failures, retries, and compensation, and explains how the architecture evolved to improve reliability, reconciliation...",
+    "tags": [
+      "saga",
+      "distributedtransactions",
+      "consistency",
+      "temporal"
+    ]
+  },
+  {
+    "id": "DVX-15360",
+    "title": "Analyze and Optimize Your Applications with JFR",
+    "speaker": "Ana-Maria Mihalceanu",
+    "track": "Java Language & Platform",
+    "room": "TBA 7",
+    "date": "2026-10-06",
+    "time": "16:50",
+    "duration": 120,
+    "level": "Intermediate",
+    "description": "Hands-on lab on Java observability using JDK Flight Recorder (JFR). Learn to capture, manage, and analyze recordings, create custom events, and integrate JFR with Prometheus to correlate application and infrastructure behavior. Participants will gain practical skills to monitor, diagnose, and opt...",
+    "tags": [
+      "observability",
+      "java",
+      "jfr",
+      "prometheus"
+    ]
+  },
+  {
+    "id": "DVX-7036",
+    "title": "Building Production-Ready Agentic Systems with LangChain4j and Quarkus",
+    "speaker": "Mario Fusco",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 8",
+    "date": "2026-10-06",
+    "time": "16:50",
+    "duration": 120,
+    "level": "Intermediate",
+    "description": "Hands-on lab building a production-ready agentic AI app with LangChain4j and Quarkus. Learn to integrate tools via MCP/A2A, add reusable skills, guardrails, resilience, and testing. Gain practical patterns for reliable, observable, secure, and testable agent workflows, leaving with a working ente...",
+    "tags": [
+      "agentic",
+      "governance",
+      "testing",
+      "langchain4j"
+    ]
+  },
+  {
+    "id": "DVX-17558",
+    "title": "From Laptop to Lakehouse: Analytical SQL with DuckDB",
+    "speaker": "Oliver Geisser",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 2",
+    "date": "2026-10-06",
+    "time": "17:35",
+    "duration": 30,
+    "level": "All",
+    "description": "DuckDB is a fast, open-source in-process analytical SQL engine with no server or dependencies. This session demos its scale from laptop analytics on CSV/JSON/Parquet to embedded Java apps, S3 queries, and lakehouse use with DuckLake and Quack, aimed at developers and engineers needing simple data...",
+    "tags": [
+      "sql",
+      "lakehouse",
+      "duckdb",
+      "analytics"
+    ]
+  },
+  {
+    "id": "DVX-5519",
+    "title": " The Magic of OpenTelemetry: Rewriting Your App in Production ",
+    "speaker": "Bruce Bujon",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-06",
+    "time": "17:35",
+    "duration": 30,
+    "level": "Advanced",
+    "description": "This talk explains how the OpenTelemetry Java agent works inside the JVM: class loading interception, runtime bytecode rewriting, and ByteBuddy-based instrumentation of frameworks like Spring, JDBC, and gRPC. It also covers production impacts such as latency, allocations, conflicts, and debugging...",
+    "tags": [
+      "instrumentation",
+      "bytebuddy",
+      "javaagent",
+      "opentelemetry"
+    ]
+  },
+  {
+    "id": "DVX-9024",
+    "title": "Beyond assertEquals: Probabilistic Security and Bias Testing for Java LLM Applications",
+    "speaker": "Iryna Dohndorf",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 4",
+    "date": "2026-10-06",
+    "time": "17:35",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "This talk introduces Tiberius, a Java-native tool for LLM security and safety testing. It uses probabilistic multi-trial scans, security contracts, and statistical assertions to test adversarial attacks like prompt injections and jailbreaks, detect bias, and generate versioned JSON fixtures for r...",
+    "tags": [
+      "java",
+      "security",
+      "llm",
+      "testing"
+    ]
+  },
+  {
+    "id": "DVX-24234",
+    "title": "AsyncAPI in action: OpenAPI for event-driven applications",
+    "speaker": "Michel Schudel",
+    "track": "Architecture & Modernization",
+    "room": "TBA 5",
+    "date": "2026-10-06",
+    "time": "17:35",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "This session introduces AsyncAPI, the spec-first counterpart to OpenAPI for event-driven systems. Through a live demo, it generates a Spring Boot Kafka producer, consumer, DTOs, and docs from one AsyncAPI spec, showing how contract-first tooling eliminates boilerplate and keeps services and docum...",
+    "tags": [
+      "kafka",
+      "asyncapi",
+      "event-driven",
+      "openapi"
+    ]
+  },
+  {
+    "id": "DVX-50101",
+    "title": "The Java Story | The Official Documentary",
+    "speaker": "Georges Saab",
+    "track": "Java Language & Platform",
+    "room": "TBA 6",
+    "date": "2026-10-06",
+    "time": "17:35",
+    "duration": 75,
+    "level": "All",
+    "description": "A documentary tracing 31 years of Java’s evolution—from Sun Microsystems to OpenJDK and Jakarta EE—through the voices of its creators and community. It highlights innovation, reinvention, and the collective effort that kept Java alive as one of the world’s most influential software platforms.",
+    "tags": [
+      "java",
+      "jakartaee",
+      "jvm",
+      "openjdk"
+    ]
+  },
+  {
+    "id": "DVX-21690",
+    "title": "Exquisite Evals for Skills & MCPs",
+    "speaker": "Christian Tzolov",
+    "track": "Development Practices",
+    "room": "TBA 2",
+    "date": "2026-10-06",
+    "time": "18:20",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "The speaker built the javadocs.dev MCP server to give Java, Kotlin, and Scala agents efficient library documentation access. They created a custom eval framework showing it is up to 5x more token-efficient and more accurate than base models or web search. The session shares best practices for eff...",
+    "tags": [
+      "documentation",
+      "javadocs",
+      "evals",
+      "mcp"
+    ]
+  },
+  {
+    "id": "DVX-10021",
+    "title": "Java Script (No, Not That One): Modern Automation with Java",
+    "speaker": "Loïc Magnette",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-06",
+    "time": "18:20",
+    "duration": 30,
+    "level": "All",
+    "description": "The talk shows how modern Java has become practical for scripting and automation, thanks to shebang support, single-file execution, and instance main methods. It also covers JBang for dependency management and advanced use cases, with live demos demonstrating fast, maintainable Java scripts.",
+    "tags": [
+      "jbang",
+      "scripting",
+      "java",
+      "automation"
+    ]
+  },
+  {
+    "id": "DVX-4077",
+    "title": "Do We Need a Build Language? Java Builds Java",
+    "speaker": "Rafael Winterhalter",
+    "track": "Java Language & Platform",
+    "room": "TBA 4",
+    "date": "2026-10-06",
+    "time": "18:20",
+    "duration": 30,
+    "level": "All",
+    "description": "Jenesis is a proof-of-concept Java build tool embedded as source code, making builds easier to run, modify, and understand without external setup. It also aims to improve supply-chain security, reproducibility, and maintainability by separating build logic from dependencies and using the Java mod...",
+    "tags": [
+      "java",
+      "security",
+      "build",
+      "jenesis"
+    ]
+  },
+  {
+    "id": "DVX-7017",
+    "title": "The Importance of HITL to Avoid Chaos and EU Regulations for AI",
+    "speaker": "Juan Antonio Breña 🇪🇸🇪🇺",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-06",
+    "time": "18:20",
+    "duration": 30,
+    "level": "Intermediate",
+    "description": "The talk explains Human-in-the-Loop design for AI coding agents in enterprise workflows, covering approval gates, audit trails, compliance with the EU AI Act, and failure risks in microservices. It offers practical patterns for adding human checkpoints to CI/CD without sacrificing speed or control.",
+    "tags": [
+      "hitl",
+      "compliance",
+      "autonomy",
+      "microservices"
+    ]
+  },
+  {
+    "id": "DVX-10037",
+    "title": "Quarkus Community BOF",
+    "speaker": "Dimitris Andreadis",
+    "track": "Java Language & Platform",
+    "room": "TBA 7",
+    "date": "2026-10-06",
+    "time": "19:00",
+    "duration": 60,
+    "level": "All",
+    "description": "Quarkus is a fast-growing Java framework with 800+ extensions and 1,000+ contributors, now under the CommonHaus Foundation. Meet core team and contributors at Devoxx to discuss the ecosystem, share ideas, and ask anything—especially about Quarkus, community involvement, and its work on Agentic AI.",
+    "tags": [
+      "agentic ai",
+      "quarkus",
+      "open-source",
+      "ecosystem"
+    ]
+  },
+  {
+    "id": "DVX-10046",
+    "title": "Who will build software after AI?",
+    "speaker": "Eddy Vos",
+    "track": "Mind the Geek",
+    "room": "TBA 8",
+    "date": "2026-10-06",
+    "time": "19:00",
+    "duration": 60,
+    "level": "All",
+    "description": "An open discussion on how AI-assisted development affects children’s coding education, including whether kids should still learn to code, which skills matter most, and how to make technology engaging and accessible. The session explores the future of Devoxx4Kids, robotics, and nurturing the next ...",
+    "tags": [
+      "coding",
+      "robotics",
+      "ai-assisted",
+      "education"
+    ]
+  },
+  {
+    "id": "DVX-31451",
+    "title": "Welcome to Devoxx",
+    "speaker": "Stephan Janssen",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "09:30",
+    "duration": 20,
+    "level": "All",
+    "description": "The welcome opening keynote for Devoxx Belgium 2026 by the founder of Devoxx giving a general update on the conference.",
+    "tags": [
+      "belgium",
+      "conference",
+      "devoxx",
+      "keynote"
+    ]
+  },
+  {
+    "id": "DVX-50102",
+    "title": "From Brainless to Brilliant — Giving an Open-Source Robot a Mind of Its Own",
+    "speaker": "Jan Van Wassenhove",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "09:50",
+    "duration": 20,
+    "level": "All",
+    "description": "A hobbyist built AURA, a personal “brain” for an open robot platform, using only a laptop. It recognizes household members, keeps learned and told information separate, and seeks permission before committing code. The project demonstrates how accessible robotics and AI now are.",
+    "tags": [
+      "firmware",
+      "autonomy",
+      "privacy",
+      "robot"
+    ]
+  },
+  {
+    "id": "DVX-31455",
+    "title": "Half of a billion Idle GPUs: The Case for On-Device AI",
+    "speaker": "Prince Canuma",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "10:10",
+    "duration": 20,
+    "level": "Intermediate",
+    "description": "This keynote argues that Apple Silicon devices form a massive, underused AI compute fleet. Drawing on the MLX ecosystem, it shows how on-device inference can handle frontier models through advanced optimization, and why privacy, latency, cost, and sovereignty will shift more AI workloads from clo...",
+    "tags": [
+      "applesilicon",
+      "quantization",
+      "on-device",
+      "inference"
+    ]
+  },
+  {
+    "id": "DVX-48301",
+    "title": "A Fleet of AI Agents, Each in Its Own Sandbox: Inside Docker's Agentic Platform",
+    "speaker": "Jean-Laurent de Morlhon",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "10:30",
+    "duration": 20,
+    "level": "Intermediate",
+    "description": "Docker’s Agentic Platform enables AI agents to autonomously read issues, code, test, and prepare pull requests in isolated sandboxes with secure identities. The talk covers orchestrated specialist agents, parallel workflows, and key production lessons on cost, hallucinations, human oversight, saf...",
+    "tags": [
+      "autonomy",
+      "ai agents",
+      "sandbox",
+      "docker"
+    ]
+  },
+  {
+    "id": "DVX-49251",
+    "title": "The Year of the Runtime",
+    "speaker": "Ron Pressler",
+    "track": "Java Language & Platform",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "10:50",
+    "duration": 20,
+    "level": "Intermediate",
+    "description": "AI coding agents reduce the importance of language syntax, making runtime performance and operability more critical. Java’s JVM and standard library are a strong fit: newer JDKs continually improve speed, observability, garbage collection, and usability without changing the programming model, wit...",
+    "tags": [
+      "java",
+      "runtime",
+      "jvm",
+      "aicoding"
+    ]
+  },
+  {
+    "id": "DVX-51951",
+    "title": "Agentic Engineering Reconversion",
+    "speaker": "Victor Rentea",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "11:10",
+    "duration": 20,
+    "level": "All",
+    "description": "This keynote examines the evolving role of software engineers amid AI-driven transformation. Drawing on lessons from hundreds of developers worldwide, it explores balancing personal life, uncertainty, and excitement; accelerating AI-focused reskilling; and adapting effectively to the profession’s...",
+    "tags": [
+      "software",
+      "developers",
+      "ai",
+      "onboarding"
+    ]
+  },
+  {
+    "id": "DVX-24233",
+    "title": "Build the Builder: A Java Coding Agent in Your IDE with ACP",
+    "speaker": "Vadim Briliantov",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This session shows how to build a production-ready coding agent in Java/Kotlin, connect it to IntelliJ via ACP, and orchestrate external agents like Codex, Claude, and Gemini. It covers reasoning loops, tools, guardrails, IDE context, and coordinated multi-agent workflows for real software engine...",
+    "tags": [
+      "guardrails",
+      "orchestration",
+      "agent",
+      "ide"
+    ]
+  },
+  {
+    "id": "DVX-7022",
+    "title": "Emergent DevEx: The Good, the Bad, and the Legacy",
+    "speaker": "Makan Sepehrifar",
+    "track": "People, Practices & Career",
+    "room": "TBA 3",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk explores how developer experience deteriorates as organizations scale, creating bureaucratic friction and outdated internal tools. It argues that copying DevEx models from companies like Google or Netflix is misguided, and offers strategies for engineers to shape and resist tool-driven ...",
+    "tags": [
+      "bureaucracy",
+      "developer experience",
+      "internal tools",
+      "scalability"
+    ]
+  },
+  {
+    "id": "DVX-21691",
+    "title": "MCP 2.0 - Stateless, New Auth (CIMD), and Exciting Extensions",
+    "speaker": "James Ward",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The session reviews recent MCP spec and implementation changes and their impact on server developers. It covers stateless transport, new CIMD authentication, and extensions like MCP Apps, Tasks, and Skills. Code examples and demos show how to build servers using the latest MCP features and approa...",
+    "tags": [
+      "extensions",
+      "authentication",
+      "mcp",
+      "stateless"
+    ]
+  },
+  {
+    "id": "DVX-29351",
+    "title": "Structured Concurrency Looms",
+    "speaker": "Alan Bateman",
+    "track": "Java Language & Platform",
+    "room": "TBA 5",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Structured Concurrency in Project Loom builds on virtual threads to simplify concurrent programming by treating related tasks as one unit. It improves cancellation, error handling, and observability, and makes code easier to understand and debug. The session covers its design, usage, evolution, a...",
+    "tags": [
+      "projectloom",
+      "structuredconcurrency",
+      "concurrency",
+      "virtualthreads"
+    ]
+  },
+  {
+    "id": "DVX-24224",
+    "title": "Post-Quantum Today: How Your Passwords Will Be Safe in a Quantum Future",
+    "speaker": "Julian Burr",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 6",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "This talk explains RSA encryption, how Shor’s algorithm could break it, the current state of quantum hardware, and why post-quantum cryptography matters now. It also introduces lattice-based quantum-safe encryption and current adoption progress, helping audiences understand future cryptography an...",
+    "tags": [
+      "quantum",
+      "lattice",
+      "rsa",
+      "pqc"
+    ]
+  },
+  {
+    "id": "DVX-22923",
+    "title": "Fun with Flags: How OpenFeature Solves Your Feature Flag Headaches",
+    "speaker": "Simon Schrottner",
+    "track": "Development Practices",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "All",
+    "description": "Feature flags improve agile software delivery, but complexity grows with targeting, multi-language support, vendor lock-in, and cleanup. This talk explores common feature flag pitfalls and shows how OpenFeature’s vendor-agnostic SDKs and tools simplify flag management and make the process easier.",
+    "tags": [
+      "vendor-agnostic",
+      "software delivery",
+      "feature flags",
+      "openfeature"
+    ]
+  },
+  {
+    "id": "DVX-8156",
+    "title": "I Hired a Real Robot as My Junior Dev — and Now My Kids Don't Want to Learn Java Anymore",
+    "speaker": "Jan Van Wassenhove",
+    "track": "Mind the Geek",
+    "room": "TBA 8",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A humorous talk on how AI agents and desktop robots may commoditize coding while increasing the value of architecture, systems thinking, and product judgment. It explores a shift from typing code to directing agents in natural language, asking whether we’re training the last generation of develop...",
+    "tags": [
+      "robotics",
+      "architecture",
+      "software",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-7040",
+    "title": "Wrap, Reshape, or Redesign: Retrofitting Your APIs for a World of Agents",
+    "speaker": "Horacio Gonzalez",
+    "track": "Architecture & Modernization",
+    "room": "TBA 9",
+    "date": "2026-10-07",
+    "time": "12:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk explores how to adapt human-designed APIs for LLM agents, which interpret instructions literally and need explicit boundaries. It presents a practical framework for retrofitting APIs into agent-ready tools, with real examples, tradeoffs, and cases where redesign improves both agent and h...",
+    "tags": [
+      "tooling",
+      "apis",
+      "agents",
+      "redesign"
+    ]
+  },
+  {
+    "id": "DVX-49254",
+    "title": "Mission Possible: The 45-Minute Path to Bullet-Proof Java Container Images",
+    "speaker": "Pasha Finkelshtein",
+    "track": "Java Language & Platform",
+    "room": "TBA 2",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "All",
+    "description": "A lunch session on hardening Java container images by reducing CVE noise and operational risk. It covers choosing minimal base images, shrinking privileges, pinning versions, signing and SBOMs, using CVSS-based scanning, and automating updates with Dependabot/Renovate, with practical Dockerfile g...",
+    "tags": [
+      "containerization",
+      "vulnerabilities",
+      "hardening",
+      "provenance"
+    ]
+  },
+  {
+    "id": "DVX-4100",
+    "title": "Life in the Ivory Tower: Confessions of a Former Developer Who Turned Into an Architect",
+    "speaker": "Robin Custers",
+    "track": "Architecture & Modernization",
+    "room": "TBA 3",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "Intermediate",
+    "description": "A humorous talk about becoming an enterprise architect and bridging the gap between hands-on development and corporate IT decision-making. It explores the psychology behind technical choices, staying technically current while moving up, and fostering collaboration between developers and architects.",
+    "tags": [
+      "collaboration",
+      "psychology",
+      "itdecisionmaking",
+      "enterprisearchitecture"
+    ]
+  },
+  {
+    "id": "DVX-50106",
+    "title": "From User Prompt to JPA Query: Comparing Tool Calling, Structured Output & Hybrid Approach",
+    "speaker": "Sebastian Kühnau",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "All",
+    "description": "The project compares three LLM approaches for natural-language database filtering in a Java Spring AI/Vaadin app: function calling, structured output, and a hybrid method. Tested with local Ollama models, it evaluates reliability, speed, cost, and limitations for handling complex filter requests.",
+    "tags": [
+      "java",
+      "llm",
+      "structuredoutput",
+      "filtering"
+    ]
+  },
+  {
+    "id": "DVX-49253",
+    "title": "Engineering for the Long Haul: Operating Open Source at Scale",
+    "speaker": "Sven Sellen",
+    "track": "Development Practices",
+    "room": "TBA 5",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "All",
+    "description": "The presentation explains how enterprises can securely and compliantly manage open-source software over time despite short lifecycles and upgrade demands. It highlights TuxCare solutions—rebootless patching, end-of-life security updates, low-noise vulnerability scanning, and enterprise support—to...",
+    "tags": [
+      "security",
+      "open-source",
+      "compliance",
+      "patching"
+    ]
+  },
+  {
+    "id": "DVX-25657",
+    "title": "Safety, speed, and governance in the agentic era",
+    "speaker": "Oleg Šelajev",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 6",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "All",
+    "description": "The session explores Docker Sandboxes as a secure local isolation layer for AI agents, limiting filesystem and credential access. It also addresses how agents can still leak data, and proposes a multi-layered approach combining sandboxing, tool governance, and policy controls for safer, trustwort...",
+    "tags": [
+      "sandboxes",
+      "credentials",
+      "isolation",
+      "docker"
+    ]
+  },
+  {
+    "id": "DVX-10038",
+    "title": "Eval Driven Development: Why you need it to make your Agentic Application survive Production",
+    "speaker": "Urs Peter",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "Intermediate",
+    "description": "Eval-Driven Development (EDD) adapts test-driven development to agentic AI systems, helping manage hallucinations, drift, and workflow surprises. This talk shows how to build reliable agents with layered evals, golden datasets, rubrics, trace signals, and regression gates, using JVM AI frameworks...",
+    "tags": [
+      "agentic",
+      "reliability",
+      "development",
+      "evaluation"
+    ]
+  },
+  {
+    "id": "DVX-22909",
+    "title": "What rules the virtual? How our systems obey physical laws.",
+    "speaker": "Marianne Hoornenborg",
+    "track": "Mind the Geek",
+    "room": "TBA 8",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "Intermediate",
+    "description": "This proposal explores the physical foundations of information and computation, asking how data is stored, moved, and erased in the real world. It examines energy, speed, and disappearance of information, then extends into quantum effects and how stable states emerge beneath digital abstractions.",
+    "tags": [
+      "computation",
+      "information",
+      "quantum",
+      "physics"
+    ]
+  },
+  {
+    "id": "DVX-50103",
+    "title": "Let's dance! – Teaching your robot some moves with reinforcement learning",
+    "speaker": "Thomas Endres",
+    "track": "Mind the Geek",
+    "room": "TBA 9",
+    "date": "2026-10-07",
+    "time": "13:05",
+    "duration": 40,
+    "level": "All",
+    "description": "A humorous talk on training a humanoid robot to walk and dance using reinforcement learning in simulation. It introduces RL basics, NVIDIA Isaac Sim, Unitree RL Lab, motion retargeting from video, and imitation learning, ending with a live dancing performance by the robot.",
+    "tags": [
+      "imitation",
+      "simulation",
+      "humanoid",
+      "reinforcement"
+    ]
+  },
+  {
+    "id": "DVX-31454",
+    "title": "Run Frontier Open Models on consumer hardware",
+    "speaker": "Prince Canuma",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A deep dive into fast, production-grade on-device inference on Macs using the MLX ecosystem. Covers unified memory, continuous batching, KV-cache compression, speculative decoding, and model porting pitfalls, with real benchmark results and engineering tradeoffs for balancing accuracy, latency, a...",
+    "tags": [
+      "memory",
+      "quantization",
+      "latency",
+      "inference"
+    ]
+  },
+  {
+    "id": "DVX-4096",
+    "title": "Deterministic by Design - Achieving Reproducible Builds with Maven",
+    "speaker": "Maarten Mulders",
+    "track": "Development Practices",
+    "room": "TBA 3",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This session shows how Apache Maven can make builds reproducible by producing identical artifacts from identical inputs. It explains how to diagnose non-determinism, use Maven’s verification tools, and improve traceability and compliance in software delivery pipelines increasingly scrutinized by ...",
+    "tags": [
+      "maven",
+      "compliance",
+      "determinism",
+      "reproducibility"
+    ]
+  },
+  {
+    "id": "DVX-4087",
+    "title": " Harness Engineering: Building the System Around Your AI Coding Agent ",
+    "speaker": "JI Darwish",
+    "track": "Architecture & Modernization",
+    "room": "TBA 4",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "AI coding agents are fundamentally simple: prompt a model, execute tool calls, feed results back, and repeat. This talk builds such an engine in Java, then iteratively adds context, constraints, and feedback to show how real tools improve reliability, safety, and understanding of their limits.",
+    "tags": [
+      "tool calls",
+      "ai agents",
+      "context management",
+      "safety guardrails"
+    ]
+  },
+  {
+    "id": "DVX-8164",
+    "title": "The pizza party of the future 🍕 software teams and product value in the age of coding agents",
+    "speaker": "Katie Clark",
+    "track": "People, Practices & Career",
+    "room": "TBA 5",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "All",
+    "description": "AI is reshaping software teams, creating new bottlenecks around value and trust. The talk explores how developer roles, team structures, and responsibilities may evolve—from cross-functional teams to AI-assisted models—drawing on past agile critiques to imagine a more value-driven future of human...",
+    "tags": [
+      "teams",
+      "software",
+      "ai",
+      "agile"
+    ]
+  },
+  {
+    "id": "DVX-9008",
+    "title": "G1, ZGC, Shenandoah, ... with all these GCs in Java, which one do I choose?",
+    "speaker": "Antoine DESSAIGNE",
+    "track": "Java Language & Platform",
+    "room": "TBA 6",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk explains why Java has multiple garbage collectors, what ZGC, Shenandoah, and others do, and their strengths and weaknesses. It traces GC history, compares alternatives, and shows when to use each one for the right project, application, or environment.",
+    "tags": [
+      "garbage collection",
+      "zgc",
+      "java",
+      "shenandoah"
+    ]
+  },
+  {
+    "id": "DVX-7018",
+    "title": "A Year of Agentic AI Evolution: Lessons Learned Building Production-grade Agentic Systems",
+    "speaker": "Mario Fusco",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "LangChain4j’s agentic framework has evolved from fixed patterns to flexible orchestration, letting developers compose strategies for different use cases. The session covers new built-in patterns, their trade-offs, and production features like tracing, state persistence, failure recovery, and huma...",
+    "tags": [
+      "observability",
+      "agentic",
+      "orchestration",
+      "langchain4j"
+    ]
+  },
+  {
+    "id": "DVX-24228",
+    "title": "Java, Raspberry Pi, and the Art of Overengineering Everyday Life",
+    "speaker": "Matti Tahvonen",
+    "track": "Mind the Geek",
+    "room": "TBA 8",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "All",
+    "description": "Java developers can build practical Raspberry Pi home automation without leaving their tools. This talk shows two real projects—a BBQ smoker controller and a jetty server for photos, water levels, and fishing alerts—covering hardware access, deployment, reliable services, mobile UIs, and secure r...",
+    "tags": [
+      "raspberry pi",
+      "sensors",
+      "java",
+      "home automation"
+    ]
+  },
+  {
+    "id": "DVX-17752",
+    "title": "🌉 Gateway API, 10 years of maturation for a new Kubernetes network API",
+    "speaker": "Kevin Davin",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 9",
+    "date": "2026-10-07",
+    "time": "14:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The text introduces Kubernetes network exposure challenges and explains how the new standard Gateway API aims to simplify them. It covers standard and proprietary options, advanced features, available implementations, and how to install Gateway API in a cluster.",
+    "tags": [
+      "ingress",
+      "kubernetes",
+      "gatewayapi",
+      "networking"
+    ]
+  },
+  {
+    "id": "DVX-8166",
+    "title": "Integration patterns for distributed systems",
+    "speaker": "Dirk Fröhner",
+    "track": "Architecture & Modernization",
+    "room": "TBA 2",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "The session explains distributed-systems challenges in modern interconnected applications—such as retries, idempotence, ordering, and failures—and the design trade-offs and patterns used to manage them. It targets architects, developers, and executives, and offers guidance for modernizing legacy ...",
+    "tags": [
+      "integration",
+      "idempotence",
+      "distributed systems",
+      "microservices"
+    ]
+  },
+  {
+    "id": "DVX-21666",
+    "title": "Teaching an Old Handle New Tricks: From Core Reflection to FFM",
+    "speaker": "Maurizio Cimadamore",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "The talk explains how Java reflection is inefficient, and how method handles and var handles create reusable, typed capabilities that better match JVM linkage. It also shows how this design supports newer APIs like Foreign Function & Memory and serialization, illustrating resilient platform design.",
+    "tags": [
+      "method handles",
+      "java runtime",
+      "reflection",
+      "var handles"
+    ]
+  },
+  {
+    "id": "DVX-8171",
+    "title": "0 to 350 Engineers on Claude Code: What Could Go Wrong?",
+    "speaker": "Nicolas Martignole",
+    "track": "People, Practices & Career",
+    "room": "TBA 4",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "All",
+    "description": "AI coding agents are transforming software development, enabling non-developers to build features and teams to work end-to-end. The talk explores real-world adoption, risks like large uncontrolled changes, cost management, and how developers and organizations must adapt to prompting, agents, skil...",
+    "tags": [
+      "coding",
+      "developers",
+      "ai",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-22942",
+    "title": "Why Documentation Won’t Write Itself—and AI Won’t Save You",
+    "speaker": "Christian Heitzmann",
+    "track": "Development Practices",
+    "room": "TBA 5",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "All",
+    "description": "The talk argues that AI won’t solve poor documentation. It presents practical principles for keeping docs close to code, separating architecture/API/code-level documentation, and preventing decay. Key takeaway: missing context remains missing unless teams make deliberate documentation decisions f...",
+    "tags": [
+      "documentation",
+      "architecture",
+      "ai",
+      "code"
+    ]
+  },
+  {
+    "id": "DVX-4051",
+    "title": "CRAcking Compliance - The EU Cyber Resilience Act",
+    "speaker": "Christian Schabetsberger",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 6",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "All",
+    "description": "The talk explains the EU Cyber Resilience Act, its impact, and new compliance requirements. It covers SBOM generation for Java, .NET, and JavaScript projects, CI integration, vulnerability management with Dependabot/Renovate, and reducing risk through automated dependency updates and distroless i...",
+    "tags": [
+      "vulnerability management",
+      "sbom",
+      "dependabot",
+      "cyber resilience act"
+    ]
+  },
+  {
+    "id": "DVX-19733",
+    "title": "Bootiful Spring Boot 4",
+    "speaker": "Josh Long",
+    "track": "Architecture & Modernization",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "All",
+    "description": "Explore Spring Boot 4.x with Java 25+, covering scalable, modular, secure, and intelligent applications. Learn about the Spring ecosystem, AI integration, seamless data access, and production optimizations including virtual threads, Project Leyden, GraalVM, and more for building faster, more effi...",
+    "tags": [
+      "graalvm",
+      "java",
+      "virtual threads",
+      "spring boot"
+    ]
+  },
+  {
+    "id": "DVX-7008",
+    "title": "How to survive and thrive as a dev (team) in the exponential age of AI. Real-world AI adoption, smarter ways of working, and lessons from the front lines",
+    "speaker": "Sander Hoogendoorn",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 8",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Sander Hoogendoorn shares a practical, no-hype view of AI at iBOOD: how it’s reshaping product architecture, engineering, and team culture. He covers real risks like lock-in and fragile dependencies, and explains why autonomous microteams, experimentation, and adaptability replace traditional pro...",
+    "tags": [
+      "microteams",
+      "architecture",
+      "ai",
+      "adaptability"
+    ]
+  },
+  {
+    "id": "DVX-4097",
+    "title": "Pragmatic multi-cloud architecture: designing for resilience and portability beyond the hype ",
+    "speaker": "Alexandre Touret",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 9",
+    "date": "2026-10-07",
+    "time": "15:10",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This session explores designing a real-world multi-cloud platform, weighing the benefits of using multiple providers against challenges like latency, fragmented data, incompatible APIs, security, and SLA risks. It covers bounded contexts, production hurdles, API design, best practices, and pragma...",
+    "tags": [
+      "multi-cloud",
+      "architecture",
+      "security",
+      "latency"
+    ]
+  },
+  {
+    "id": "DVX-11562",
+    "title": "Surviving the \"AI Slopageddon\": How AI shakes the foundations of Open Source",
+    "speaker": "Raphael Semeteys",
+    "track": "Development Practices",
+    "room": "TBA 2",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "All",
+    "description": "Vibe Coding boosts productivity but overwhelms open-source maintainers with low-quality AI-generated pull requests, hallucinated bug reports, and autonomous agents. This talk examines AI’s existential threat to open source and proposes defensive strategies such as stricter access, restructuring w...",
+    "tags": [
+      "coding",
+      "governance",
+      "vibe",
+      "opensource"
+    ]
+  },
+  {
+    "id": "DVX-19730",
+    "title": "Building LLM Inference Engines in Java with TornadoVM and the NVIDIA Ecosystem",
+    "speaker": "Thanos Stratikopoulos",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The session shows how Java can run GPU-accelerated local LLMs natively with TornadoVM, using NVIDIA libraries without JNI. It covers GPULlama3.java, quantized inference, Quarkus and LangChain4J integration, and how TornadoVM plus Project Babylon/Panama position Java as a strong AI and HPC platform.",
+    "tags": [
+      "java",
+      "tornadovm",
+      "llm",
+      "gpu"
+    ]
+  },
+  {
+    "id": "DVX-17791",
+    "title": "Consistency Patterns in Event-Driven Architecture",
+    "speaker": "Emanuel Trandafir",
+    "track": "Architecture & Modernization",
+    "room": "TBA 4",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk explains how to avoid inconsistencies in distributed systems caused by dual writes and failed transactions. It covers Outbox/Inbox patterns, idempotent consumers, and Saga orchestration/choreography, showing when to use each and the trade-offs involved with eventual consistency.",
+    "tags": [
+      "distributedsystems",
+      "inbox",
+      "sagas",
+      "outbox"
+    ]
+  },
+  {
+    "id": "DVX-24212",
+    "title": "GraalVM Next: Layers, Crema, and WebAssembly in Action",
+    "speaker": "Alina Yurenko",
+    "track": "Development Practices",
+    "room": "TBA 5",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The session explores three GraalVM Native Image projects: Native Image Layers for shared code and memory, Project Crema for dynamic class loading at runtime, and Web Image for compiling JVM apps to WebAssembly for browsers. Together, they expand packaging, runtime behavior, and deployment targets.",
+    "tags": [
+      "graalvm",
+      "class loading",
+      "native image",
+      "webassembly"
+    ]
+  },
+  {
+    "id": "DVX-49252",
+    "title": "Big Runtimes Make Efficient Programs",
+    "speaker": "Ron Pressler",
+    "track": "Java Language & Platform",
+    "room": "TBA 6",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Large runtimes, like the JVM, can improve both convenience and performance by enabling JIT compilation and garbage collection. This challenges the idea that smaller runtimes and more compile-time decisions are always faster, showing the real tradeoffs are more complex.",
+    "tags": [
+      "performance",
+      "java",
+      "runtime",
+      "jit"
+    ]
+  },
+  {
+    "id": "DVX-31453",
+    "title": "Architecture Observability and Guardrails",
+    "speaker": "Victor Rentea",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "All",
+    "description": "Talk on preventing “AI slop” by enforcing code quality in AI-generated codebases. It covers agent design feedback loops and ways to preserve human review bandwidth, using C4 models, PlantUML, captured sequence diagrams, complexity visualizations, and efficient testing practices.",
+    "tags": [
+      "code quality",
+      "ai-generated",
+      "code review",
+      "testing"
+    ]
+  },
+  {
+    "id": "DVX-4086",
+    "title": "AI Made Building Cheap. Now Decisions Are the Bottleneck.",
+    "speaker": "Dave Sammut",
+    "track": "People, Practices & Career",
+    "room": "TBA 8",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "AI is making software delivery faster, shifting the main bottleneck from execution to decision-making. This talk shows how AI can improve discovery, architecture, and delivery conversations, turning discussions into maps, diagrams, risks, and options to expose complexity, align stakeholders, and ...",
+    "tags": [
+      "discovery",
+      "architecture",
+      "ai",
+      "decision-making"
+    ]
+  },
+  {
+    "id": "DVX-50107",
+    "title": "Building an Agent Ready Platform",
+    "speaker": "Timo Salm",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 9",
+    "date": "2026-10-07",
+    "time": "16:40",
+    "duration": 50,
+    "level": "All",
+    "description": "This session explains how to move AI agents from demo to production using platform engineering: secure model access, agent identity, inherited guardrails, and observability for actions and cost. It shows what developers should ask for from platform teams, and what platform teams should build first.",
+    "tags": [
+      "observability",
+      "platform",
+      "guardrails",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-10802",
+    "title": "A Deserter Returns: What the Java community helped me rediscover",
+    "speaker": "Thierry Chantier",
+    "track": "Mind the Geek",
+    "room": "TBA 2",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "All",
+    "description": "A developer explains leaving Java for Python, then rediscovering Java through picocli, Quarkus, and TamboUI. The talk explores Java’s modern CLI, fast native apps, and terminal UIs, showing how community and new tooling made Java relevant again.",
+    "tags": [
+      "java",
+      "quarkus",
+      "tamboui",
+      "picocli"
+    ]
+  },
+  {
+    "id": "DVX-16426",
+    "title": "No Country For Old APIs. Wrapping legacy Java services as MCP tools without rewriting them.",
+    "speaker": "Željko Kozina",
+    "track": "Architecture & Modernization",
+    "room": "TBA 3",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A demo-driven session on connecting AI agents to legacy Java, REST, and SOAP enterprise systems using MCP, Spring AI, and GraphQL. It tackles real brownfield challenges—auth, tool sprawl, oversized responses, and unsafe retries—and offers reusable patterns for secure, practical integration.",
+    "tags": [
+      "authentication",
+      "brownfield",
+      "facade",
+      "mcp"
+    ]
+  },
+  {
+    "id": "DVX-17759",
+    "title": "Kubernetes for Developers",
+    "speaker": "Alain Regnier",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 4",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Kubernetes for developers: what you need to know, without becoming a Kubernetes expert.",
+    "tags": [
+      "usage",
+      "companies",
+      "kubernetes",
+      "evolution"
+    ]
+  },
+  {
+    "id": "DVX-19713",
+    "title": "Create your own AI Agents without code",
+    "speaker": "David Gageot",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 5",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Docker Agent is an open-source, no-code platform for creating specialized AI agents quickly and affordably. It supports testing, benchmarking, optimization, and collaborative multi-agent workflows, while working with any LLM provider.",
+    "tags": [
+      "docker agent",
+      "ai agents",
+      "multi-agent",
+      "coding assistants"
+    ]
+  },
+  {
+    "id": "DVX-16401",
+    "title": "Beyond encryption at rest: computing on encrypted data",
+    "speaker": "Andrea Iacono",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 6",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk explains Homomorphic Encryption, which enables computation on encrypted data without decryption. It covers core concepts, modern Fully Homomorphic Encryption, practical applications in confidential AI, healthcare, and finance, and current limitations such as performance, ciphertext size...",
+    "tags": [
+      "cryptography",
+      "homomorphic encryption",
+      "fully homomorphic encryption",
+      "confidential ai"
+    ]
+  },
+  {
+    "id": "DVX-9046",
+    "title": "rm -rf self-doubt: Debugging Impostor Syndrome for Developers",
+    "speaker": "Vincent Mayers",
+    "track": "People, Practices & Career",
+    "room": "TBA 7",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This session explains the neuroscience behind imposter syndrome in software teams and offers practical strategies to manage self-doubt, respond better to feedback, and grow through discomfort. Attendees will gain immediately usable tools for code reviews, design discussions, and stepping into lar...",
+    "tags": [
+      "growth",
+      "impostersyndrome",
+      "neuroscience",
+      "selfdoubt"
+    ]
+  },
+  {
+    "id": "DVX-14463",
+    "title": "When benchmarks go bad - what we learned from measuring performance wrong",
+    "speaker": "Francesco Nigro",
+    "track": "Development Practices",
+    "room": "TBA 8",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk explores common performance measurement mistakes, cognitive biases, and misleading intuitions. Franz and Holly explain why performance testing matters, how it can go wrong, and offer practical guidance for improving application performance, including test system setup, load generators, ...",
+    "tags": [
+      "performance",
+      "biases",
+      "measurement",
+      "load testing"
+    ]
+  },
+  {
+    "id": "DVX-5510",
+    "title": "Quarkus Meets Leyden at the JVM Performance Edge",
+    "speaker": "Georgios Andrianakis",
+    "track": "Java Language & Platform",
+    "room": "TBA 9",
+    "date": "2026-10-07",
+    "time": "17:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk shares hands-on Quarkus experiments with Project Leyden, exploring how Leyden’s JVM startup and warm-up improvements interact with Quarkus’ build-time optimizations. It highlights what works, current limitations, performance findings, broken assumptions, and design changes needed to com...",
+    "tags": [
+      "optimization",
+      "startup",
+      "quarkus",
+      "leyden"
+    ]
+  },
+  {
+    "id": "DVX-24206",
+    "title": "GraalVM Community BOF",
+    "speaker": "Thomas Wuerthinger",
+    "track": "Java Language & Platform",
+    "room": "TBA 10",
+    "date": "2026-10-07",
+    "time": "18:50",
+    "duration": 60,
+    "level": "Intermediate",
+    "description": "Join GraalVM core members for updates on Crema, enabling dynamic class loading in Native Image, and news across GraalOS, GraalPy, GraalWasm, Micronaut, and the broader ecosystem. This community BOF invites questions, feedback, and ideas to help shape GraalVM’s future.",
+    "tags": [
+      "graalvm",
+      "nativeimage",
+      "graalwasm",
+      "graalpy"
+    ]
+  },
+  {
+    "id": "DVX-19707",
+    "title": "Getting started with speaking: Your first conference talk",
+    "speaker": "Bert Jan Schrijver",
+    "track": "People, Practices & Career",
+    "room": "TBA 11",
+    "date": "2026-10-07",
+    "time": "18:50",
+    "duration": 60,
+    "level": "All",
+    "description": "This session, led by experienced speakers, offers practical guidance on starting technical speaking: choosing topics, writing proposals, preparing talks, and delivering effectively. It shares lessons learned, successes, failures, and key takeaways to help attendees begin their own speaking journey.",
+    "tags": [
+      "speaking",
+      "proposals",
+      "presentations",
+      "technical events"
+    ]
+  },
+  {
+    "id": "DVX-9023",
+    "title": "Rewriting the rules: How AI transforms engineering and inspiring young minds",
+    "speaker": "Ayoub Hammou Ahabchane",
+    "track": "Mind the Geek",
+    "room": "TBA 2",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk shows how AI drives innovation in regulated banking, improving developer productivity through agentic automation, prompt libraries and Copilot. It also highlights social impact via Devoxx4Kids, where engineers built playful coding and cybersecurity learning platforms for children, inspi...",
+    "tags": [
+      "education",
+      "productivity",
+      "ai",
+      "innovation"
+    ]
+  },
+  {
+    "id": "DVX-25048",
+    "title": "Java on Kubernetes Without Container Images: The WebAssembly Way",
+    "speaker": "Bruno Borges",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk shows how KWasm-style runtime delegation can let Java apps run on Kubernetes without container images. It explains containerd internals, custom shims, node provisioners, and CRDs, then demonstrates Brewlet.sh, a new open-source project that deploys a Spring Boot JAR directly as an OCI ar...",
+    "tags": [
+      "kubernetes",
+      "springboot",
+      "containerd",
+      "webassembly"
+    ]
+  },
+  {
+    "id": "DVX-16414",
+    "title": "From vibe coding to harness engineering: modernizing a regulated environment with AI",
+    "speaker": "Anyul Rivas",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "AI-enabled migration of a banking mainframe to the cloud required a shift from “vibe coding” to “harness engineering.” The talk shows how to control AI-generated code in regulated environments through spec-driven development, evolutionary pipelines, and continuous validation, balancing agility, s...",
+    "tags": [
+      "specification",
+      "ai",
+      "validation",
+      "harnesses"
+    ]
+  },
+  {
+    "id": "DVX-12753",
+    "title": "Software Monuments - Architectural Lessons from the Systems That Shaped Computing",
+    "speaker": "Tobias Voss",
+    "track": "Architecture & Modernization",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk explores landmark software systems—Linux, Apollo Guidance Computer, Java, Deep Blue, the World Wide Web, and ELIZA—to reveal enduring architectural principles behind their success and show how these lessons can inspire modern software design.",
+    "tags": [
+      "java",
+      "architecture",
+      "linux",
+      "internet"
+    ]
+  },
+  {
+    "id": "DVX-19748",
+    "title": "Snake in 10 Lines: Learning More by Coding Less",
+    "speaker": "Guus de Wit",
+    "track": "Mind the Geek",
+    "room": "TBA 6",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "All",
+    "description": "A live-coding talk recreates Snake in 10 lines of JDK-only code, overcoming input and design challenges to distill the game’s essence. The project demonstrates how extreme conciseness fosters creativity, deeper understanding, and transferable problem-solving techniques.",
+    "tags": [
+      "coding",
+      "snake",
+      "minimalism",
+      "constraints"
+    ]
+  },
+  {
+    "id": "DVX-11556",
+    "title": "223 Pull Requests in 11 Days: The Recipe for Building Real Software with AI Agents",
+    "speaker": "Julien Dubois",
+    "track": "Development Practices",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "An AI-agent workflow enabled building an 83,000-line Spring Boot developer UI in 11 days instead of 6.5–8.5 months. The talk explains how to orchestrate multiple agents with specs, tests, and parallel overnight builds to achieve major productivity gains while delivering a new developer console.",
+    "tags": [
+      "developer",
+      "ai",
+      "spring boot",
+      "automation"
+    ]
+  },
+  {
+    "id": "DVX-9035",
+    "title": "Toxic Flows in MCP Servers and Skills: What Your Agent Blindly Trusts",
+    "speaker": "Brian Vermeer",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk introduces “toxic flows” in AI agent stacks: trust paths through MCP servers and Skills that can leak context, manipulate decisions, and trigger unintended actions. It shows how trust failures arise, parallels familiar software risks, and offers a framework for identifying boundaries an...",
+    "tags": [
+      "deserialization",
+      "trust",
+      "mcp",
+      "skills"
+    ]
+  },
+  {
+    "id": "DVX-23527",
+    "title": "Project Detroit: From Foreign Libraries to Foreign Language Runtimes",
+    "speaker": "Maurizio Cimadamore",
+    "track": "Java Language & Platform",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Project Detroit uses Java’s Foreign Function & Memory API to embed native runtimes like V8 and CPython directly into Java applications. It replaces custom reimplementations like Nashorn with standard runtimes, exploring challenges such as garbage collection coordination and virtual thread pinning.",
+    "tags": [
+      "python",
+      "ffm",
+      "v8",
+      "javascript"
+    ]
+  },
+  {
+    "id": "DVX-21657",
+    "title": "Reflect, Transform, Accelerate: Bringing GPU Computing to Java",
+    "speaker": "Juan Fumero",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk presents HAT, a toolkit using Java Code Reflection to accelerate Java workloads on GPUs through reflection, transformation, and offloading to OpenCL or CUDA. It includes tensor-core and matrix-multiplication examples, plus performance profiling and tuning with NVIDIA Nsight Compute and N...",
+    "tags": [
+      "cuda",
+      "reflection",
+      "parallelism",
+      "gpu"
+    ]
+  },
+  {
+    "id": "DVX-8169",
+    "title": "How to Architect Green Software",
+    "speaker": "Ioannis Kolaxis",
+    "track": "Architecture & Modernization",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The session examines sustainability trade-offs in architecture decisions, balancing energy use and carbon footprint against maintainability, portability, availability, and performance. It offers practical techniques to reduce emissions and costs, and provides a catalog of trade-offs to apply in f...",
+    "tags": [
+      "sustainability",
+      "trade-offs",
+      "latency",
+      "serverless"
+    ]
+  },
+  {
+    "id": "DVX-22905",
+    "title": "When ORM Becomes OMG: Performance Pitfalls in JPA and Friends",
+    "speaker": "Jos Roseboom",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk examines common JPA performance pitfalls, from unexpected data loading and transaction issues to connection mismanagement. Using a sample app, it shows how libraries and tooling can reveal real-world ORM problems and help prevent slowdowns in Spring Data JPA applications.",
+    "tags": [
+      "jpa",
+      "performance",
+      "orm",
+      "transactions"
+    ]
+  },
+  {
+    "id": "DVX-22947",
+    "title": "High-Performance Java-Native AI with CUDA and the Vector API",
+    "speaker": "Zoran Sevarac",
+    "track": "Java Language & Platform",
+    "room": "TBA 6",
+    "date": "2026-10-08",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "This session shows how modern Java, using the Foreign Function & Memory API and Vector API, can run high-performance AI natively on CPUs and GPUs without JNI or Python. It includes Deep Netts CUDA integration, SIMD acceleration, and a fraud detection use case.",
+    "tags": [
+      "java",
+      "vector",
+      "ffm",
+      "gpu"
+    ]
+  },
+  {
+    "id": "DVX-9032",
+    "title": "Agents With Seatbelts: Practical Ways to Keep AI Code Gen Under Control",
+    "speaker": "Jonathan Vila López",
+    "track": "Development Practices",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This session shares best practices for MCP setups and AI agents in development workflows, focusing on quality, security, and avoiding unintended actions. It compares LLM code-generation stability and consistency, and addresses how to measure AI-driven improvement, helping teams build reliable, pr...",
+    "tags": [
+      "security",
+      "metrics",
+      "agents",
+      "mcp"
+    ]
+  },
+  {
+    "id": "DVX-14457",
+    "title": " Coder, Coach, Catalyst - using questions to make people grow ",
+    "speaker": "Martin Mazur",
+    "track": "People, Practices & Career",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk teaches technologists basic coaching skills—listening, asking better questions, and using informal to formal coaching—to help others solve their own problems, foster growth, and reduce the burden of constantly taking on teammates’ issues.",
+    "tags": [
+      "questions",
+      "growth",
+      "listening",
+      "coaching"
+    ]
+  },
+  {
+    "id": "DVX-5541",
+    "title": "Dream Machines & Walled Gardens",
+    "speaker": "Anders Norås",
+    "track": "Mind the Geek",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "10:40",
+    "duration": 50,
+    "level": "All",
+    "description": "The talk profiles Ted Nelson and his 1974 manifesto *Computer Lib/Dream Machines*, which envisioned computers as tools for freedom, creativity, and open hypertext. It asks how the internet might differ today if Nelson’s user-centered, decentralized vision had prevailed over Big Tech’s closed, alg...",
+    "tags": [
+      "computing",
+      "ted nelson",
+      "hypertext",
+      "decentralization"
+    ]
+  },
+  {
+    "id": "DVX-25671",
+    "title": "State of Agentic Coding",
+    "speaker": "Daniela Petruzalek",
+    "track": "Development Practices",
+    "room": "TBA 2",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This session reviews recent advances in agentic coding, from MCP to skills, and explores ways to build trust in AI coding agents. It includes live demos of practical development workflows and an overview of the Google Antigravity ecosystem.",
+    "tags": [
+      "ai-assisted",
+      "autonomous",
+      "softwareengineering",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-21671",
+    "title": "The Rise of Agent Enablement: Coding Agents Don't Scale Themselves. Neither Do Your Teams.",
+    "speaker": "Patrick Debois",
+    "track": "People, Practices & Career",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "All",
+    "description": "The talk argues that “dark factory” readiness is organizational, not technical. Using Conway’s Law, it outlines four enablement layers: agent, team, platform, and organization. It targets engineering leaders scaling agentic coding beyond tools, focusing on roles, rituals, infrastructure, ROI, and...",
+    "tags": [
+      "organization",
+      "platform",
+      "readiness",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-23543",
+    "title": "The Yearly Java Performance Update for 2026",
+    "speaker": "Per-Ake Minborg",
+    "track": "Java Language & Platform",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk surveys recent Java performance improvements across the JDK—libraries, HotSpot, JIT, and GC—showing how they boost startup, memory use, throughput, and virtual-thread scalability. It explains what upgrades deliver automatically, what needs tuning, and how engineers measure real-world im...",
+    "tags": [
+      "optimization",
+      "performance",
+      "java",
+      "jdk"
+    ]
+  },
+  {
+    "id": "DVX-17556",
+    "title": "SIMD for Java: how Elasticsearch already benefits from the Panama Vector API",
+    "speaker": "Piotr Przybyl",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk explains how Elasticsearch uses Java’s Panama Vector API to accelerate vector search and analytical queries with SIMD instructions. It shows how Lucene and Elasticsearch enable runtime SIMD safely, despite the API being incubating, and discusses implications for high-performance Java co...",
+    "tags": [
+      "elasticsearch",
+      "simd",
+      "java",
+      "vector"
+    ]
+  },
+  {
+    "id": "DVX-14452",
+    "title": "Quixotic: Pure Java Inference at Native Speed",
+    "speaker": "Alfonso² Peterssen",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 6",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Quixotic brings AI to Java by running models in-process as pure Java, with no Python, ONNX, or native dependencies. It keeps sensitive data inside the JVM, compiles models into fast native binaries, and enables secure, portable AI for regulated industries.",
+    "tags": [
+      "java",
+      "sovereignty",
+      "ai",
+      "jvm"
+    ]
+  },
+  {
+    "id": "DVX-8153",
+    "title": "Taming Microservice Overload: Our Journey to Modular Monoliths",
+    "speaker": "Mario Klaver",
+    "track": "Architecture & Modernization",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "At the Port of Rotterdam, an overgrown microservices architecture created operational complexity and fragmented ownership. This talk shows how Domain-Driven Design and Spring Modulith were used to consolidate services into modular monoliths, preserving domain boundaries while improving maintainab...",
+    "tags": [
+      "domain-driven design",
+      "microservices",
+      "spring modulith",
+      "modular monoliths"
+    ]
+  },
+  {
+    "id": "DVX-24245",
+    "title": "Making sense of vector databases",
+    "speaker": "Balkrishna Rawool",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk explains vector databases, covering vectors, embeddings, indexing algorithms, and similarity metrics. It demonstrates a simple in-memory vector database using Java’s Vector API and integrates with other vector databases via Spring AI, progressing from basic use cases to advanced applica...",
+    "tags": [
+      "semantic search",
+      "embedding models",
+      "indexing algorithms",
+      "vector databases"
+    ]
+  },
+  {
+    "id": "DVX-16443",
+    "title": "Say Goodbye to LLM API keys with Workload Identity Federation",
+    "speaker": "Siarhei Biarozkin",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The session explains why API keys are unsafe for production LLM access and how Workload Identity Federation replaces them with short-lived tokens. It covers SPIFFE and Kubernetes service tokens as workload identities, then demonstrates a Quarkus LangChain4j app using SPIFFE-issued JWTs with Anthr...",
+    "tags": [
+      "anthropic",
+      "workload identity federation",
+      "spiffe",
+      "api keys"
+    ]
+  },
+  {
+    "id": "DVX-50104",
+    "title": "Engineering Lessons from Working on Software Older Than Me",
+    "speaker": "Guust Ysebie",
+    "track": "Development Practices",
+    "room": "TBA 2",
+    "date": "2026-10-08",
+    "time": "12:55",
+    "duration": 40,
+    "level": "All",
+    "description": "A session on engineering lessons from maintaining and scaling legacy PDF technology, covering compatibility, performance, security, testing, and interoperability. It shows how mature systems teach resilient software design and highlights the invisible challenges behind reliable user experiences.",
+    "tags": [
+      "performance",
+      "security",
+      "pdf",
+      "compatibility"
+    ]
+  },
+  {
+    "id": "DVX-41302",
+    "title": "\"You May Now Optimize the Wedding\": Optimizing the Seating, Bachelor Party, and Honeymoon with Constraint AI",
+    "speaker": "Geoffrey De Smet",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "12:55",
+    "duration": 40,
+    "level": "All",
+    "description": "This talk shows how to automate complex planning problems using constraint optimization. Using wedding scenarios like seating charts, pub crawls, and honeymoon itineraries, it demonstrates how Timefold solves scheduling, routing, and planning challenges with real code and constraints, turning “co...",
+    "tags": [
+      "optimization",
+      "routing",
+      "planning",
+      "scheduling"
+    ]
+  },
+  {
+    "id": "DVX-44601",
+    "title": "Agents Shouldn't Control Control Flow",
+    "speaker": "Jeremy Adams",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "12:55",
+    "duration": 40,
+    "level": "All",
+    "description": "A deterministic compiler turns an enterprise context graph into governed agent workflows in Java, with control flow treated as a build artifact. The LLM only writes summaries, while code passes through Git, CI, tests, and human review, reducing hallucination risk and enabling policy-controlled ch...",
+    "tags": [
+      "agentic",
+      "workflow",
+      "compiler",
+      "context-graph"
+    ]
+  },
+  {
+    "id": "DVX-24244",
+    "title": "Green Maven builds: sustainable CI in practice",
+    "speaker": "Jan Boonen",
+    "track": "Development Practices",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "12:55",
+    "duration": 40,
+    "level": "Intermediate",
+    "description": "This session shows practical ways to make Maven builds greener and faster by improving CI pipelines. Using GitLab CI and GitHub Actions examples, it demonstrates techniques to reduce energy use, save machine resources, and cut build time.",
+    "tags": [
+      "maven",
+      "energy",
+      "githubactions",
+      "ci"
+    ]
+  },
+  {
+    "id": "DVX-17782",
+    "title": "Is the IDE dead ?",
+    "speaker": "Martin Lippert",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "12:55",
+    "duration": 40,
+    "level": "Intermediate",
+    "description": "This session explores how AI is reshaping developer tools, questioning the future of traditional IDEs versus terminal-based workflows. It examines what engineers need in 2026, how AI agents are becoming power users, and what these shifts mean for tool builders and software engineers.",
+    "tags": [
+      "ai",
+      "terminal",
+      "ide",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-7020",
+    "title": "Who to blame? The AI, The Programmer, or The Prompt?",
+    "speaker": "Makan Sepehrifar",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "12:55",
+    "duration": 40,
+    "level": "All",
+    "description": "An interactive courtroom-style session on AI security, where audiences judge responsibility for five real CVEs in AI tools. It analyzes root causes, evolving vulnerabilities, and the “blame game,” arguing that securing agentic AI requires shared responsibility among developers, providers, and users.",
+    "tags": [
+      "shared responsibility",
+      "cve",
+      "vulnerabilities",
+      "ai security"
+    ]
+  },
+  {
+    "id": "DVX-50109",
+    "title": "Keeping Spring Applications Secure in the Age of AI",
+    "speaker": "Neven Cvetkovic",
+    "track": "Java Language & Platform",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "12:55",
+    "duration": 40,
+    "level": "All",
+    "description": "AI-assisted research is rapidly uncovering Spring vulnerabilities, increasing upgrade pressure. This session explains how Spring teams can respond using Long Term Support releases, Spring Application Advisor for automated CI patching and upgrades, and direct support from the Spring team through V...",
+    "tags": [
+      "security",
+      "spring",
+      "automation",
+      "upgrades"
+    ]
+  },
+  {
+    "id": "DVX-50105",
+    "title": "Building, Shipping and Governing AI Agents on Kubernetes",
+    "speaker": "Tom O'Rourke",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A live demo of building and deploying a Kubernetes-based engineering agent with KAgent, AgentGateway, and AgentRegistry. It shows how platform configuration can reduce tool-call overhead, limit context exposure, and enforce least-privilege access without changing agent code.",
+    "tags": [
+      "github",
+      "agentgateway",
+      "toolcalls",
+      "kubernetes"
+    ]
+  },
+  {
+    "id": "DVX-5502",
+    "title": "Taming the Chaos: Security and Predictability in LLM-Powered Applications",
+    "speaker": "Rustam Mehmandarov",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "The proposal presents practical patterns for building reliable LLM systems despite inherent randomness. It covers prompt-injection defenses, PII redaction, deterministic validation, self-correction, and multi-model consensus to improve safety and predictability. Examples use Java and LangChain4J,...",
+    "tags": [
+      "guardrails",
+      "llms",
+      "promptinjection",
+      "validation"
+    ]
+  },
+  {
+    "id": "DVX-8186",
+    "title": "The Hexagonal Hangover",
+    "speaker": "Ties van de Ven",
+    "track": "Architecture & Modernization",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk critiques dogmatic use of Clean and Hexagonal Architecture, arguing that unnecessary abstraction can hurt code clarity and maintainability. Using Java examples, it explores trade-offs and decision metrics—coupling, cohesion, and distance—to help choose architecture based on context rathe...",
+    "tags": [
+      "cohesion",
+      "architecture",
+      "abstraction",
+      "coupling"
+    ]
+  },
+  {
+    "id": "DVX-24218",
+    "title": "Conquest, time travel and explosions using Git",
+    "speaker": "Alexander Chatzizacharias",
+    "track": "Mind the Geek",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "All",
+    "description": "An interactive talk uses an RTS game built around Git to explain branches, merges, rebases, detached heads, and conflicts. Through time travel, alternate timelines, and explosive gameplay, beginners gain intuition and veterans get a fresh perspective on how Git really works.",
+    "tags": [
+      "rebase",
+      "branches",
+      "merge",
+      "git"
+    ]
+  },
+  {
+    "id": "DVX-23536",
+    "title": "Ask the Architects",
+    "speaker": "Gavin Bierman",
+    "track": "Java Language & Platform",
+    "room": "TBA 6",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Ask Oracle engineers any questions about your favorite programming language and runtime.",
+    "tags": [
+      "engineers",
+      "runtime",
+      "oracle",
+      "programming"
+    ]
+  },
+  {
+    "id": "DVX-22916",
+    "title": "Java and the Next Generation of Programming Models",
+    "speaker": "Ana-Maria Mihalceanu",
+    "track": "Java Language & Platform",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "The session explores using Java to bridge external runtimes and AI models without glue code. It covers the Foreign Function and Memory API and jextract for safe native interaction, then Project Babylon’s code reflection to express, transform, and lower AI models directly in Java for accelerator-b...",
+    "tags": [
+      "java",
+      "inference",
+      "foreignfunctionmemory",
+      "codereflection"
+    ]
+  },
+  {
+    "id": "DVX-19706",
+    "title": "Software engineering in the age of AI agents: who’s in control?",
+    "speaker": "Bert Jan Schrijver",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk explores how generative AI is changing software engineering—from coding to verification and guidance. It shares lessons, successes, failures, and responsible practices for using fast-evolving AI tools. The key message: even when AI does the work, humans remain accountable for the outcome.",
+    "tags": [
+      "accountability",
+      "softwareengineering",
+      "verification",
+      "generativeai"
+    ]
+  },
+  {
+    "id": "DVX-23522",
+    "title": "Hardwood: Building a Parquet Parser From Scratch (With a Little Help From AI)",
+    "speaker": "Gunnar Morling",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "13:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A talk about Hardwood, a new modern Java Parquet parser built from scratch to avoid Hadoop dependencies and single-threaded limits. It explores Parquet internals, parallel decoding, high-throughput techniques, JDK Flight Recorder profiling, and lessons from AI-assisted development with Claude Code.",
+    "tags": [
+      "performance",
+      "java",
+      "ai",
+      "parquet"
+    ]
+  },
+  {
+    "id": "DVX-49255",
+    "title": "Modernizing legacy code with AI: hands-on examples & lessons learned",
+    "speaker": "Koen Vanderkimpen",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "All",
+    "description": "Smals Research shares practical lessons from using AI to modernize legacy software, including Java EE to Jakarta EE migrations and COBOL environments. The session shows where AI speeds up migration, where it fails, and how teams can keep modernization reliable, documented, and verifiable.",
+    "tags": [
+      "migration",
+      "jakarta",
+      "modernization",
+      "legacy"
+    ]
+  },
+  {
+    "id": "DVX-27453",
+    "title": "Build a private cluster for the office",
+    "speaker": "John Davies",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A technical talk on building private, local AI systems for regulated organizations using open-weight models. It covers hardware choices, networking, model selection, private data access, and fast document retrieval, helping small teams reduce dependence on frontier model providers while ensuring ...",
+    "tags": [
+      "local",
+      "governance",
+      "models",
+      "privacy"
+    ]
+  },
+  {
+    "id": "DVX-5530",
+    "title": "Kill All Mutants! (Intro to Mutation Testing)",
+    "speaker": "Dave Aronson",
+    "track": "Development Practices",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "Mutation testing checks whether tests fail when code is changed, revealing weak tests, redundant or unreachable code. This talk explains how mutation testing works, when to use it, its pros, cons, history, examples, and tools for popular languages.",
+    "tags": [
+      "code quality",
+      "test suite",
+      "testing",
+      "mutation"
+    ]
+  },
+  {
+    "id": "DVX-24202",
+    "title": "Beyond the Pod: Architecting and Scaling AI Agents on Kubernetes",
+    "speaker": "Abdellfetah SGHIOUAR",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk presents Agent Substrate, a Kubernetes system that separates logical AI agents from physical Pods. It enables thousands of stateful, idle agents to share resources efficiently, with hibernation, rapid activation, session teleportation, and dynamic security controls for scalable, isolate...",
+    "tags": [
+      "kubernetes",
+      "isolation",
+      "agents",
+      "scalability"
+    ]
+  },
+  {
+    "id": "DVX-16444",
+    "title": "Faster Development with Java, Python, and Micronaut",
+    "speaker": "Graeme Rocher",
+    "track": "Java Language & Platform",
+    "room": "TBA 6",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk shows how Micronaut, GraalPy, and GraalVM let Python gain Java’s structure, tooling, and native performance without losing simplicity. It explores building polyglot applications, integrating Python and Java cleanly, and using AI to enhance workflows and developer experiences.",
+    "tags": [
+      "micronaut",
+      "graalvm",
+      "python",
+      "graalpy"
+    ]
+  },
+  {
+    "id": "DVX-10031",
+    "title": "The Dark Secrets of Computer Science",
+    "speaker": "Fabien Marsaud",
+    "track": "Mind the Geek",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A humorous talk about the absurdities of software engineering: legacy systems, language quirks, bad integrations, confusing standards, and endless debates like Lombok vs. reactive, CORS, date formats, and vi. It riffs on technical pain points, from Y2K38 and IEEE 754 to WASM, Excel, and bizarre H...",
+    "tags": [
+      "programming",
+      "quirks",
+      "humor",
+      "legacy"
+    ]
+  },
+  {
+    "id": "DVX-22932",
+    "title": "Why Java Is Perfect for AI - Just Not the AI You’re Thinking Of",
+    "speaker": "Trisha Gee",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk argues that enterprise AI should augment existing Java applications, not replace them. Java’s types, APIs, testing, and concurrency make it well suited to control unpredictable AI outputs, enabling fast, observable, dependable agentic systems without rebuilding architectures or surrender...",
+    "tags": [
+      "java",
+      "ai",
+      "enterprise",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-5549",
+    "title": "Underneath the Black Marker: AI Techniques for Detecting and Reversing Redactions",
+    "speaker": "David vonThenen",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "15:00",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This session demonstrates how redactions fail in PDFs and images, and how AI can recover hidden text or visual content. It also explains proper redaction practices, showing that true privacy requires removing data, not just visually obscuring it.",
+    "tags": [
+      "computervision",
+      "pdf",
+      "privacy",
+      "redaction"
+    ]
+  },
+  {
+    "id": "DVX-41301",
+    "title": "Owning the inference layer: When and how to run your own models",
+    "speaker": "Maarten Vandeperre",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk compares hosted model APIs and self-hosted inference for GenAI, covering tradeoffs in cost, latency, flexibility, and data control. It highlights open tools like vLLM and llm-d, and offers a practical framework for deciding when self-hosting is worth the operational complexity.",
+    "tags": [
+      "sovereignty",
+      "latency",
+      "inference",
+      "self-hosting"
+    ]
+  },
+  {
+    "id": "DVX-12758",
+    "title": "Knocking on the Wrong Door: The Six Developers You’ll Meet in Security",
+    "speaker": "Enrique Larios Vargas",
+    "track": "People, Practices & Career",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "All",
+    "description": "SECUR-E, an OWASP framework using COM-B, helps teams diagnose why secure development fails—whether due to skills, environment, or motivation—not just awareness. It identifies six developer patterns and guides tailored interventions, improving secure software practices without blame.",
+    "tags": [
+      "security culture",
+      "com-b",
+      "psychological safety",
+      "secure development"
+    ]
+  },
+  {
+    "id": "DVX-25042",
+    "title": "Owning the Code You Didn't Type",
+    "speaker": "Renato Guerra Cavalcanti",
+    "track": "Development Practices",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "All",
+    "description": "As AI writes code faster than humans can read it, the bottleneck shifts to understanding and accountability. This talk shares practical techniques—phased delivery, guided walk-throughs, human-centered review, engineering depth, and file-based collaboration—to keep developers in control, improve c...",
+    "tags": [
+      "readability",
+      "understanding",
+      "control",
+      "code"
+    ]
+  },
+  {
+    "id": "DVX-23539",
+    "title": "Everyday JSON",
+    "speaker": "Viktor Klang",
+    "track": "Java Language & Platform",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "A new JEP proposes a simple, incubating built-in Java API for parsing, navigating, and generating JSON for lightweight use cases where external libraries are unnecessary. The talk explains how Data-Oriented Programming shapes the API, its use cases, trade-offs, and capabilities.",
+    "tags": [
+      "java",
+      "data-oriented programming",
+      "api",
+      "json"
+    ]
+  },
+  {
+    "id": "DVX-19708",
+    "title": "Choose your own adventure in agentic design patterns",
+    "speaker": "Guillaume Laforge",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 6",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "This talk explores advanced multi-agent system patterns beyond basics, including routing, swarms, planning approaches, progressive disclosure in skills, LLM-as-Judge evaluation, and agent loops. Drawing on experience with LangChain4j and ADK for Java, it helps developers choose the right abstract...",
+    "tags": [
+      "routing",
+      "reflection",
+      "planning",
+      "agents"
+    ]
+  },
+  {
+    "id": "DVX-49256",
+    "title": "ADRs: The Why and How",
+    "speaker": "Venkat Subramaniam",
+    "track": "Development Practices",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This presentation explains Architectural Decision Records (ADRs), showing how to create and maintain them and why they matter. It highlights their role in documenting decisions, capturing the reasons behind them, and helping teams reassess choices as business needs or technologies change.",
+    "tags": [
+      "documentation",
+      "architectural",
+      "decisions",
+      "records"
+    ]
+  },
+  {
+    "id": "DVX-12751",
+    "title": "Microservices Without the Distributed Mess",
+    "speaker": "Steven Hillaert",
+    "track": "Architecture & Modernization",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "A pragmatic talk on microservices trade-offs: defining service boundaries, ownership, communication, and consistency using Domain-Driven Design. It explains common pitfalls like distributed monoliths, unclear boundaries, and fragile transactions, and offers practical heuristics for building cohes...",
+    "tags": [
+      "boundaries",
+      "ddd",
+      "orchestration",
+      "microservices"
+    ]
+  },
+  {
+    "id": "DVX-11560",
+    "title": "How I built my own intelligent Robot Arm from Scratch",
+    "speaker": "Iulia Feroli",
+    "track": "Mind the Geek",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "16:30",
+    "duration": 50,
+    "level": "All",
+    "description": "A playful introduction to physical AI, showing how large language models can be applied to robotics and embedded systems. The speaker shares their journey building a robot arm from scratch, adding AI capabilities, and exploring the potential for autonomous, self-evolving systems in robotics.",
+    "tags": [
+      "robotics",
+      "physical ai",
+      "robot arm",
+      "embedded systems"
+    ]
+  },
+  {
+    "id": "DVX-25661",
+    "title": " Introducing Agent Control Theory: The System Runs the Model",
+    "speaker": "Mark Pollack",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "All",
+    "description": "The talk presents “Agent Control Theory” for enterprise coding agents: treat agents as measurable systems, log every run, judge against specs, and use evidence to optimize prompts, tools, workflows, or models. It aims to reduce cost, improve quality, and enable vendor portability through controll...",
+    "tags": [
+      "theory",
+      "workflow",
+      "control",
+      "agent"
+    ]
+  },
+  {
+    "id": "DVX-9017",
+    "title": "AI in the Dark: Running LLMs in Air-Gapped Production Environments",
+    "speaker": "Mihaela Gheorghe-Roman",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 3",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk describes moving an AI service from demo to production in an air-gapped defence environment with no internet, cloud APIs, or external services. It covers local LLM constraints, offline tool-calling, hallucination risks, and the need for human oversight in a fully isolated system.",
+    "tags": [
+      "air-gapped",
+      "hallucination",
+      "llm",
+      "production"
+    ]
+  },
+  {
+    "id": "DVX-4090",
+    "title": "Help! I hate my team mate!",
+    "speaker": "Jessica Siewert",
+    "track": "People, Practices & Career",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "All",
+    "description": "The talk explores common team conflicts when new members join or working styles clash, leading to mistrust, disrespect, and demotivation. It shares real experiences and practical ways teams handle these problems, helping participants understand their options when cooperation breaks down.",
+    "tags": [
+      "cooperation",
+      "communication",
+      "conflict",
+      "teamwork"
+    ]
+  },
+  {
+    "id": "DVX-9029",
+    "title": "From a startup stack to 5 microseconds: inside a crypto trading engine",
+    "speaker": "Oleg Lobanov",
+    "track": "Architecture & Modernization",
+    "room": "TBA 5",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "Bitvavo rebuilt its live crypto exchange core for deterministic, replayable, low-latency processing. Replacing database-centered architecture with an ordered log, replicated state machine, Raft, and reliable UDP delivered sub-millisecond latency and 100,000 orders/second, while balancing correctn...",
+    "tags": [
+      "deterministic",
+      "consensus",
+      "trading",
+      "latency"
+    ]
+  },
+  {
+    "id": "DVX-22946",
+    "title": "Decoding the Cosmos: Voyager's 1970s Algorithms Meet Today's Cutting-Edge Tech",
+    "speaker": "Pieter van der Meer",
+    "track": "Mind the Geek",
+    "room": "TBA 6",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk explores Voyager’s 1970s-era communication coding, the Viterbi algorithm, and modern machine-learning approaches to decoding deep-space signals. It compares vintage engineering ingenuity with today’s tools through real examples and demonstrations, showing how classic algorithms and AI c...",
+    "tags": [
+      "machinelearning",
+      "decoding",
+      "viterbi",
+      "voyager"
+    ]
+  },
+  {
+    "id": "DVX-14459",
+    "title": "Bootiful Security",
+    "speaker": "Daniel Garnier-Moiroux",
+    "track": "Security, Trust & Compliance",
+    "room": "TBA 7",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "All",
+    "description": "Passkeys offer a passwordless future with stronger, simpler authentication. This talk by Daniel Garnier Moiroux and Josh Long explores how Spring Security 7 can help replace passwords, improve security, and streamline login experiences for users and systems.",
+    "tags": [
+      "passwords",
+      "authentication",
+      "spring security",
+      "passkeys"
+    ]
+  },
+  {
+    "id": "DVX-7035",
+    "title": "Their API Went Down. So Why Is My App on Fire?",
+    "speaker": "Ines Panker",
+    "track": "Development Practices",
+    "room": "TBA 8",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk explains how to protect your app from outages in APIs you don’t control. Beyond try-except, it covers practical patterns like caching 429s, resuming syncs, and using circuit breakers to prevent external failures from cascading into your own production system.",
+    "tags": [
+      "outages",
+      "ratelimit",
+      "circuitbreaker",
+      "apis"
+    ]
+  },
+  {
+    "id": "DVX-51601",
+    "title": "Production-Ready Java Containers: Smaller, Faster, Smarter",
+    "speaker": "Albert Attard",
+    "track": "Java Language & Platform",
+    "room": "TBA 9",
+    "date": "2026-10-08",
+    "time": "17:40",
+    "duration": 50,
+    "level": "All",
+    "description": "This session explores optimizing Java containers using tailored runtimes with jlink, CDS, AOT, JVM container awareness, memory tuning, and efficient image-building practices. Through progressive measurement, it examines trade-offs among size, startup, warmup, memory, throughput, observability, se...",
+    "tags": [
+      "optimization",
+      "jlink",
+      "java",
+      "containers"
+    ]
+  },
+  {
+    "id": "DVX-10043",
+    "title": "What Does it Print? The Java Quiz (Hard Edition 🤯)",
+    "speaker": "Clément de Tastes",
+    "track": "Java Language & Platform",
+    "room": "TBA 10",
+    "date": "2026-10-08",
+    "time": "18:50",
+    "duration": 60,
+    "level": "Advanced",
+    "description": "Interactive Java session exploring tricky language subtleties through short code snippets. Participants will predict outputs together, revisit core concepts, challenge assumptions, and deepen their understanding of how Java actually behaves in practice.",
+    "tags": [
+      "subtleties",
+      "java",
+      "pitfalls",
+      "snippets"
+    ]
+  },
+  {
+    "id": "DVX-8167",
+    "title": "Open Source in the Age of AI: Where's the value?",
+    "speaker": "Trisha Gee",
+    "track": "Development Practices",
+    "room": "TBA 11",
+    "date": "2026-10-08",
+    "time": "18:50",
+    "duration": 60,
+    "level": "Advanced",
+    "description": "This talk explores how AI changes the value of open source, asking whether libraries and tools remain commercially useful when AI can generate code. It brings together maintainers and contributors to discuss funding, community, business models, and the purpose of open source in an AI-driven world.",
+    "tags": [
+      "ai",
+      "opensource",
+      "community",
+      "business"
+    ]
+  },
+  {
+    "id": "DVX-49751",
+    "title": "F*ck The System, and other bad ideas for the future",
+    "speaker": "Jo Caudron",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 4",
+    "date": "2026-10-08",
+    "time": "18:55",
+    "duration": 45,
+    "level": "All",
+    "description": "A provocative manifesto exploring today’s geopolitical upheaval and asking how Europe can become sovereign, resilient, and innovative in the emerging world order. It challenges old assumptions, reimagines the future, and appeals to citizens, entrepreneurs, policymakers, and thinkers seeking a str...",
+    "tags": [
+      "sovereignty",
+      "innovation",
+      "resilience",
+      "europe"
+    ]
+  },
+  {
+    "id": "DVX-27452",
+    "title": "The Praxis proxy or: How I Learned to Stop Worrying and Love AI workloads",
+    "speaker": "Alex Snaps",
+    "track": "Cloud Native, Data & Infrastructure",
+    "room": "TBA 2",
+    "date": "2026-10-09",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "Praxis is an open-source Rust proxy framework built for AI traffic, enabling body-based routing, credential isolation, streaming, token-cost controls, and MCP support. Unlike traditional proxies, it uses composable filters for routing, guardrails, rate limiting, and custom logic, letting teams bu...",
+    "tags": [
+      "rust",
+      "ai",
+      "proxy",
+      "mcp"
+    ]
+  },
+  {
+    "id": "DVX-17794",
+    "title": "Escaping Java's Allocation Gravity with Value Classes",
+    "speaker": "Clément de Tastes",
+    "track": "Java Language & Platform",
+    "room": "TBA 3",
+    "date": "2026-10-09",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "This talk introduces Java’s Project Valhalla value types through a black hole simulation, showing how they improve immutability, memory efficiency, and performance for heavy numerical workloads. It also explores experimental non-nullable `!` syntax, optimization potential, current limitations, an...",
+    "tags": [
+      "valuetypes",
+      "java",
+      "projectvalhalla",
+      "blackhole"
+    ]
+  },
+  {
+    "id": "DVX-21694",
+    "title": "Why it takes 3000 commits to bring Valhalla's value objects to the JDK",
+    "speaker": "David Simms",
+    "track": "Java Language & Platform",
+    "room": "TBA 4",
+    "date": "2026-10-09",
+    "time": "09:30",
+    "duration": 50,
+    "level": "All",
+    "description": "JEP 401 Value Objects arrives in OpenJDK preview, enabling a new Java type model with minimal code changes. The talk explains what value objects are, JVM benefits, Valhalla history, implementation details, and the path toward bridging objects and primitives, including future support like `List`.",
+    "tags": [
+      "valueobjects",
+      "valhalla",
+      "openjdk",
+      "javavm"
+    ]
+  },
+  {
+    "id": "DVX-21675",
+    "title": "All you need to know about Maven 4!",
+    "speaker": "Matthias Bünger",
+    "track": "Development Practices",
+    "room": "TBA 5",
+    "date": "2026-10-09",
+    "time": "09:30",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk explores Maven 4’s long-awaited development, the challenges of evolving a mature ecosystem without breaking compatibility, and the motivations behind its redesign. It also highlights key new features and improvements in the upcoming major release.",
+    "tags": [
+      "maven",
+      "version",
+      "features",
+      "ecosystem"
+    ]
+  },
+  {
+    "id": "DVX-9025",
+    "title": "The Quantum Tech Lead: Hands-On and Abstract at the Same Time",
+    "speaker": "Cristian Schuszter",
+    "track": "People, Practices & Career",
+    "room": "TBA 6",
+    "date": "2026-10-09",
+    "time": "09:30",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "This talk explores the transition from individual contributor to technical leader, showing how leadership can amplify impact rather than reduce it. Drawing on experience at CERN, it shares practical techniques for adapting, staying relevant, and maintaining technical influence while leading teams.",
+    "tags": [
+      "leadership",
+      "technical",
+      "influence",
+      "transition"
+    ]
+  },
+  {
+    "id": "DVX-49257",
+    "title": "Embabel Agent v1.5",
+    "speaker": "Rod Johnson",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 2",
+    "date": "2026-10-09",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "Embabel is a JVM-native agent framework built on Spring AI and Spring Boot that replaces LLM-driven decision-making with deterministic Goal-Oriented Action Planning (GOAP). Developers declare goals and actions; a code-generated planner chains them by conditions, producing inspectable, reproducibl...",
+    "tags": [
+      "deterministic",
+      "spring",
+      "embabel",
+      "goap"
+    ]
+  },
+  {
+    "id": "DVX-15359",
+    "title": "Is AI killing XP practices? (Or are we letting it?)",
+    "speaker": "Nacho Cougil",
+    "track": "Development Practices",
+    "room": "TBA 3",
+    "date": "2026-10-09",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "AI can tempt teams to skip core XP practices like TDD, refactoring, pair programming, and CI. This session shows why these habits are at risk in AI-assisted development, what breaks when they’re ignored, and why they matter even more as AI accelerates both good and bad engineering.",
+    "tags": [
+      "refactoring",
+      "xp",
+      "ai",
+      "testing"
+    ]
+  },
+  {
+    "id": "DVX-21655",
+    "title": "What’s happening with Project Amber?",
+    "speaker": "Gavin Bierman",
+    "track": "Java Language & Platform",
+    "room": "TBA 4",
+    "date": "2026-10-09",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "Project Amber is advancing Java’s data-oriented programming with new pattern-matching features: user-defined deconstruction, nested constant patterns, exhaustive matching, safer primitive conversions, and compact record reconstruction. The talk explores experimental designs, their benefits, and t...",
+    "tags": [
+      "reconstruction",
+      "deconstruction",
+      "java",
+      "pattern-matching"
+    ]
+  },
+  {
+    "id": "DVX-10023",
+    "title": "You thought technical debt was bad? Meet design debt!",
+    "speaker": "Julien Topçu",
+    "track": "Development Practices",
+    "room": "TBA 5",
+    "date": "2026-10-09",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk argues that technical debt is only the surface of deeper accidental design debt, which can worsen despite best practices like refactoring, KISS, and YAGNI. It explores how design debt forms, affects architecture and business, and how to detect, assess, and prevent it.",
+    "tags": [
+      "architecture",
+      "microservices",
+      "design debt",
+      "technical debt"
+    ]
+  },
+  {
+    "id": "DVX-16408",
+    "title": "10 Billion Records vs. The Regulator: An Architectural Post-Mortem of an 11TB Exadata Failure",
+    "speaker": "Martin Ladecky",
+    "track": "Architecture & Modernization",
+    "room": "TBA 6",
+    "date": "2026-10-09",
+    "time": "10:40",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "A major bank incident triggered a BaFin investigation after an 11TB Oracle Exadata system failed at 10 billion records. This session examines emergency mitigation, a missed query-window check, cache warming, shifting deduplication to writes, and designing zero-loss dual-write migration to Cloud P...",
+    "tags": [
+      "migration",
+      "performance",
+      "compliance",
+      "database"
+    ]
+  },
+  {
+    "id": "DVX-52101",
+    "title": "Java Next - From Valhalla to Leyden, from Babylon to Panama, from Amber to Detroit",
+    "speaker": "Nicolai Parlog",
+    "track": "Java Language & Platform",
+    "room": "TBA 2",
+    "date": "2026-10-09",
+    "time": "11:50",
+    "duration": 50,
+    "level": "All",
+    "description": "This talk explores Java’s evolution and future through major projects: Valhalla’s unified type system, Leyden’s faster startup, Babylon’s foreign models and hardware support, Panama’s native interoperability, Amber’s expressive language features, Loom’s structured concurrency, and Detroit’s Pytho...",
+    "tags": [
+      "panama",
+      "java",
+      "valhalla",
+      "leyden"
+    ]
+  },
+  {
+    "id": "DVX-5538",
+    "title": " Strangling the dragon: modernizing legacy systems with the Strangler Fig pattern ",
+    "speaker": "Daniel Raneland",
+    "track": "Architecture & Modernization",
+    "room": "TBA 3",
+    "date": "2026-10-09",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "The talk argues against full rewrites of legacy systems, citing risk and the second system effect. It promotes the Strangler Fig pattern for gradual replacement, combined with Domain-Driven Design and the Inverse Conway Manoeuvre to align system architecture with team structure.",
+    "tags": [
+      "strangler",
+      "rewrite",
+      "legacy",
+      "conway"
+    ]
+  },
+  {
+    "id": "DVX-9036",
+    "title": "My old trains have a second life, with TinyGo!",
+    "speaker": "Florian FORESTIER",
+    "track": "Mind the Geek",
+    "room": "TBA 4",
+    "date": "2026-10-09",
+    "time": "11:50",
+    "duration": 50,
+    "level": "All",
+    "description": "A retro model train hobby project was modernized with Seeed Studio hardware, Bluetooth, and TinyGo to create a digital railway network with individual train control for speed, direction, and lights. The talk covers embedded hardware/software architecture, lessons learned, and open-source implemen...",
+    "tags": [
+      "digital conversion",
+      "model trains",
+      "bluetooth",
+      "embedded systems"
+    ]
+  },
+  {
+    "id": "DVX-23531",
+    "title": "We created our own AI orchestrator and it became so much more!",
+    "speaker": "Ricky van Rijn",
+    "track": "Development Practices",
+    "room": "TBA 5",
+    "date": "2026-10-09",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Intermediate",
+    "description": "We built an agent orchestration tool using Embabel Agent, Skills, and Spec files to coordinate AI-driven software work. It provides a visual dashboard for active agents, tasks, and next steps, reshaping team roles: developers review AI output, analysts define requirements, and product owners mana...",
+    "tags": [
+      "agentic",
+      "requirements",
+      "orchestration",
+      "automation"
+    ]
+  },
+  {
+    "id": "DVX-21687",
+    "title": "10 boring reasons why Java is the best ecosystem for agentic development",
+    "speaker": "Ed Burns",
+    "track": "Agentic Engineering & Tooling",
+    "room": "TBA 6",
+    "date": "2026-10-09",
+    "time": "11:50",
+    "duration": 50,
+    "level": "Advanced",
+    "description": "The talk argues that Java’s “boring” strengths—types, tests, static analysis, mature builds, formatting, observability, and more—help control AI agents’ risks like hallucinations, non-determinism, and unmaintainable code. It maps 10 Java features to agent failure modes and ends with a practical a...",
+    "tags": [
+      "observability",
+      "java",
+      "agents",
+      "testing"
+    ]
+  }
+]
