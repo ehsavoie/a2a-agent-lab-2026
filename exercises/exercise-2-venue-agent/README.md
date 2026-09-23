@@ -1,10 +1,15 @@
 # Exercise 2: Venue & On-Site Operations Agent (Spring Boot + LangChain4j)
 
-A Spring Boot A2A agent using [spring-a2a](https://github.com/Sh1bari/spring-a2a) that manages real-time venue operations: IoT room capacity sensors, indoor navigation, catering queue tracking, and fast-track entry pass reservations.
+A Spring Boot A2A agent using [spring-a2a](https://github.com/Sh1bari/spring-a2a) that simulates venue operations: IoT-style room capacity readings, indoor navigation, catering queue tracking, and fast-track entry pass reservations.
 
 ## Quick Start
 
+Requires JDK 21+, Maven 3.9+, and a Google AI Gemini API key in `GOOGLE_AI_GEMINI_API_KEY`.
+
 ```bash
+# From the repository root:
+export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
+cd exercises/exercise-2-venue-agent
 mvn spring-boot:run
 ```
 
