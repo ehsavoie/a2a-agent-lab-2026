@@ -131,7 +131,7 @@ public class VenueAgentConfig {
                     emitter.addArtifact(
                             Collections.singletonList(new TextPart("Error: " + e.getMessage())),
                             null, "error", null);
-                    emitter.complete();
+                    emitter.fail();
                 }
             }
 
