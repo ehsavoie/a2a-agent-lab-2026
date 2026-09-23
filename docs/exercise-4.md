@@ -17,6 +17,12 @@ In this exercise you will:
 
 ## Part 1: Build the Expense & Compliance Agent
 
+The agent uses `gpt-6-luna` through the OpenAI Responses API at medium reasoning effort. Create an OpenAI API key with API billing enabled before starting it. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+
+```bash
+export OPENAI_API_KEY=your-api-key-here
+```
+
 Navigate to the exercise directory:
 
 ```bash
@@ -92,14 +98,27 @@ public interface ExpenseService {
 Wired programmatically in `ExpenseServiceProducer` — same CDI pattern as Exercise 1:
 
 ```java
+import dev.langchain4j.http.client.HttpClientBuilderLoader;
+import dev.langchain4j.model.openai.OpenAiResponsesChatModel;
+import java.time.Duration;
+
 @ApplicationScoped
 public class ExpenseServiceProducer {
 
+    @ConfigProperty(name = "openai.api-key")
+    String openAiApiKey;
+
+    @ConfigProperty(name = "openai.model-name", defaultValue = "gpt-6-luna")
+    String openAiModelName;
+
     @PostConstruct
     void init() {
-        GoogleAiGeminiChatModel chatModel = GoogleAiGeminiChatModel.builder()
-                .apiKey(geminiApiKey)
-                .modelName(geminiModelName)
+        OpenAiResponsesChatModel chatModel = OpenAiResponsesChatModel.builder()
+                .httpClientBuilder(HttpClientBuilderLoader.loadHttpClientBuilder()
+                        .readTimeout(Duration.ofSeconds(120)))
+                .apiKey(openAiApiKey)
+                .modelName(openAiModelName)
+                .reasoningEffort("medium")
                 .build();
 
         expenseService = AiServices.builder(ExpenseService.class)
@@ -410,7 +429,7 @@ DevSphere Orchestrator
 This gives you:
 - **Total latency**: How long the full request took
 - **Per-agent latency**: How long each specialist agent took
-- **LLM call duration**: How much time was spent in Google AI Gemini
+- **LLM call duration**: How much time was spent in the OpenAI Responses API
 - **Network overhead**: The gap between spans shows serialization/network time
 
 ---
@@ -513,7 +532,7 @@ In two hours, you built a **production-grade A2A agent ecosystem**:
 
 > **Troubleshooting:**
 >
-> - **"API key not valid"**: Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set with a valid Google AI Studio API key.
-> - **Empty responses**: The first LLM call can be slow. Increase the timeout if needed.
+> - **Authentication or billing error**: Check `OPENAI_API_KEY` and confirm API billing is enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+> - **Empty responses**: The first LLM call can be slow. Increase the OpenAI HTTP read timeout in `ExpenseServiceProducer` if needed.
 > - **Port 8082 conflict**: Make sure you're starting WildFly with `-Djboss.socket.binding.port-offset=2`.
 > - **No traces in Grafana**: Verify the LGTM stack is running on port 3000 (Grafana) and OTLP collector is on port 4317. Check that all agents have OTel configured correctly.

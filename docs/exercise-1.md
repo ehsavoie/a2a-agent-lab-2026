@@ -12,7 +12,7 @@ By the end, your agent will:
 
 - Advertise its capabilities via a standard **AgentCard**
 - Accept questions from any A2A client via `SendMessage`
-- Use an LLM (Google Gemini) with **tool calling** to search the real conference schedule
+- Use OpenAI GPT-6 Luna through the Responses API at medium reasoning effort with **tool calling** to search the real conference schedule
 - Filter sessions by time — so when Maya arrives at 9:45 AM, she only sees sessions she can still attend
 - Return structured results following the A2A **Task** lifecycle
 
@@ -80,7 +80,7 @@ cd exercises/exercise-1-schedule-advisor
 Key dependencies:
 - `a2a-jakarta-jsonrpc` — A2A Jakarta EE transport (JSON-RPC on JAX-RS)
 - `a2a-java-sdk-server-common` — A2A server-side SDK
-- `langchain4j` + `langchain4j-google-ai-gemini` — LangChain4j with Google AI Gemini support
+- `langchain4j` + `langchain4j-open-ai` — LangChain4j with OpenAI Responses API support
 - Jakarta EE APIs (CDI, JAX-RS) — provided by WildFly at runtime
 
 ### WAR Packaging
@@ -210,14 +210,18 @@ Since we are on plain Jakarta EE (not Quarkus), we cannot use `@RegisterAiServic
 Create `src/main/java/dev/devconf/schedule/ScheduleServiceProducer.java`:
 
 ```java
+import dev.langchain4j.http.client.HttpClientBuilderLoader;
+import dev.langchain4j.model.openai.OpenAiResponsesChatModel;
+import java.time.Duration;
+
 @ApplicationScoped
 public class ScheduleServiceProducer {
 
-    @ConfigProperty(name = "gemini.api-key")
-    String geminiApiKey;
+    @ConfigProperty(name = "openai.api-key")
+    String openaiApiKey;
 
-    @ConfigProperty(name = "gemini.model-name", defaultValue = "gemini-2.5-flash")
-    String modelName;
+    @ConfigProperty(name = "openai.model-name", defaultValue = "gpt-6-luna")
+    String openaiModelName;
 
     @ConfigProperty(name = "session.data.path",
                     defaultValue = "../../conference-data/sessions.json")
@@ -227,11 +231,12 @@ public class ScheduleServiceProducer {
 
     @PostConstruct
     void init() {
-        GoogleAiGeminiChatModel chatModel = GoogleAiGeminiChatModel.builder()
-                .apiKey(geminiApiKey)
-                .modelName(modelName)
-                .temperature(0.7)
-                .timeout(Duration.ofSeconds(60))
+        OpenAiResponsesChatModel chatModel = OpenAiResponsesChatModel.builder()
+                .httpClientBuilder(HttpClientBuilderLoader.loadHttpClientBuilder()
+                        .readTimeout(Duration.ofSeconds(120)))
+                .apiKey(openaiApiKey)
+                .modelName(openaiModelName)
+                .reasoningEffort("medium")
                 .build();
 
         ScheduleTool scheduleTool = new ScheduleTool(sessionDataPath);
@@ -428,9 +433,9 @@ a2a.authorization.required=false
 # Session data path
 session.data.path=../../conference-data/sessions.json
 
-# Google AI Gemini LLM Configuration
-gemini.api-key=${GOOGLE_AI_GEMINI_API_KEY}
-gemini.model-name=gemini-2.5-flash
+# OpenAI Responses API LLM configuration (medium reasoning effort in the producer)
+openai.api-key=${OPENAI_API_KEY}
+openai.model-name=gpt-6-luna
 
 # A2A Agent Configuration
 a2a.agent.name=Schedule & Content Advisor
@@ -439,9 +444,11 @@ a2a.agent.version=1.0.0
 a2a.agent.url=http://localhost:8080
 ```
 
-Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set, then build and start:
+Create an OpenAI API key with API billing enabled and export it before building. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
+
 # Build the WAR and provision WildFly
 mvn package -Dsession.data.path=$(pwd)/../../conference-data/sessions.json
 
@@ -603,7 +610,7 @@ At this point you should have:
 
 > **Troubleshooting:**
 >
-> - **"API key not valid"**: Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set with a valid Google AI Studio API key.
-> - **Empty responses**: The first LLM call can be slow. Increase the timeout in `microprofile-config.properties` if needed.
+> - **Authentication or billing error**: Check `OPENAI_API_KEY` and confirm API billing is enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+> - **Empty responses**: The first LLM call can be slow. Increase the producer's HTTP read timeout in `ScheduleServiceProducer` if needed.
 > - **"No sessions found"**: Verify the `session.data.path` system property points correctly to `conference-data/sessions.json`. Pass it via `-Dsession.data.path=...` when starting WildFly.
 > - **Port conflict on 8080**: If another service is using port 8080, start WildFly with a port offset: `./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=10` and update `a2a.agent.url` accordingly.

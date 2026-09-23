@@ -10,16 +10,17 @@ This is the complete working **Schedule & Content Advisor** agent built with Qua
 | `ScheduleService.java` | `@RegisterAiService(tools = ScheduleTool.class)` — Quarkus auto-wires the LLM with the schedule tools |
 | `ScheduleAgentCardProducer.java` | CDI producer for the A2A AgentCard |
 | `ScheduleAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
-| `application.properties` | Quarkus HTTP port, Gemini config, session data path, agent identity |
+| `application.properties` | Quarkus HTTP port, OpenAI model and reasoning config, session data path, agent identity |
 
 ## Prerequisites
 
-- `GOOGLE_AI_GEMINI_API_KEY` environment variable set with a valid Google AI Studio API key
+- `OPENAI_API_KEY` environment variable set with an OpenAI API key with API billing enabled for `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 - JDK 21+, Maven 3.9+
 
 ## How to Run
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
 ./run.sh
 # Or manually:
 cd ../../exercises/exercise-1-schedule-advisor

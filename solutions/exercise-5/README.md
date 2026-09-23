@@ -14,11 +14,11 @@ The full source lives in `../../exercises/exercise-5-orchestrator/`:
 | `ResponseAggregator.java` | LangChain4j AI Service that synthesizes multi-agent responses |
 | `OrchestratorAgentCardProducer.java` | AgentCard with skill "general-conference-assistant" |
 | `OrchestratorAgentExecutorProducer.java` | Orchestration loop: decompose → dispatch → aggregate |
-| `application.properties` | Port 8090, agent URLs, Gemini config |
+| `application.properties` | Port 8090, agent URLs, OpenAI model and reasoning config |
 
 ## Prerequisites
 
-- `GOOGLE_AI_GEMINI_API_KEY` environment variable set with a valid Google AI Studio API key
+- `OPENAI_API_KEY` environment variable set with an OpenAI API key with API billing enabled for `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 - **Schedule & Content Advisor** running on port **8080** (Exercise 1)
 - **Venue & On-Site Operations Agent** running on port **8081** (Exercise 2)
 - **Travel & Logistics Agent** running on port **9000** (Exercise 3)
@@ -26,6 +26,7 @@ The full source lives in `../../exercises/exercise-5-orchestrator/`:
 ## How to Run
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
 ./run.sh
 # Or manually:
 cd ../../exercises/exercise-5-orchestrator

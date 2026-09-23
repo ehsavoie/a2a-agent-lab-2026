@@ -11,7 +11,7 @@ The full source lives in `../../exercises/exercise-4-expense-agent/`:
 |------|---------|
 | `ExpenseTool.java` | `@Tool` methods for logging expenses, processing receipts, compliance checks |
 | `ExpenseService.java` | AI Service interface for expense operations |
-| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with GoogleAiGeminiChatModel |
+| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with an OpenAI Responses API chat model |
 | `ExpenseAgentCardProducer.java` | Port-offset-aware AgentCard with multi-transport auto-detection |
 | `ExpenseAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
 | `persistence.xml` | JPA persistence unit for PostgreSQL-backed task/notification stores |
@@ -38,11 +38,13 @@ Configuration snippets in `../../exercises/exercise-4-observability/`:
 ## Prerequisites
 
 - All agents from Exercises 1-3 running
+- `OPENAI_API_KEY` set to an OpenAI API key with API billing enabled for `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 - **LGTM stack** running (started by `podman-compose up -d`) — Grafana on port **3000**
 
 ## How to Run the Expense Agent
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
 ./run-full-system.sh
 # Or manually:
 cd ../../exercises/exercise-4-expense-agent

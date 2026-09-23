@@ -10,16 +10,17 @@ The complete working **Venue & On-Site Operations Agent** built with Spring Boot
 | `VenueService.java` | LangChain4j AI Service interface with `@SystemMessage` |
 | `VenueAgentConfig.java` | Spring `@Configuration` with `@Bean` for AgentCard + AgentExecutor (using `AiServices.builder`) |
 | `VenueAgentApplication.java` | Spring Boot main class |
-| `application.properties` | Port 8081, LangChain4j Gemini config, agent metadata |
+| `application.properties` | Port 8081, OpenAI model and reasoning config, agent metadata |
 
 ## Prerequisites
 
-- `GOOGLE_AI_GEMINI_API_KEY` environment variable set with a valid Google AI Studio API key
+- `OPENAI_API_KEY` environment variable set with an OpenAI API key with API billing enabled for `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 - JDK 21+, Maven 3.9+
 
 ## How to Run
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
 ./run-all.sh
 # Or manually:
 mvn spring-boot:run

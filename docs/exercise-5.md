@@ -64,7 +64,7 @@ cd exercises/exercise-5-orchestrator
 
 The `pom.xml` is set up with the same Quarkus stack used across the lab:
 - Quarkus (Arc, REST, Jackson)
-- LangChain4j with Google AI Gemini
+- LangChain4j with OpenAI GPT-6 Luna through the Responses API at medium reasoning effort
 - A2A Java SDK (server + client)
 
 Check `src/main/resources/application.properties`:
@@ -72,9 +72,11 @@ Check `src/main/resources/application.properties`:
 ```properties
 quarkus.http.port=8090
 
-# Google AI Gemini
-quarkus.langchain4j.ai.gemini.api-key=${GOOGLE_AI_GEMINI_API_KEY}
-quarkus.langchain4j.ai.gemini.chat-model.model-id=gemini-2.5-flash
+# OpenAI Responses API
+quarkus.langchain4j.openai.api-key=${OPENAI_API_KEY}
+quarkus.langchain4j.openai.chat-model.mode=responses
+quarkus.langchain4j.openai.chat-model.model-name=gpt-6-luna
+quarkus.langchain4j.openai.chat-model.reasoning-effort=medium
 
 # Agent URLs for discovery
 orchestrator.agent-urls=http://localhost:8080,http://localhost:8081,http://localhost:9000,http://localhost:8082
@@ -85,6 +87,14 @@ a2a.agent.url=http://localhost:8090
 ```
 
 Notice the `orchestrator.agent-urls` property — this lists the agents the Orchestrator will discover. In production, you'd use a service registry; for the lab, static URLs keep things simple.
+
+Before starting the Orchestrator, create an OpenAI API key with API billing enabled and export it:
+
+```bash
+export OPENAI_API_KEY=your-api-key-here
+```
+
+ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ---
 

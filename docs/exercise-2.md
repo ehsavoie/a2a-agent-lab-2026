@@ -75,7 +75,7 @@ cd exercises/exercise-2-venue-agent
 
 Check `pom.xml` — key dependencies:
 - `spring-boot-starter-web` — embedded HTTP server
-- `langchain4j-google-ai-gemini-spring-boot-starter` — LangChain4j with Google AI Gemini
+- `langchain4j-open-ai` — LangChain4j with the OpenAI Responses API
 - `a2a-spring-boot-starter-server-rest` — A2A REST transport for Spring Boot
 
 ---
@@ -118,6 +118,20 @@ Open `src/main/java/dev/devconf/venue/VenueAgentConfig.java`:
 ```java
 @Configuration
 public class VenueAgentConfig {
+
+    @Bean
+    public ChatModel chatModel(
+            @Value("${langchain4j.open-ai.chat-model.api-key}") String apiKey,
+            @Value("${langchain4j.open-ai.chat-model.log-requests}") boolean logRequests,
+            @Value("${langchain4j.open-ai.chat-model.log-responses}") boolean logResponses) {
+        return OpenAiResponsesChatModel.builder()
+                .apiKey(apiKey)
+                .modelName("gpt-6-luna")
+                .reasoningEffort("medium")
+                .logRequests(logRequests)
+                .logResponses(logResponses)
+                .build();
+    }
 
     private static final String SYSTEM_INSTRUCTION = """
             You are the DevConf 2026 Venue & On-Site Operations Agent.
@@ -191,9 +205,9 @@ Check `src/main/resources/application.properties`:
 ```properties
 server.port=8081
 
-langchain4j.google-ai-gemini.chat-model.api-key=${GOOGLE_AI_GEMINI_API_KEY}
-langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash
-langchain4j.google-ai-gemini.chat-model.temperature=0.7
+langchain4j.open-ai.chat-model.api-key=${OPENAI_API_KEY}
+langchain4j.open-ai.chat-model.log-requests=true
+langchain4j.open-ai.chat-model.log-responses=true
 
 a2a.agent.name=Venue & On-Site Operations Agent
 a2a.agent.description=Manages real-time venue operations including IoT room capacity, indoor mapping, and catering tracking
@@ -201,9 +215,10 @@ a2a.agent.version=1.0.0
 a2a.agent.url=http://localhost:8081
 ```
 
-Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set, then start:
+Create an OpenAI API key with API billing enabled and export it before starting. This configuration uses `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
 mvn spring-boot:run
 ```
 
@@ -327,6 +342,6 @@ At this point you should have:
 
 > **Troubleshooting:**
 >
-> - **"API key not valid"**: Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set with a valid Google AI Studio API key.
+> - **Authentication or billing error**: Check `OPENAI_API_KEY` and confirm API billing is enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 > - **Port conflict**: Make sure no other service is running on port 8081.
-> - **LangChain4j auto-config issues**: Ensure `langchain4j-google-ai-gemini-spring-boot-starter` is in your classpath — it auto-configures the `ChatModel` bean that `AiServices.builder()` uses.
+> - **Missing `ChatModel` bean**: Ensure `VenueAgentConfig` creates the `OpenAiResponsesChatModel` bean used by `AiServices.builder()` and `langchain4j-open-ai` is on the classpath.

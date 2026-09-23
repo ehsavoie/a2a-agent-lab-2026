@@ -25,10 +25,10 @@
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
 
-        <!-- LangChain4j with Google AI Gemini -->
+        <!-- LangChain4j with OpenAI -->
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-ai-gemini</artifactId>
+            <artifactId>quarkus-langchain4j-openai</artifactId>
         </dependency>
 
         <!-- A2A Java SDK -->

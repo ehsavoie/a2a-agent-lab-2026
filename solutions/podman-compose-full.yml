@@ -11,7 +11,7 @@ version: "3.8"
 #     cd exercises/exercise-4-expense-agent && mvn package -DskipTests
 #
 #   Set your API key:
-#     export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
+#     export OPENAI_API_KEY=your-api-key-here
 #
 #   Then run:
 #     podman-compose -f solutions/podman-compose-full.yml up -d
@@ -54,7 +54,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - GOOGLE_AI_GEMINI_API_KEY=${GOOGLE_AI_GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SESSION_DATA_PATH=/app/data/sessions.json
     volumes:
       - ../conference-data:/app/data:ro
@@ -66,7 +66,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - GOOGLE_AI_GEMINI_API_KEY=${GOOGLE_AI_GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
 
   travel-agent:
     build:
@@ -86,7 +86,7 @@ services:
     ports:
       - "8090:8090"
     environment:
-      - GOOGLE_AI_GEMINI_API_KEY=${GOOGLE_AI_GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://lgtm:4317
       - ORCHESTRATOR_AGENT_URLS=http://schedule-advisor:8080,http://venue-agent:8081,http://travel-agent:9000,http://expense-agent:8082
     depends_on:
@@ -102,7 +102,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - GOOGLE_AI_GEMINI_API_KEY=${GOOGLE_AI_GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - JBOSS_SOCKET_BINDING_PORT_OFFSET=2
     depends_on:
       - postgresql

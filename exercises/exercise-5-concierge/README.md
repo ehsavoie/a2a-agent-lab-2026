@@ -48,11 +48,12 @@ exercise-5-concierge/
 
 - Exercise 1 **Session Agent** running on port **8080**
 - Exercise 3 **Travel Tips Agent** running on port **9000**
-- `GOOGLE_AI_GEMINI_API_KEY` environment variable set
+- `OPENAI_API_KEY` environment variable set for `gpt-6-luna` through the Responses API at medium reasoning effort. An OpenAI API key with API billing enabled is required; ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ## How to Run
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
 cd exercise-5-concierge
 mvn quarkus:dev
 ```

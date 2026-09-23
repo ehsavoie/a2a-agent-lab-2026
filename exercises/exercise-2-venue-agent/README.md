@@ -4,11 +4,11 @@ A Spring Boot A2A agent using [spring-a2a](https://github.com/Sh1bari/spring-a2a
 
 ## Quick Start
 
-Requires JDK 21+, Maven 3.9+, and a Google AI Gemini API key in `GOOGLE_AI_GEMINI_API_KEY`.
+Requires JDK 21+, Maven 3.9+, and an OpenAI API key with API billing enabled in `OPENAI_API_KEY`. This agent uses `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ```bash
 # From the repository root:
-export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
+export OPENAI_API_KEY=your-api-key-here
 cd exercises/exercise-2-venue-agent
 mvn spring-boot:run
 ```

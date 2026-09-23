@@ -9,7 +9,7 @@ The conference organizers need an AI agent that helps attendees find the right s
 - A **Quarkus + LangChain4j** A2A agent running on port 8080
 - An **AgentCard** advertising the agent's skills via `/.well-known/agent-card.json`
 - An **AgentExecutor** that receives A2A messages and returns structured responses
-- LLM-powered **session search** using Google AI Gemini with tool calling against the conference schedule
+- LLM-powered **session search** using OpenAI GPT-6 Luna through the Responses API with medium reasoning effort and tool calling against the conference schedule
 
 ## Key A2A Concepts
 
@@ -30,15 +30,15 @@ src/main/java/dev/devconf/session/
 └── SessionAgentExecutorProducer.java # CDI producer for the AgentExecutor (message handling)
 
 src/main/resources/
-└── application.properties           # Gemini API key, model, port, agent metadata
+└── application.properties           # OpenAI API key, model, reasoning effort, port, agent metadata
 ```
 
 ## Prerequisites
 
-Set your Google AI Gemini API key:
+Set an OpenAI API key with API billing enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ```bash
-export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
+export OPENAI_API_KEY=your-api-key-here
 ```
 
 ## How to Run

@@ -21,19 +21,21 @@ echo "  DevSphere — Full System Launch"
 echo "============================================"
 echo ""
 
-# Check infrastructure
-echo "Checking infrastructure..."
-if curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-  echo "  [OK] Ollama is running"
+# Check API configuration
+echo "Checking API configuration..."
+if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+  echo "  [OK] OPENAI_API_KEY is set"
 else
-  echo "  [!!] Ollama is NOT running — start it with: cd $ROOT && podman-compose up -d"
+  echo "  [!!] OPENAI_API_KEY is not set — export a valid OpenAI API key with API billing enabled"
   exit 1
 fi
 
+# Check infrastructure
+echo "Checking infrastructure..."
 if curl -s http://localhost:3000 > /dev/null 2>&1; then
   echo "  [OK] Grafana (LGTM) is running"
 else
-  echo "  [!!] Grafana (LGTM) is NOT running — start it with: cd $ROOT && podman-compose up -d"
+  echo "  [!!] Grafana (LGTM) is NOT running — start it with: cd $ROOT/exercises/exercise-5-orchestrator && podman-compose up -d"
   exit 1
 fi
 
@@ -57,14 +59,14 @@ python travel_agent.py > /tmp/travel-agent.log 2>&1 &
 PIDS+=($!)
 
 echo "[4/5] Starting Orchestrator & Concierge (Quarkus :8090)..."
-cd "$ROOT/exercises/exercise-4-orchestrator"
+cd "$ROOT/exercises/exercise-5-orchestrator"
 mvn -q quarkus:dev -Dquarkus.console.enabled=false > /tmp/orchestrator.log 2>&1 &
 PIDS+=($!)
 
 echo "[5/5] Building & starting Expense & Compliance Agent (WildFly :8082)..."
-cd "$ROOT/exercises/exercise-5-expense-agent"
+cd "$ROOT/exercises/exercise-4-expense-agent"
 mvn -q package -Pjsonrpc
-"$ROOT/exercises/exercise-5-expense-agent/target/wildfly/bin/standalone.sh" \
+"$ROOT/exercises/exercise-4-expense-agent/target/wildfly/bin/standalone.sh" \
   -Djboss.socket.binding.port-offset=2 > /tmp/expense-agent.log 2>&1 &
 PIDS+=($!)
 

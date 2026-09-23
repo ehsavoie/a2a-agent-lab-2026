@@ -1,29 +1,33 @@
 package dev.devconf.expense;
 
-import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import dev.langchain4j.http.client.HttpClientBuilderLoader;
+import dev.langchain4j.model.openai.OpenAiResponsesChatModel;
 import dev.langchain4j.service.AiServices;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.time.Duration;
+
 @ApplicationScoped
 public class ExpenseServiceProducer {
 
-    @ConfigProperty(name = "gemini.api-key")
-    String geminiApiKey;
+    @ConfigProperty(name = "openai.api-key")
+    String openAiApiKey;
 
-    @ConfigProperty(name = "gemini.model-name", defaultValue = "gemini-2.5-flash")
-    String geminiModelName;
+    @ConfigProperty(name = "openai.model-name", defaultValue = "gpt-6-luna")
+    String openAiModelName;
 
     private ExpenseService expenseService;
 
     @PostConstruct
     void init() {
-        GoogleAiGeminiChatModel chatModel = GoogleAiGeminiChatModel.builder()
-                .apiKey(geminiApiKey)
-                .modelName(geminiModelName)
-                .temperature(0.7)
-                .timeout(java.time.Duration.ofSeconds(120))
+        OpenAiResponsesChatModel chatModel = OpenAiResponsesChatModel.builder()
+                .httpClientBuilder(HttpClientBuilderLoader.loadHttpClientBuilder()
+                        .readTimeout(Duration.ofSeconds(120)))
+                .apiKey(openAiApiKey)
+                .modelName(openAiModelName)
+                .reasoningEffort("medium")
                 .build();
 
         expenseService = AiServices.builder(ExpenseService.class)

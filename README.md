@@ -189,6 +189,7 @@ sequenceDiagram
 - **Podman** with `podman-compose`
 - **curl** or **httpie** for testing
 - A terminal with at least 4 tabs/panes
+- An OpenAI API key with API billing enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ## Quick Start
 
@@ -198,10 +199,10 @@ git clone <repo-url>
 cd a2a-agent-lab-2026
 
 # 2. Start infrastructure (Grafana LGTM)
-podman-compose up -d
+podman-compose -f exercises/exercise-5-orchestrator/podman-compose.yml up -d
 
-# 3. Set your Google AI Gemini API key
-export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
+# 3. Set your OpenAI API key (used with gpt-6-luna at medium reasoning effort)
+export OPENAI_API_KEY=your-api-key-here
 
 # 4. Verify
 open http://localhost:3000                     # Grafana UI (admin/admin)
@@ -260,6 +261,6 @@ mvn compile
 - **[Quarkus](https://quarkus.io/)** — Supersonic Subatomic Java framework
 - **[Spring Boot](https://spring.io/projects/spring-boot)** — Java application framework
 - **[WildFly](https://www.wildfly.org/)** — Jakarta EE application server
-- **[Google AI Gemini](https://ai.google.dev/)** — Google's Gemini LLM API
+- **[OpenAI API](https://developers.openai.com/api/docs/models/gpt-6-luna)** — GPT-6 Luna via the Responses API
 - **[OpenTelemetry](https://opentelemetry.io/)** — Observability framework
 - **[Grafana LGTM](https://grafana.com/blog/2024/03/13/an-opentelemetry-backend-in-a-docker-image-introducing-grafana/otel-lgtm/)** — All-in-one observability stack (Loki + Grafana + Tempo + Mimir)

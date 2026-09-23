@@ -6,7 +6,7 @@ The **Expense & Compliance Agent** standardizes receipts and session attendance 
 
 - **Runtime:** WildFly 41 (Jakarta EE) with enterprise features
 - **A2A SDK:** `a2a-jakarta-jsonrpc` / `a2a-jakarta-rest` / `a2a-jakarta-grpc` (via Maven profiles)
-- **LLM:** LangChain4j + Google AI Gemini
+- **LLM:** LangChain4j + OpenAI GPT-6 Luna via the Responses API at medium reasoning effort
 - **Persistence:** JPA-backed TaskStore + PushNotificationConfigStore (PostgreSQL)
 - **Replication:** Kafka replicated queue manager for multi-node deployment
 - **Port:** 8082 (WildFly with port offset 2)
@@ -41,7 +41,11 @@ The `AgentCardProducer` auto-detects which transports are on the classpath and a
 
 ## Build & Run
 
+Set an OpenAI API key with API billing enabled before starting the agent. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+
 ```bash
+export OPENAI_API_KEY=your-api-key-here
+
 # Build with JSON-RPC transport
 mvn package -Pjsonrpc
 
@@ -97,7 +101,7 @@ curl -s -X POST http://localhost:8082/ \
 |------|---------|
 | `ExpenseTool.java` | `@Tool` methods for logging expenses, processing receipts, compliance checks |
 | `ExpenseService.java` | AI Service interface for expense operations |
-| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with GoogleAiGeminiChatModel |
+| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with an OpenAI Responses API chat model |
 | `ExpenseAgentCardProducer.java` | Port-offset-aware AgentCard with multi-transport auto-detection |
 | `ExpenseAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
 | `persistence.xml` | JPA persistence unit for JpaTask + JpaPushNotificationConfig |

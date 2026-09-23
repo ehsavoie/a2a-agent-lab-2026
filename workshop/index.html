@@ -689,7 +689,8 @@
         <tr><td><strong>JDK</strong></td><td>21+</td><td>Java development</td></tr>
         <tr><td><strong>Maven</strong></td><td>3.9+</td><td>Build tool</td></tr>
         <tr><td><strong>Python</strong></td><td>3.11+</td><td>Exercise 3 (Travel Agent)</td></tr>
-        <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>Ollama + Grafana LGTM infrastructure</td></tr>
+        <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>PostgreSQL + Grafana LGTM infrastructure</td></tr>
+        <tr><td><strong>OpenAI API key</strong></td><td>API billing enabled</td><td>Java LLM exercises</td></tr>
         <tr><td><strong>curl</strong></td><td>any</td><td>API testing</td></tr>
         <tr><td><strong>IDE</strong></td><td>IntelliJ / VS Code / etc.</td><td>Code editor</td></tr>
     </tbody>
@@ -697,23 +698,22 @@
 
 <h3>1. Start the infrastructure</h3>
 
-<p>The lab uses Podman Compose (or Docker Compose) to run Ollama and the Grafana LGTM stack:</p>
+<p>The Java agent examples call the OpenAI API. Set <code>OPENAI_API_KEY</code> to an API key with API billing enabled. A ChatGPT subscription does not cover API usage, and the GPT-6 Luna API Free tier is unsupported.</p>
 
-<pre><code>podman-compose up -d</code></pre>
+<p>Use Podman Compose (or Docker Compose) to start the database and observability containers:</p>
+
+<pre><code>cd exercises/exercise-5-orchestrator
+podman-compose up -d</code></pre>
+
+<p>With Docker Compose, run <code>docker compose up -d</code> from the same directory.</p>
 
 <p>This starts:</p>
 <ul>
-    <li><strong>Ollama</strong> on port <code>11434</code> &mdash; local LLM server with the <code>granite4:350m</code> model</li>
+    <li><strong>PostgreSQL</strong> on port <code>5432</code> &mdash; database used by the Expense Agent</li>
     <li><strong>Grafana LGTM</strong> on port <code>3000</code> (Grafana UI) and <code>4317</code> (OTLP) &mdash; logs, traces, and metrics via Loki, Tempo, and Mimir</li>
 </ul>
 
-<p>Verify Ollama is ready:</p>
-
-<pre><code>curl http://localhost:11434/api/tags</code></pre>
-
-<p>You should see <code>granite4:350m</code> in the model list. If not, pull it manually:</p>
-
-<pre><code>podman exec ollama ollama pull granite4:350m</code></pre>
+<p>Once the containers are running, open Grafana at <code>http://localhost:3000</code>.</p>
 
 <h3>2. Build the A2A Java SDK</h3>
 
@@ -731,7 +731,6 @@ mvn install -DskipTests</code></pre>
 <pre><code>a2a-agent-lab-2026/
   pom.xml                              &larr; Root aggregator
   conference-data/sessions.json        &larr; Shared conference data
-  podman-compose.yml                   &larr; Ollama + Grafana LGTM
   exercises/                           &larr; All exercise projects
     exercise-1-schedule-advisor/       &larr; Quarkus + A2A Java SDK
     exercise-2-venue-agent/            &larr; Spring Boot + Spring AI
@@ -739,6 +738,7 @@ mvn install -DskipTests</code></pre>
     exercise-4-expense-agent/          &larr; WildFly 41 Enterprise (JPA, Kafka)
     exercise-4-observability/          &larr; OTel configuration snippets
     exercise-5-orchestrator/           &larr; Quarkus Native Orchestrator
+      podman-compose.yml               &larr; PostgreSQL + Grafana LGTM
   solutions/                           &larr; Complete solutions + scripts</code></pre>
 </section>
 
@@ -1423,7 +1423,7 @@ def extract_receipt(query):
 
 <div class="callout warning">
     <div class="callout-title">&#9888; No LLM here</div>
-    <p>Unlike the Java agents in Exercises 1 and 2, the Travel &amp; Logistics Agent does <strong>not</strong> use an LLM. It is a <strong>rule-based agent</strong> that pattern-matches keywords in queries against hardcoded travel data &mdash; no Ollama, no AI model, no LangChain. This is intentional: it shows that A2A agents don&rsquo;t need to be &ldquo;AI-powered&rdquo; to participate in the mesh. Any service that speaks the A2A protocol is a first-class citizen.</p>
+    <p>Unlike the Java agents in Exercises 1 and 2, the Travel &amp; Logistics Agent does <strong>not</strong> use an LLM. It is a <strong>rule-based agent</strong> that pattern-matches keywords in queries against hardcoded travel data. It makes no model API calls and requires no OpenAI API key. This is intentional: it shows that A2A agents don&rsquo;t need to be &ldquo;AI-powered&rdquo; to participate in the mesh. Any service that speaks the A2A protocol is a first-class citizen.</p>
 </div>
 
 <div class="callout info">
@@ -2067,13 +2067,13 @@ mvn quarkus:dev</code></pre>
 <h2>Troubleshooting</h2>
 
 <div class="callout warning">
-    <div class="callout-title">&#9888; Connection refused on Ollama</div>
-    <p>Make sure <code>podman-compose up -d</code> is running and the model has been pulled. Check with: <code>curl http://localhost:11434/api/tags</code></p>
+    <div class="callout-title">&#9888; OpenAI API authentication or quota errors</div>
+    <p>Check that <code>OPENAI_API_KEY</code> is set to a valid key and that API billing is enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.</p>
 </div>
 
 <div class="callout warning">
     <div class="callout-title">&#9888; Empty or slow responses</div>
-    <p>The first LLM call can be slow while Ollama loads the model into memory. Increase the timeout if needed.</p>
+    <p>LLM response times depend on the API request. If a request times out, check the agent logs and increase the configured timeout if needed.</p>
 </div>
 
 <div class="callout warning">
