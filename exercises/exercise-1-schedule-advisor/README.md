@@ -88,6 +88,10 @@ User message → A2A JSON-RPC transport
 | `session-recommend` | Personalized recommendations based on interests and availability |
 | `speaker-info` | Speaker information and their sessions |
 
+## Companion Project
+
+The companion Session Agent project is in [exercise-1-session-agent](../exercise-1-session-agent/README.md).
+
 ## Full Instructions
 
 See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the complete step-by-step guide.

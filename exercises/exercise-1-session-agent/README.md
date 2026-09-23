@@ -103,6 +103,10 @@ A successful response looks like:
 - `status.state` is `completed`
 - `artifacts[0].parts[0].text` contains session recommendations
 
+## Companion Project
+
+The companion Schedule & Content Advisor project is in [exercise-1-schedule-advisor](../exercise-1-schedule-advisor/README.md).
+
 ## Full Instructions
 
 See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the full walkthrough.

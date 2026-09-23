@@ -79,6 +79,10 @@ Replace the anonymous `AgentExecutor` in any agent's executor producer with `Tra
    - `Orchestrator → Expense Agent` (receipt processing)
    - LLM call durations within each agent
 
+## Companion Project
+
+The companion Expense & Compliance Agent project is in [exercise-4-expense-agent](../exercise-4-expense-agent/README.md).
+
 ## Full Instructions
 
 See [../../docs/exercise-4.md](../../docs/exercise-4.md) for the complete step-by-step guide, including the distributed state and load balancing discussion.

@@ -103,6 +103,10 @@ curl -s -X POST http://localhost:8082/ \
 | `persistence.xml` | JPA persistence unit for JpaTask + JpaPushNotificationConfig |
 | `microprofile-config.properties` | Kafka/SmallRye Reactive Messaging configuration |
 
+## Companion Project
+
+The companion Observability project is in [exercise-4-observability](../exercise-4-observability/README.md).
+
 ## Full Instructions
 
 See [../../docs/exercise-4.md](../../docs/exercise-4.md) for the complete step-by-step guide.

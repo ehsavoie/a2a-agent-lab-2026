@@ -33,6 +33,10 @@ curl -s -X POST http://localhost:8090/ \
   }' | jq .
 ```
 
+## Companion Project
+
+The companion Concierge project is in [exercise-5-concierge](../exercise-5-concierge/README.md).
+
 ## Full Instructions
 
 See [../../docs/exercise-5.md](../../docs/exercise-5.md) for the complete step-by-step guide.

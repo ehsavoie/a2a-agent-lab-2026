@@ -89,6 +89,10 @@ curl -s --max-time 120 -X POST http://localhost:8090 \
 
 The response should combine session recommendations **and** restaurant suggestions — pulled from two different agents.
 
+## Companion Project
+
+The companion Orchestrator project is in [exercise-5-orchestrator](../exercise-5-orchestrator/README.md).
+
 ## Full Instructions
 
 See [../../docs/exercise-5.md](../../docs/exercise-5.md) for the complete step-by-step guide.
