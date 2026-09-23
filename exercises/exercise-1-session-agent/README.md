@@ -44,7 +44,8 @@ export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
 ## How to Run
 
 ```bash
-cd exercise-1-session-agent
+# From the repository root:
+cd exercises/exercise-1-session-agent
 mvn quarkus:dev
 ```
 
@@ -83,25 +84,27 @@ A successful response looks like:
   "jsonrpc": "2.0",
   "id": "1",
   "result": {
-    "id": "<task-id>",
-    "status": {
-      "state": "completed"
-    },
-    "artifacts": [
-      {
-        "parts": [
-          {
-            "text": "Here are the AI-related sessions at DevConf 2026..."
-          }
-        ]
-      }
-    ]
+    "task": {
+      "id": "<task-id>",
+      "status": {
+        "state": "TASK_STATE_COMPLETED"
+      },
+      "artifacts": [
+        {
+          "parts": [
+            {
+              "text": "Here are the AI-related sessions at DevConf 2026..."
+            }
+          ]
+        }
+      ]
+    }
   }
 }
 ```
 
-- `status.state` is `completed`
-- `artifacts[0].parts[0].text` contains session recommendations
+- `result.task.status.state` is `TASK_STATE_COMPLETED`
+- `result.task.artifacts[0].parts[0].text` contains session recommendations
 
 ## Companion Project
 
@@ -109,4 +112,4 @@ The companion Schedule & Content Advisor project is in [exercise-1-schedule-advi
 
 ## Full Instructions
 
-See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the full walkthrough.
+See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the Exercise 1 walkthrough. It covers the companion Schedule & Content Advisor project, not this Session Recommender.

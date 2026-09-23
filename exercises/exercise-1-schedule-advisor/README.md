@@ -6,7 +6,16 @@ Built with **Quarkus**, the **A2A Java SDK reference implementation** (`a2a-java
 
 ## Quick Start
 
+Requires JDK 21+, Maven 3.9+, and a Google AI Gemini API key:
+
 ```bash
+export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
+```
+
+```bash
+# From the repository root
+cd exercises/exercise-1-schedule-advisor
+
 # Start in dev mode (hot-reload on port 8080)
 mvn quarkus:dev
 
@@ -94,4 +103,4 @@ The companion Session Agent project is in [exercise-1-session-agent](../exercise
 
 ## Full Instructions
 
-See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the complete step-by-step guide.
+See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the Exercise 1 walkthrough. It describes a Jakarta EE/WildFly version; this checked-in project uses Quarkus as shown above.
