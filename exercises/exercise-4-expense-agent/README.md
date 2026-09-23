@@ -1,4 +1,4 @@
-# Exercise 5: Expense & Compliance Agent (WildFly Enterprise)
+# Exercise 4: Expense & Compliance Agent (WildFly Enterprise)
 
 The **Expense & Compliance Agent** standardizes receipts and session attendance into corporate audit-ready expense logs. It validates expenses against corporate compliance rules and can process structured receipt data received from other agents (e.g. the Travel & Logistics Agent).
 

@@ -7,8 +7,8 @@ version: "3.8"
 #   First, build all Java agents:
 #     cd exercises/exercise-1-schedule-advisor && mvn package -DskipTests
 #     cd exercises/exercise-2-venue-agent && mvn package -DskipTests
-#     cd exercises/exercise-4-orchestrator && mvn package -DskipTests
-#     cd exercises/exercise-5-expense-agent && mvn package -DskipTests
+#     cd exercises/exercise-5-orchestrator && mvn package -DskipTests
+#     cd exercises/exercise-4-expense-agent && mvn package -DskipTests
 #
 #   Set your API key:
 #     export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
@@ -20,6 +20,18 @@ services:
   # ============================================================
   # Infrastructure
   # ============================================================
+
+  postgresql:
+    image: docker.io/library/postgres:17
+    container_name: devconf-postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=devconf
+      - POSTGRES_PASSWORD=devconf
+      - POSTGRES_DB=devconf
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   lgtm:
     image: docker.io/grafana/otel-lgtm:latest
@@ -68,7 +80,7 @@ services:
 
   orchestrator:
     build:
-      context: ../exercises/exercise-4-orchestrator
+      context: ../exercises/exercise-5-orchestrator
       dockerfile: src/main/docker/Dockerfile.jvm
     container_name: devconf-orchestrator
     ports:
@@ -85,10 +97,15 @@ services:
 
   expense-agent:
     build:
-      context: ../exercises/exercise-5-expense-agent
+      context: ../exercises/exercise-4-expense-agent
     container_name: devconf-expense-agent
     ports:
       - "8082:8082"
     environment:
       - GOOGLE_AI_GEMINI_API_KEY=${GOOGLE_AI_GEMINI_API_KEY}
       - JBOSS_SOCKET_BINDING_PORT_OFFSET=2
+    depends_on:
+      - postgresql
+
+volumes:
+  pgdata:

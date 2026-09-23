@@ -1,4 +1,4 @@
-# Exercise 4: The Concierge — Orchestrating the Agent Mesh
+# Exercise 5: The Concierge — Orchestrating the Agent Mesh
 
 **Time:** 25 minutes
 
@@ -33,7 +33,7 @@ A **Concierge Agent** (Quarkus + LangChain4j) that dynamically discovers other a
 ## Project Structure
 
 ```
-exercise-4-concierge/
+exercise-5-concierge/
 ├── pom.xml
 └── src/main/java/dev/devconf/concierge/
     ├── AgentDiscoveryService.java        # Discovers agents via AgentCard HTTP fetch
@@ -53,7 +53,7 @@ exercise-4-concierge/
 ## How to Run
 
 ```bash
-cd exercise-4-concierge
+cd exercise-5-concierge
 mvn quarkus:dev
 ```
 
@@ -91,4 +91,4 @@ The response should combine session recommendations **and** restaurant suggestio
 
 ## Full Instructions
 
-See [../../docs/exercise-4.md](../../docs/exercise-4.md) for the complete step-by-step guide.
+See [../../docs/exercise-5.md](../../docs/exercise-5.md) for the complete step-by-step guide.

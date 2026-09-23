@@ -19,8 +19,8 @@
         <module>exercise-1-schedule-advisor</module>
         <module>exercise-1-session-agent</module>
         <module>exercise-2-venue-agent</module>
-        <module>exercise-4-concierge</module>
-        <module>exercise-4-orchestrator</module>
-        <module>exercise-5-expense-agent</module>
+        <module>exercise-4-expense-agent</module>
+        <module>exercise-5-concierge</module>
+        <module>exercise-5-orchestrator</module>
     </modules>
 </project>

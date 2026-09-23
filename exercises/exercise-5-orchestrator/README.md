@@ -1,4 +1,4 @@
-# Exercise 4: The Orchestrator & Concierge (Quarkus Native)
+# Exercise 5: The Orchestrator & Concierge (Quarkus Native)
 
 The primary edge router and user-facing gateway. Receives user prompts, inspects AgentCard schemas across the mesh, and orchestrates multi-agent tasks using LangChain4j for query decomposition and response aggregation.
 

@@ -11,89 +11,343 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>solution-orchestrator</artifactId>
-    <name>DevSphere Orchestrator &amp; Concierge (Quarkus)</name>
+    <artifactId>solution-expense-agent</artifactId>
+    <packaging>war</packaging>
+    <name>DevSphere Expense &amp; Compliance Agent (WildFly + Java A2A SDK)</name>
+    <description>A2A agent that standardizes receipts into corporate audit-ready expense logs with compliance validation</description>
+
+    <properties>
+        <a2a-jakarta.version>1.0.0.Final</a2a-jakarta.version>
+        <version.wildfly>41.0.1.Final</version.wildfly>
+        <version.wildfly.datasources>11.4.0.Final</version.wildfly.datasources>
+        <version.wildfly.grpc>0.2.1.Final</version.wildfly.grpc>
+        <version.wildfly-maven-plugin>5.1.3.Final</version.wildfly-maven-plugin>
+        <langchain4j.version>1.20.0</langchain4j.version>
+        <jackson.version>2.18.2</jackson.version>
+        <jboss.home>${project.build.directory}/wildfly</jboss.home>
+        <!--
+            Default build does not provision a WildFly server.
+            Each profile sets this to 'package' and further configures the plugin.
+        -->
+        <wildfly.maven.plugin.phase>none</wildfly.maven.plugin.phase>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-bom</artifactId>
+                <version>11.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
-        <!-- Quarkus Core -->
+        <!-- Jakarta EE APIs — provided by WildFly -->
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-arc</artifactId>
+            <groupId>jakarta.enterprise</groupId>
+            <artifactId>jakarta.enterprise.cdi-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-jackson</artifactId>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- A2A MicroProfile Config integration -->
+        <dependency>
+            <groupId>org.a2aproject.sdk</groupId>
+            <artifactId>a2a-java-sdk-microprofile-config</artifactId>
+            <version>${a2a-sdk.version}</version>
+        </dependency>
+
+        <!-- A2A Java SDK — server core (bundled in WAR) -->
+        <dependency>
+            <groupId>org.a2aproject.sdk</groupId>
+            <artifactId>a2a-java-sdk-server-common</artifactId>
+            <version>${a2a-sdk.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.enterprise</groupId>
+                    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jakarta.inject</groupId>
+                    <artifactId>jakarta.inject-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- ============================================================ -->
+        <!-- Enterprise features: JPA-backed stores + replicated queue    -->
+        <!-- manager, enabling multi-node/load-balanced deployment.       -->
+        <!-- ============================================================ -->
+        <dependency>
+            <groupId>org.a2aproject.sdk</groupId>
+            <artifactId>a2a-java-extras-task-store-database-jpa</artifactId>
+            <version>${a2a-sdk.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.enterprise</groupId>
+                    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jakarta.inject</groupId>
+                    <artifactId>jakarta.inject-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.a2aproject.sdk</groupId>
+            <artifactId>a2a-java-extras-push-notification-config-store-database-jpa</artifactId>
+            <version>${a2a-sdk.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.enterprise</groupId>
+                    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jakarta.inject</groupId>
+                    <artifactId>jakarta.inject-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.a2aproject.sdk</groupId>
+            <artifactId>a2a-java-queue-manager-replicated-core</artifactId>
+            <version>${a2a-sdk.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.quarkus.arc</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.quarkus.security</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.a2aproject.sdk</groupId>
+            <artifactId>a2a-java-queue-manager-replication-mp-reactive</artifactId>
+            <version>${a2a-sdk.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.quarkus</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.quarkus.arc</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.quarkus.security</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- LangChain4j with Google AI Gemini -->
         <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-ai-gemini</artifactId>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>${langchain4j.version}</version>
         </dependency>
-
-        <!-- LangChain4j Agentic support (supervisor, A2A client agents) -->
-        <dependency>
-            <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-agentic</artifactId>
-        </dependency>
-
-        <!-- A2A client implementation for @A2AClientAgent -->
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-agentic-a2a</artifactId>
-            <version>1.19.0-beta29</version>
+            <artifactId>langchain4j-google-ai-gemini</artifactId>
+            <version>${langchain4j.version}</version>
         </dependency>
 
-        <!-- A2A client transports (JSON-RPC + REST) -->
+        <!-- JSON parsing -->
         <dependency>
-            <groupId>org.a2aproject.sdk</groupId>
-            <artifactId>a2a-java-sdk-client-transport-jsonrpc</artifactId>
-            <version>1.3.2.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.a2aproject.sdk</groupId>
-            <artifactId>a2a-java-sdk-client-transport-rest</artifactId>
-            <version>1.3.2.Final</version>
-        </dependency>
-
-        <!-- Test -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>io.quarkus.platform</groupId>
-                <artifactId>quarkus-maven-plugin</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>generate-code</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
                     <release>21</release>
-                    <parameters>true</parameters>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>${version.wildfly-maven-plugin}</version>
+                <configuration>
+                    <feature-packs>
+                        <feature-pack>
+                            <groupId>org.wildfly</groupId>
+                            <artifactId>wildfly-galleon-pack</artifactId>
+                            <version>${version.wildfly}</version>
+                        </feature-pack>
+                        <feature-pack>
+                            <groupId>org.wildfly</groupId>
+                            <artifactId>wildfly-datasources-galleon-pack</artifactId>
+                            <version>${version.wildfly.datasources}</version>
+                        </feature-pack>
+                    </feature-packs>
+                    <discover-provisioning-info>
+                        <add-ons>
+                            <add-on>wildfly-cli</add-on>
+                            <add-on>postgresql:default</add-on>
+                            <add-on>kafka</add-on>
+                        </add-ons>
+                    </discover-provisioning-info>
+                    <jboss-home>${jboss.home}</jboss-home>
+                    <name>ROOT.war</name>
+                    <provisioning-dir>${jboss.home}</provisioning-dir>
+                    <galleon-options>
+                        <jboss-fork-embedded>true</jboss-fork-embedded>
+                    </galleon-options>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>provisioning</id>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                        <phase>${wildfly.maven.plugin.phase}</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jsonrpc</id>
+            <properties>
+                <wildfly.maven.plugin.phase>package</wildfly.maven.plugin.phase>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.wildfly.a2a</groupId>
+                    <artifactId>a2a-jakarta-jsonrpc</artifactId>
+                    <version>${a2a-jakarta.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>grpc</id>
+            <properties>
+                <wildfly.maven.plugin.phase>package</wildfly.maven.plugin.phase>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.wildfly.a2a</groupId>
+                    <artifactId>a2a-jakarta-grpc</artifactId>
+                    <version>${a2a-jakarta.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>*</artifactId>
+                        </exclusion>
+                        <exclusion>
+                            <groupId>com.google.protobuf</groupId>
+                            <artifactId>protobuf-java</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.wildfly.a2a</groupId>
+                    <artifactId>a2a-jakarta-jsonrpc</artifactId>
+                    <version>${a2a-jakarta.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.wildfly.plugins</groupId>
+                        <artifactId>wildfly-maven-plugin</artifactId>
+                        <configuration>
+                            <feature-packs>
+                                <feature-pack>
+                                    <groupId>org.wildfly</groupId>
+                                    <artifactId>wildfly-galleon-pack</artifactId>
+                                    <version>${version.wildfly}</version>
+                                </feature-pack>
+                                <feature-pack>
+                                    <groupId>org.wildfly.grpc</groupId>
+                                    <artifactId>wildfly-grpc-feature-pack</artifactId>
+                                    <version>${version.wildfly.grpc}</version>
+                                </feature-pack>
+                                <feature-pack>
+                                    <groupId>org.wildfly</groupId>
+                                    <artifactId>wildfly-datasources-galleon-pack</artifactId>
+                                    <version>${version.wildfly.datasources}</version>
+                                </feature-pack>
+                            </feature-packs>
+                            <discover-provisioning-info>
+                                <add-ons>
+                                    <add-on>wildfly-cli</add-on>
+                                    <add-on>grpc</add-on>
+                                    <add-on>postgresql:default</add-on>
+                                    <add-on>kafka</add-on>
+                                </add-ons>
+                            </discover-provisioning-info>
+                            <galleon-options>
+                                <jboss-fork-embedded>true</jboss-fork-embedded>
+                                <stability-level>preview</stability-level>
+                            </galleon-options>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>provisioning</id>
+                                <goals>
+                                    <goal>package</goal>
+                                </goals>
+                                <phase>${wildfly.maven.plugin.phase}</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>rest</id>
+            <properties>
+                <wildfly.maven.plugin.phase>package</wildfly.maven.plugin.phase>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.wildfly.a2a</groupId>
+                    <artifactId>a2a-jakarta-rest</artifactId>
+                    <version>${a2a-jakarta.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.wildfly.a2a</groupId>
+                    <artifactId>a2a-jakarta-jsonrpc</artifactId>
+                    <version>${a2a-jakarta.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

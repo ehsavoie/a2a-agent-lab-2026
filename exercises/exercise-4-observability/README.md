@@ -1,4 +1,4 @@
-# Exercise 5: Enterprise Day-2 — Observability & Production Readiness
+# Exercise 4: Enterprise Day-2 — Observability & Production Readiness
 
 **Time:** 20 minutes
 
@@ -10,11 +10,11 @@ OpenTelemetry tracing across all agents (Quarkus, Spring Boot, WildFly/Java A2A 
 
 ## What's in This Directory
 
-This directory contains configuration snippets and code to **add on top of** the agents built in Exercises 1-4.
+This directory contains configuration snippets and code to **add on top of** the agents built in Exercises 1-3.
 
 | File | Description |
 |------|-------------|
-| `quarkus-otel-pom-additions.xml` | Maven dependency to add to the Orchestrator (Ex 4) |
+| `quarkus-otel-pom-additions.xml` | Maven dependency to add to the Orchestrator (Ex 5) |
 | `quarkus-otel-properties.properties` | OTel exporter config for Quarkus `application.properties` |
 | `spring-otel-pom-additions.xml` | Maven dependencies for the Venue Agent (Ex 2) |
 | `spring-otel-properties.properties` | OTel exporter config for Spring Boot `application.properties` |
@@ -41,7 +41,7 @@ This directory contains configuration snippets and code to **add on top of** the
 
 ## How to Apply
 
-### Quarkus Agent (Orchestrator — Exercise 4)
+### Quarkus Agent (Orchestrator — Exercise 5)
 
 1. Add the dependency from `quarkus-otel-pom-additions.xml` to the agent's `pom.xml`
 2. Append the properties from `quarkus-otel-properties.properties` to `application.properties`
@@ -59,7 +59,7 @@ This directory contains configuration snippets and code to **add on top of** the
 2. Add the code from `python_otel_setup.py` to `travel_agent.py` (before `main()`)
 3. Restart
 
-### Java A2A SDK Agents (Schedule Advisor + Expense Agent — Exercises 1 & 5)
+### Java A2A SDK Agents (Schedule Advisor + Expense Agent — Exercises 1 & 4)
 
 Java A2A SDK agents use manual OTel spans. See `TracedAgentExecutor.java` for the pattern — wrap the `execute()` method in a custom span and inject a `Tracer` from the OTel API.
 
@@ -81,4 +81,4 @@ Replace the anonymous `AgentExecutor` in any agent's executor producer with `Tra
 
 ## Full Instructions
 
-See [../../docs/exercise-5.md](../../docs/exercise-5.md) for the complete step-by-step guide, including the distributed state and load balancing discussion.
+See [../../docs/exercise-4.md](../../docs/exercise-4.md) for the complete step-by-step guide, including the distributed state and load balancing discussion.

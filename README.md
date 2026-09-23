@@ -153,7 +153,7 @@ sequenceDiagram
     O->>M: "Here's your plan, Maya:<br/>🚕 Take a rideshare (25 min, $35)...<br/>📅 Catch the 10:15 AM Vector Indexing talk...<br/>💰 Taxi receipt logged as EXP-A1B2C3D4..."
 ```
 
-### Sequence 4: Enterprise Agent (Exercise 5 — JPA + Kafka)
+### Sequence 4: Enterprise Agent (Exercise 4 — JPA + Kafka)
 
 The Expense Agent uses enterprise features for production-grade persistence and multi-node support:
 
@@ -214,8 +214,8 @@ open http://localhost:3000                     # Grafana UI (admin/admin)
 | 1 | [Your First A2A Agent](exercises/exercise-1-schedule-advisor/) | 30 min | Schedule & Content Advisor | Quarkus + `@RegisterAiService` |
 | 2 | [Cross-Runtime Agents](exercises/exercise-2-venue-agent/) | 20 min | Venue & On-Site Operations | Spring Boot + LangChain4j |
 | 3 | [Cross-Language Interop](exercises/exercise-3-travel-agent-python/) | 15 min | Travel & Logistics Agent | Python A2A SDK |
-| 4 | [The Orchestrator](exercises/exercise-4-orchestrator/) | 25 min | Orchestrator & Concierge | Quarkus + Multi-Agent |
-| 5 | [Enterprise Day-2](exercises/exercise-5-expense-agent/) | 20 min | Expense & Compliance Agent + OpenTelemetry | WildFly 41 Enterprise (JPA + Kafka) |
+| 4 | [Enterprise Day-2](exercises/exercise-4-expense-agent/) | 20 min | Expense & Compliance Agent + OpenTelemetry | WildFly 41 Enterprise (JPA + Kafka) |
+| 5 | [The Orchestrator](exercises/exercise-5-orchestrator/) | 25 min | Orchestrator & Concierge | Quarkus + Multi-Agent |
 
 Each exercise adds a new agent to the DevSphere mesh. If you fall behind, check the `solutions/` directory for complete working code at each checkpoint.
 

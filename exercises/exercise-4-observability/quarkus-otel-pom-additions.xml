@@ -1,4 +1,4 @@
-<!-- Add these dependencies to exercise-1-session-agent/pom.xml and exercise-4-concierge/pom.xml -->
+<!-- Add these dependencies to exercise-1-session-agent/pom.xml and exercise-5-concierge/pom.xml -->
 
 <!-- OpenTelemetry for Quarkus -->
 <dependency>

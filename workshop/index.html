@@ -541,40 +541,40 @@
     </div>
 
     <div class="sidebar-section">
-        <div class="sidebar-section-title">Exercise 4 &mdash; Orchestrator</div>
+        <div class="sidebar-section-title">Exercise 4 &mdash; Expense + OTel</div>
         <a href="#ex4-intro" class="sidebar-link">
-            <span class="step-num purple">0</span> Orchestrator overview
+            <span class="step-num purple">1</span> Expense Agent
         </a>
         <a href="#ex4-step1" class="sidebar-link">
-            <span class="step-num purple">1</span> A2A Client Agents
+            <span class="step-num purple">2</span> Cross-Agent Handoff
         </a>
         <a href="#ex4-step2" class="sidebar-link">
-            <span class="step-num purple">2</span> Supervisor Agent
+            <span class="step-num purple">3</span> OTel Setup
         </a>
         <a href="#ex4-step3" class="sidebar-link">
-            <span class="step-num purple">3</span> REST Endpoint &amp; Web UI
+            <span class="step-num purple">4</span> Grafana &amp; Production
         </a>
         <a href="#ex4-test" class="sidebar-link">
-            <span class="step-num purple">&#10003;</span> Test &amp; validate
+            <span class="step-num purple">&#10003;</span> Wrap-up
         </a>
     </div>
 
     <div class="sidebar-section">
-        <div class="sidebar-section-title">Exercise 5 &mdash; Expense + OTel</div>
+        <div class="sidebar-section-title">Exercise 5 &mdash; Orchestrator</div>
         <a href="#ex5-intro" class="sidebar-link">
-            <span class="step-num red">1</span> Expense Agent
+            <span class="step-num red">0</span> Orchestrator overview
         </a>
         <a href="#ex5-step1" class="sidebar-link">
-            <span class="step-num red">2</span> Cross-Agent Handoff
+            <span class="step-num red">1</span> A2A Client Agents
         </a>
         <a href="#ex5-step2" class="sidebar-link">
-            <span class="step-num red">3</span> OTel Setup
+            <span class="step-num red">2</span> Supervisor Agent
         </a>
         <a href="#ex5-step3" class="sidebar-link">
-            <span class="step-num red">4</span> Grafana &amp; Production
+            <span class="step-num red">3</span> REST Endpoint &amp; Web UI
         </a>
         <a href="#ex5-test" class="sidebar-link">
-            <span class="step-num red">&#10003;</span> Wrap-up
+            <span class="step-num red">&#10003;</span> Test &amp; validate
         </a>
     </div>
 
@@ -633,14 +633,14 @@
         <p>Python A2A SDK agent for flights, transit, hotels, and receipt extraction. Cross-language Java &harr; Python.</p>
     </div>
     <div class="card">
-        <div class="card-icon">&#129504;</div>
-        <h4>Exercise 4: Orchestrator</h4>
-        <p>Quarkus REST app with <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> — the LLM orchestrates A2A sub-agents autonomously.</p>
+        <div class="card-icon">&#128176;</div>
+        <h4>Exercise 4: Expense + OTel</h4>
+        <p>WildFly Enterprise expense agent (JPA, Kafka, multi-transport) with cross-agent handoff, plus OpenTelemetry tracing with the Grafana LGTM stack.</p>
     </div>
     <div class="card">
-        <div class="card-icon">&#128176;</div>
-        <h4>Exercise 5: Expense + OTel</h4>
-        <p>WildFly Enterprise expense agent (JPA, Kafka, multi-transport) with cross-agent handoff, plus OpenTelemetry tracing with the Grafana LGTM stack.</p>
+        <div class="card-icon">&#129504;</div>
+        <h4>Exercise 5: Orchestrator</h4>
+        <p>Quarkus REST app with <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> — the LLM orchestrates A2A sub-agents autonomously.</p>
     </div>
 </div>
 
@@ -663,12 +663,12 @@
         <p>Travel &amp; Logistics Agent: Python agent with flight status, transit comparison, receipt extraction</p>
     </div>
     <div class="timeline-item purple">
-        <strong>Exercise 4 &mdash; 25 min</strong>
-        <p>Orchestrator &amp; Concierge: Quarkus REST app with <code>@SupervisorAgent</code>, <code>@A2AClientAgent</code>, and web UI</p>
+        <strong>Exercise 4 &mdash; 20 min</strong>
+        <p>Expense &amp; Compliance Agent (WildFly Enterprise) + OpenTelemetry tracing across the entire call chain in Grafana</p>
     </div>
     <div class="timeline-item red">
-        <strong>Exercise 5 &mdash; 20 min</strong>
-        <p>Expense &amp; Compliance Agent (WildFly Enterprise) + OpenTelemetry tracing across the entire call chain in Grafana</p>
+        <strong>Exercise 5 &mdash; 25 min</strong>
+        <p>Orchestrator &amp; Concierge: Quarkus REST app with <code>@SupervisorAgent</code>, <code>@A2AClientAgent</code>, and web UI</p>
     </div>
 </div>
 </section>
@@ -736,9 +736,9 @@ mvn install -DskipTests</code></pre>
     exercise-1-schedule-advisor/       &larr; Quarkus + A2A Java SDK
     exercise-2-venue-agent/            &larr; Spring Boot + Spring AI
     exercise-3-travel-agent-python/    &larr; Python A2A SDK
-    exercise-4-orchestrator/           &larr; Quarkus Native Orchestrator
-    exercise-5-expense-agent/          &larr; WildFly 41 Enterprise (JPA, Kafka)
-    exercise-5-observability/          &larr; OTel configuration snippets
+    exercise-4-expense-agent/          &larr; WildFly 41 Enterprise (JPA, Kafka)
+    exercise-4-observability/          &larr; OTel configuration snippets
+    exercise-5-orchestrator/           &larr; Quarkus Native Orchestrator
   solutions/                           &larr; Complete solutions + scripts</code></pre>
 </section>
 
@@ -1428,7 +1428,7 @@ def extract_receipt(query):
 
 <div class="callout info">
     <div class="callout-title">&#128161; Receipt extraction for cross-agent handoff</div>
-    <p>The <code>receipt-extraction</code> skill outputs structured data that the Expense &amp; Compliance Agent (Exercise 5) can consume. This is the cross-language data handoff in Maya&rsquo;s scenario.</p>
+    <p>The <code>receipt-extraction</code> skill outputs structured data that the Expense &amp; Compliance Agent (Exercise 4) can consume. This is the cross-language data handoff in Maya&rsquo;s scenario.</p>
 </div>
 </section>
 
@@ -1598,218 +1598,26 @@ Java &rarr; Python A2A Interop Client
 
 <div class="callout success">
     <div class="callout-title">&#9989; Key takeaway</div>
-    <p><strong>A2A is a wire protocol.</strong> Any language that speaks JSON-RPC over HTTP can participate in the mesh. Keep all three agents running for Exercise 4.</p>
+    <p><strong>A2A is a wire protocol.</strong> Any language that speaks JSON-RPC over HTTP can participate in the mesh. Keep all three agents running for Exercise 5.</p>
 </div>
 </section>
 
 
 <!-- ============================================================ -->
-<!-- EXERCISE 4: ORCHESTRATOR & CONCIERGE                          -->
+<!-- EXERCISE 4: EXPENSE & COMPLIANCE + OBSERVABILITY              -->
 <!-- ============================================================ -->
 <section id="ex4-intro" class="section-anchor">
-<h2><span class="badge badge-purple">Exercise 4</span> The Orchestrator &amp; Concierge <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(25 min)</span></h2>
+<h2><span class="badge badge-purple">Exercise 4</span> Expense &amp; Compliance + Enterprise Observability <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(20 min)</span></h2>
 
-<p><em>&ldquo;Maya types: &lsquo;My flight was delayed so I missed the morning shuttle. I&rsquo;m interested in agentic AI and Java agents&mdash;what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?&rsquo; No single agent can answer this. You need an orchestrator.&rdquo;</em></p>
-
-<div class="arch-diagram">
-<pre>
-  Browser / curl
-       |
-       v  POST /api/query
-  +-------------------------------+
-  |  Orchestrator (Quarkus) :8090 |
-  |  REST app + Web UI            |
-  |                               |
-  |  @SupervisorAgent             |
-  |   LLM decides which agents   |
-  |   to call, then synthesizes   |
-  |   the final answer            |
-  |                               |
-  |  @A2AClientAgent sub-agents   |
-  |  +--------+ +------+ +-----+ |
-  |  |Schedule| |Travel| |Venue| |
-  |  |:8080   | |:9000 | |:8081| |
-  |  +--------+ +------+ +-----+ |
-  +-------------------------------+
-</pre>
-</div>
-
-<pre><code>cd exercises/exercise-4-orchestrator</code></pre>
-</section>
-
-<!-- Step 1: A2A Client Agents -->
-<section id="ex4-step1" class="section-anchor">
-<div class="step-box">
-    <div class="step-header">
-        <span class="step-number" style="background: var(--accent-purple);">1</span>
-        <span class="step-title">Declare A2A Client Agents</span>
-    </div>
-    <p>Each downstream A2A agent is wrapped as a LangChain4j sub-agent using <code>@A2AClientAgent</code>. The framework automatically fetches the AgentCard and handles A2A communication. Use the <code>@V</code> annotation on parameters to bind them as agentic scope variables.</p>
-</div>
-
-<details class="solution">
-    <summary>Show ScheduleAdvisorA2AAgent.java (one per remote agent)</summary>
-    <div class="solution-body">
-<pre><code>import dev.langchain4j.agentic.declarative.A2AClientAgent;
-import dev.langchain4j.service.V;
-
-public interface ScheduleAdvisorA2AAgent {
-
-    @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8080",
-            name = "Schedule &amp; Content Advisor",
-            description = "Answers questions about conference sessions, schedules, speakers, and talk content",
-            outputKey = "response"
-    )
-    String ask(@V("query") String query);
-}
-
-// Similarly: VenueA2AAgent, TravelA2AAgent, ExpenseA2AAgent
-// Each points to a different agent URL</code></pre>
-    </div>
-</details>
-</section>
-
-<!-- Step 2: Supervisor Agent -->
-<section id="ex4-step2" class="section-anchor">
-<div class="step-box">
-    <div class="step-header">
-        <span class="step-number" style="background: var(--accent-purple);">2</span>
-        <span class="step-title">Supervisor Agent</span>
-    </div>
-    <p>The <code>@SupervisorAgent</code> is the brain of the orchestrator. The LLM autonomously decides which sub-agents to call based on the user&rsquo;s question, then synthesizes a unified response.</p>
-</div>
-
-<details class="solution">
-    <summary>Show OrchestratorSupervisor.java</summary>
-    <div class="solution-body">
-<pre><code>public interface OrchestratorSupervisor {
-
-    @SystemMessage("""
-            You are the DevSphere conference concierge for Devoxx Belgium 2026
-            at Kinepolis Antwerp.
-            You coordinate specialist agents to answer attendee questions.
-            Use the available agents to gather information, then synthesize
-            a clear, helpful response.
-            """)
-    @SupervisorAgent(
-            name = "DevSphere Orchestrator",
-            description = "Orchestrates specialist agents to answer complex, multi-domain questions",
-            subAgents = {
-                    ScheduleAdvisorA2AAgent.class,
-                    VenueA2AAgent.class,
-                    TravelA2AAgent.class,
-                    ExpenseA2AAgent.class
-            }
-    )
-    String orchestrate(String query);
-}</code></pre>
-    </div>
-</details>
-
-<div class="callout info">
-    <div class="callout-title">&#128161; No manual routing needed</div>
-    <p>Unlike a hand-coded decompose/dispatch/aggregate loop, the <code>@SupervisorAgent</code> lets the LLM decide which agents to call and how to combine results. Add a new <code>@A2AClientAgent</code> sub-agent and the supervisor automatically learns to use it.</p>
-</div>
-</section>
-
-<!-- Step 3: REST Endpoint -->
-<section id="ex4-step3" class="section-anchor">
-<div class="step-box">
-    <div class="step-header">
-        <span class="step-number" style="background: var(--accent-purple);">3</span>
-        <span class="step-title">REST Endpoint &amp; Web UI</span>
-    </div>
-    <p>The orchestrator is <strong>not</strong> an A2A agent itself &mdash; it&rsquo;s the user-facing entry point. A simple JAX-RS resource exposes <code>POST /api/query</code> and a built-in web UI at the root lets you chat interactively.</p>
-</div>
-
-<details class="solution">
-    <summary>Show OrchestratorResource.java</summary>
-    <div class="solution-body">
-<pre><code>@Path("/api")
-public class OrchestratorResource {
-
-    @Inject
-    OrchestratorSupervisor supervisor;
-
-    @POST
-    @Path("/query")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public QueryResponse query(QueryRequest request) {
-        String response = supervisor.orchestrate(request.query());
-        return new QueryResponse(response);
-    }
-
-    public record QueryRequest(String query) {}
-    public record QueryResponse(String response) {}
-}</code></pre>
-    </div>
-</details>
-</section>
-
-<!-- Test Exercise 4 -->
-<section id="ex4-test" class="section-anchor">
-<div class="step-box">
-    <div class="step-header">
-        <span class="step-number" style="background: var(--accent-purple);">&#10003;</span>
-        <span class="step-title">Test the Orchestrator</span>
-    </div>
-
-    <h4>Make sure these agents are running</h4>
-    <table>
-        <thead><tr><th>Terminal</th><th>Agent</th><th>Port</th></tr></thead>
-        <tbody>
-            <tr><td>Tab 1</td><td>Schedule &amp; Content Advisor (Quarkus)</td><td>8080</td></tr>
-            <tr><td>Tab 2</td><td>Venue &amp; On-Site Operations (Spring Boot)</td><td>8081</td></tr>
-            <tr><td>Tab 3</td><td>Travel &amp; Logistics (Python)</td><td>9000</td></tr>
-            <tr><td>Tab 4</td><td><strong>Orchestrator &amp; Concierge (Quarkus)</strong></td><td><strong>8090</strong></td></tr>
-        </tbody>
-    </table>
-
-    <h4>Start the Orchestrator</h4>
-    <pre><code>cd exercises/exercise-4-orchestrator
-mvn quarkus:dev</code></pre>
-
-    <h4>Send Maya&rsquo;s full scenario (curl)</h4>
-    <pre><code>curl -s -X POST http://localhost:8090/api/query \
-  -H "Content-Type: application/json" \
-  -d '{"query": "My flight was delayed. What sessions about LangChain4j or agentic patterns are available today, and how do I get to the venue quickly?"}' | jq .</code></pre>
-
-    <h4>Or use the Web UI</h4>
-    <p>Open <a href="http://localhost:8090" target="_blank">http://localhost:8090</a> in your browser for an interactive chat interface.</p>
-</div>
-
-<h3>Checkpoint</h3>
-
-<ul class="checklist">
-    <li>Orchestrator running on port 8090 with web UI at the root</li>
-    <li><code>@A2AClientAgent</code> interfaces wrap each remote A2A agent</li>
-    <li><code>@SupervisorAgent</code> lets the LLM autonomously select and call agents</li>
-    <li>Single unified response synthesized from multiple agent answers</li>
-    <li><code>POST /api/query</code> returns a JSON response</li>
-</ul>
-
-<div class="callout success">
-    <div class="callout-title">&#9989; Key takeaway</div>
-    <p><strong>LangChain4j + A2A:</strong> the <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> annotations replace hundreds of lines of manual orchestration code. The Orchestrator doesn&rsquo;t know how any agent is implemented &mdash; it only knows what each agent can do (from the AgentCard) and how to talk to it (via A2A). The orchestrator itself is just a REST app &mdash; only the downstream agents speak A2A.</p>
-</div>
-</section>
-
-
-<!-- ============================================================ -->
-<!-- EXERCISE 5: EXPENSE & COMPLIANCE + OBSERVABILITY              -->
-<!-- ============================================================ -->
-<section id="ex5-intro" class="section-anchor">
-<h2><span class="badge badge-red">Exercise 5</span> Expense &amp; Compliance + Enterprise Observability <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(20 min)</span></h2>
 
 <p><em>&ldquo;Maya uploads her taxi receipt photo. The Travel Agent extracts the fare details and the Expense &amp; Compliance Agent processes it into an audit-ready reimbursement entry. Meanwhile, the ops team watches the full trace in Grafana.&rdquo;</em></p>
 </section>
 
-<section id="ex5-step1" class="section-anchor">
+
+<section id="ex4-step1" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
-        <span class="step-number" style="background: var(--accent-red);">1</span>
+        <span class="step-number" style="background: var(--accent-purple);">1</span>
         <span class="step-title">Build the Expense &amp; Compliance Agent (Java A2A SDK)</span>
     </div>
     <p>A Jakarta EE enterprise agent on WildFly 41 with JPA persistence, Kafka replication, and multi-transport support that standardizes receipts into corporate audit-ready expense logs.</p>
@@ -1852,7 +1660,7 @@ mvn quarkus:dev</code></pre>
 </details>
 
 <h4>Build &amp; Run on port 8082</h4>
-<pre><code>cd exercises/exercise-5-expense-agent
+<pre><code>cd exercises/exercise-4-expense-agent
 mvn package -Pjsonrpc
 ./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2</code></pre>
 
@@ -1861,10 +1669,10 @@ mvn package -Pjsonrpc
 </section>
 
 <!-- Cross-Agent Handoff -->
-<section id="ex5-step2" class="section-anchor">
+<section id="ex4-step2" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
-        <span class="step-number" style="background: var(--accent-red);">2</span>
+        <span class="step-number" style="background: var(--accent-purple);">2</span>
         <span class="step-title">Cross-Agent Data Handoff</span>
     </div>
     <p>The key integration point in Maya&rsquo;s scenario: the Travel Agent&rsquo;s <code>receipt-extraction</code> skill outputs structured data that the Expense Agent&rsquo;s <code>receipt-processing</code> skill consumes.</p>
@@ -1885,10 +1693,10 @@ extract_receipt(query)         &rarr;        processReceipt(receiptData)
 </section>
 
 <!-- OTel Setup -->
-<section id="ex5-step3" class="section-anchor">
+<section id="ex4-step3" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
-        <span class="step-number" style="background: var(--accent-red);">3</span>
+        <span class="step-number" style="background: var(--accent-purple);">3</span>
         <span class="step-title">OpenTelemetry + Grafana LGTM</span>
     </div>
     <p>Add tracing to all agents so you can see the full distributed call chain.</p>
@@ -1943,10 +1751,10 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
 </section>
 
 <!-- Wrap-up -->
-<section id="ex5-test" class="section-anchor">
+<section id="ex4-test" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
-        <span class="step-number" style="background: var(--accent-red);">&#10003;</span>
+        <span class="step-number" style="background: var(--accent-purple);">&#10003;</span>
         <span class="step-title">Checkpoint</span>
     </div>
 </div>
@@ -1989,6 +1797,201 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
 
 
 <!-- ============================================================ -->
+<!-- EXERCISE 5: ORCHESTRATOR & CONCIERGE                          -->
+<!-- ============================================================ -->
+<section id="ex5-intro" class="section-anchor">
+<h2><span class="badge badge-red">Exercise 5</span> The Orchestrator &amp; Concierge <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(25 min)</span></h2>
+
+<p><em>&ldquo;Maya types: &lsquo;My flight was delayed so I missed the morning shuttle. I&rsquo;m interested in agentic AI and Java agents&mdash;what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?&rsquo; No single agent can answer this. You need an orchestrator.&rdquo;</em></p>
+
+<div class="arch-diagram">
+<pre>
+  Browser / curl
+       |
+       v  POST /api/query
+  +-------------------------------+
+  |  Orchestrator (Quarkus) :8090 |
+  |  REST app + Web UI            |
+  |                               |
+  |  @SupervisorAgent             |
+  |   LLM decides which agents   |
+  |   to call, then synthesizes   |
+  |   the final answer            |
+  |                               |
+  |  @A2AClientAgent sub-agents   |
+  |  +--------+ +------+ +-----+ |
+  |  |Schedule| |Travel| |Venue| |
+  |  |:8080   | |:9000 | |:8081| |
+  |  +--------+ +------+ +-----+ |
+  +-------------------------------+
+</pre>
+</div>
+
+<pre><code>cd exercises/exercise-5-orchestrator</code></pre>
+</section>
+
+<!-- Step 1: A2A Client Agents -->
+<section id="ex5-step1" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">1</span>
+        <span class="step-title">Declare A2A Client Agents</span>
+    </div>
+    <p>Each downstream A2A agent is wrapped as a LangChain4j sub-agent using <code>@A2AClientAgent</code>. The framework automatically fetches the AgentCard and handles A2A communication. Use the <code>@V</code> annotation on parameters to bind them as agentic scope variables.</p>
+</div>
+
+<details class="solution">
+    <summary>Show ScheduleAdvisorA2AAgent.java (one per remote agent)</summary>
+    <div class="solution-body">
+<pre><code>import dev.langchain4j.agentic.declarative.A2AClientAgent;
+import dev.langchain4j.service.V;
+
+public interface ScheduleAdvisorA2AAgent {
+
+    @A2AClientAgent(
+            a2aServerUrl = "http://localhost:8080",
+            name = "Schedule &amp; Content Advisor",
+            description = "Answers questions about conference sessions, schedules, speakers, and talk content",
+            outputKey = "response"
+    )
+    String ask(@V("query") String query);
+}
+
+// Similarly: VenueA2AAgent, TravelA2AAgent, ExpenseA2AAgent
+// Each points to a different agent URL</code></pre>
+    </div>
+</details>
+</section>
+
+<!-- Step 2: Supervisor Agent -->
+<section id="ex5-step2" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">2</span>
+        <span class="step-title">Supervisor Agent</span>
+    </div>
+    <p>The <code>@SupervisorAgent</code> is the brain of the orchestrator. The LLM autonomously decides which sub-agents to call based on the user&rsquo;s question, then synthesizes a unified response.</p>
+</div>
+
+<details class="solution">
+    <summary>Show OrchestratorSupervisor.java</summary>
+    <div class="solution-body">
+<pre><code>public interface OrchestratorSupervisor {
+
+    @SystemMessage("""
+            You are the DevSphere conference concierge for Devoxx Belgium 2026
+            at Kinepolis Antwerp.
+            You coordinate specialist agents to answer attendee questions.
+            Use the available agents to gather information, then synthesize
+            a clear, helpful response.
+            """)
+    @SupervisorAgent(
+            name = "DevSphere Orchestrator",
+            description = "Orchestrates specialist agents to answer complex, multi-domain questions",
+            subAgents = {
+                    ScheduleAdvisorA2AAgent.class,
+                    VenueA2AAgent.class,
+                    TravelA2AAgent.class,
+                    ExpenseA2AAgent.class
+            }
+    )
+    String orchestrate(String query);
+}</code></pre>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; No manual routing needed</div>
+    <p>Unlike a hand-coded decompose/dispatch/aggregate loop, the <code>@SupervisorAgent</code> lets the LLM decide which agents to call and how to combine results. Add a new <code>@A2AClientAgent</code> sub-agent and the supervisor automatically learns to use it.</p>
+</div>
+</section>
+
+<!-- Step 3: REST Endpoint -->
+<section id="ex5-step3" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">3</span>
+        <span class="step-title">REST Endpoint &amp; Web UI</span>
+    </div>
+    <p>The orchestrator is <strong>not</strong> an A2A agent itself &mdash; it&rsquo;s the user-facing entry point. A simple JAX-RS resource exposes <code>POST /api/query</code> and a built-in web UI at the root lets you chat interactively.</p>
+</div>
+
+<details class="solution">
+    <summary>Show OrchestratorResource.java</summary>
+    <div class="solution-body">
+<pre><code>@Path("/api")
+public class OrchestratorResource {
+
+    @Inject
+    OrchestratorSupervisor supervisor;
+
+    @POST
+    @Path("/query")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public QueryResponse query(QueryRequest request) {
+        String response = supervisor.orchestrate(request.query());
+        return new QueryResponse(response);
+    }
+
+    public record QueryRequest(String query) {}
+    public record QueryResponse(String response) {}
+}</code></pre>
+    </div>
+</details>
+</section>
+
+<!-- Test Exercise 5 -->
+<section id="ex5-test" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">&#10003;</span>
+        <span class="step-title">Test the Orchestrator</span>
+    </div>
+
+    <h4>Make sure these agents are running</h4>
+    <table>
+        <thead><tr><th>Terminal</th><th>Agent</th><th>Port</th></tr></thead>
+        <tbody>
+            <tr><td>Tab 1</td><td>Schedule &amp; Content Advisor (Quarkus)</td><td>8080</td></tr>
+            <tr><td>Tab 2</td><td>Venue &amp; On-Site Operations (Spring Boot)</td><td>8081</td></tr>
+            <tr><td>Tab 3</td><td>Travel &amp; Logistics (Python)</td><td>9000</td></tr>
+            <tr><td>Tab 4</td><td>Expense &amp; Compliance (WildFly)</td><td>8082</td></tr>
+            <tr><td>Tab 5</td><td><strong>Orchestrator &amp; Concierge (Quarkus)</strong></td><td><strong>8090</strong></td></tr>
+        </tbody>
+    </table>
+
+    <h4>Start the Orchestrator</h4>
+    <pre><code>cd exercises/exercise-5-orchestrator
+mvn quarkus:dev</code></pre>
+
+    <h4>Send Maya&rsquo;s full scenario (curl)</h4>
+    <pre><code>curl -s -X POST http://localhost:8090/api/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "My flight was delayed. What sessions about LangChain4j or agentic patterns are available today, and how do I get to the venue quickly?"}' | jq .</code></pre>
+
+    <h4>Or use the Web UI</h4>
+    <p>Open <a href="http://localhost:8090" target="_blank">http://localhost:8090</a> in your browser for an interactive chat interface.</p>
+</div>
+
+<h3>Checkpoint</h3>
+
+<ul class="checklist">
+    <li>Orchestrator running on port 8090 with web UI at the root</li>
+    <li><code>@A2AClientAgent</code> interfaces wrap each remote A2A agent</li>
+    <li><code>@SupervisorAgent</code> lets the LLM autonomously select and call agents</li>
+    <li>Single unified response synthesized from multiple agent answers</li>
+    <li><code>POST /api/query</code> returns a JSON response</li>
+</ul>
+
+<div class="callout success">
+    <div class="callout-title">&#9989; Key takeaway</div>
+    <p><strong>LangChain4j + A2A:</strong> the <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> annotations replace hundreds of lines of manual orchestration code. The Orchestrator doesn&rsquo;t know how any agent is implemented &mdash; it only knows what each agent can do (from the AgentCard) and how to talk to it (via A2A). The orchestrator itself is just a REST app &mdash; only the downstream agents speak A2A.</p>
+</div>
+</section>
+
+
+<!-- ============================================================ -->
 <!-- WHAT'S NEXT                                                   -->
 <!-- ============================================================ -->
 <section id="whats-next" class="section-anchor">
@@ -2010,12 +2013,12 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
         <p>Python agent for flights, transit comparison, and receipt extraction &mdash; cross-language A2A</p>
     </div>
     <div class="timeline-item purple">
-        <strong>Exercise 4 &mdash; Orchestrator &amp; Concierge</strong>
-        <p>Quarkus REST app with <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> &mdash; LLM-driven orchestration with a web UI</p>
+        <strong>Exercise 4 &mdash; Expense &amp; Compliance + Observability</strong>
+        <p>WildFly Enterprise agent (JPA, Kafka, multi-transport) with cross-agent data handoff and OpenTelemetry tracing in Grafana</p>
     </div>
     <div class="timeline-item red">
-        <strong>Exercise 5 &mdash; Expense &amp; Compliance + Observability</strong>
-        <p>WildFly Enterprise agent (JPA, Kafka, multi-transport) with cross-agent data handoff and OpenTelemetry tracing in Grafana</p>
+        <strong>Exercise 5 &mdash; Orchestrator &amp; Concierge</strong>
+        <p>Quarkus REST app with <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> &mdash; LLM-driven orchestration with a web UI</p>
     </div>
 </div>
 
