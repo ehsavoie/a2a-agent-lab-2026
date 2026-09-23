@@ -21,9 +21,16 @@ The complete working **Venue & On-Site Operations Agent** built with Spring Boot
 
 ```bash
 export OPENAI_API_KEY=your-api-key-here
-./run-all.sh
-# Or manually:
+# From the repository root, run the matching solution:
+cd solutions/exercise-2
 mvn spring-boot:run
+```
+
+`run-all.sh` launches the exercise project under `exercises/`. From the repository root, use it to run that version instead:
+
+```bash
+export OPENAI_API_KEY=your-api-key-here
+./solutions/exercise-2/run-all.sh
 ```
 
 ## How to Verify
