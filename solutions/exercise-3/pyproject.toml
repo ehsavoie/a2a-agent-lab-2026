@@ -14,3 +14,6 @@ llm = [
     "langchain>=0.3.0",
     "langchain-openai>=0.3.0",
 ]
+
+[tool.setuptools]
+py-modules = ["travel_agent"]
