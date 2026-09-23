@@ -15,7 +15,7 @@ It is 8:15 AM on Day 1. Maya lands at the airport, but her flight was delayed by
 Here's how the mesh resolves her request in real-time:
 
 1. **Edge Routing & Decomposition** — The Quarkus Orchestrator parses Maya's intent, inspects the active AgentCard registry, and splits the prompt into sub-tasks
-2. **Travel & Transit** — The Python Travel Agent compares transit options and determines a rideshare is 15 min faster than the delayed airport express train
+2. **Travel & Transit** — The Python Travel Agent compares transit options and determines a rideshare is 20 min faster than the delayed airport express train
 3. **Session Matching** — The Quarkus Schedule Advisor filters out morning sessions (Maya arrives at 9:45 AM) and finds a 10:15 AM session on "Scaling Vector Indexing in Enterprise Meshes"
 4. **Venue Check** — The Spring Boot Venue Agent checks Hall B's real-time IoT sensors, confirms 60% capacity, and reserves a fast-track entry pass
 5. **Expense Log** — The WildFly Expense Agent processes Maya's taxi receipt into an audit-ready reimbursement entry
