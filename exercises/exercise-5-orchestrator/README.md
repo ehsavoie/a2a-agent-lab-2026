@@ -32,3 +32,7 @@ curl -s -X POST http://localhost:8090/ \
     "id": "maya-1"
   }' | jq .
 ```
+
+## Full Instructions
+
+See [../../docs/exercise-5.md](../../docs/exercise-5.md) for the complete step-by-step guide.

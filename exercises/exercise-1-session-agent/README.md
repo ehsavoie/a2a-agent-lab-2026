@@ -103,6 +103,6 @@ A successful response looks like:
 - `status.state` is `completed`
 - `artifacts[0].parts[0].text` contains session recommendations
 
-## Step-by-Step Guide
+## Full Instructions
 
 See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the full walkthrough.

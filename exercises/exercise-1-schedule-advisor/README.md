@@ -87,3 +87,7 @@ User message → A2A JSON-RPC transport
 | `session-search` | Search sessions by topic, technology, speaker, or track |
 | `session-recommend` | Personalized recommendations based on interests and availability |
 | `speaker-info` | Speaker information and their sessions |
+
+## Full Instructions
+
+See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the complete step-by-step guide.

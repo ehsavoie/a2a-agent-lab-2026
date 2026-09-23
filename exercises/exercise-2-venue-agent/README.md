@@ -37,3 +37,7 @@ curl -s -X POST http://localhost:8081/message:send \
 | `indoor-map` | Get walking directions between venue locations |
 | `catering-queue` | Check catering station queue lengths and wait times |
 | `entry-pass` | Reserve a fast-track entry pass for priority seating |
+
+## Full Instructions
+
+See [../../docs/exercise-2.md](../../docs/exercise-2.md) for the complete step-by-step guide.
