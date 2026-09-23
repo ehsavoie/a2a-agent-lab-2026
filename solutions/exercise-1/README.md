@@ -10,11 +10,11 @@ This is the complete working **Schedule & Content Advisor** agent built with Qua
 | `ScheduleService.java` | `@RegisterAiService(tools = ScheduleTool.class)` — Quarkus auto-wires the LLM with the schedule tools |
 | `ScheduleAgentCardProducer.java` | CDI producer for the A2A AgentCard |
 | `ScheduleAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
-| `application.properties` | Quarkus HTTP port, Ollama connection, session data path, agent identity |
+| `application.properties` | Quarkus HTTP port, Gemini config, session data path, agent identity |
 
 ## Prerequisites
 
-- Ollama running on `localhost:11434` with the `granite4:350m` model pulled
+- `GOOGLE_AI_GEMINI_API_KEY` environment variable set with a valid Google AI Studio API key
 - JDK 21+, Maven 3.9+
 
 ## How to Run

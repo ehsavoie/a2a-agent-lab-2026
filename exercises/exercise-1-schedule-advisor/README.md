@@ -2,7 +2,7 @@
 
 The **Schedule & Content Advisor** deep-scans the Devoxx Belgium 2026 session catalog, speaker bios, and domain tracks. It matches attendee skill levels and interests to specific talks.
 
-Built with **Quarkus**, the **A2A Java SDK reference implementation** (`a2a-java-sdk-reference-jsonrpc`), and **Quarkus LangChain4j** with Ollama for native `@RegisterAiService` tool calling.
+Built with **Quarkus**, the **A2A Java SDK reference implementation** (`a2a-java-sdk-reference-jsonrpc`), and **Quarkus LangChain4j** with Google AI Gemini for native `@RegisterAiService` tool calling.
 
 ## Quick Start
 
@@ -64,7 +64,7 @@ curl -s -X POST http://localhost:8080/ \
 | `ScheduleService.java` | `@RegisterAiService(tools = ScheduleTool.class)` — Quarkus auto-wires the LLM with the schedule tools |
 | `ScheduleAgentCardProducer.java` | CDI `@Produces @PublicAgentCard` for the A2A AgentCard |
 | `ScheduleAgentExecutorProducer.java` | CDI `@Produces` for the AgentExecutor (message handling) |
-| `application.properties` | Quarkus HTTP port, Ollama config, session data path, agent identity |
+| `application.properties` | Quarkus HTTP port, Gemini config, session data path, agent identity |
 
 ## How It Works
 

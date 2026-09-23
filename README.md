@@ -197,14 +197,13 @@ sequenceDiagram
 git clone <repo-url>
 cd a2a-agent-lab-2026
 
-# 2. Start infrastructure (Ollama + Grafana LGTM)
+# 2. Start infrastructure (Grafana LGTM)
 podman-compose up -d
 
-# 3. Wait for Ollama to be ready and the model to be pulled
-podman logs -f devconf-ollama-pull
+# 3. Set your Google AI Gemini API key
+export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
 
 # 4. Verify
-curl http://localhost:11434/api/tags          # Should list 'granite4:350m'
 open http://localhost:3000                     # Grafana UI (admin/admin)
 ```
 
@@ -261,6 +260,6 @@ mvn compile
 - **[Quarkus](https://quarkus.io/)** — Supersonic Subatomic Java framework
 - **[Spring Boot](https://spring.io/projects/spring-boot)** — Java application framework
 - **[WildFly](https://www.wildfly.org/)** — Jakarta EE application server
-- **[Ollama](https://ollama.ai/)** — Local LLM runner
+- **[Google AI Gemini](https://ai.google.dev/)** — Google's Gemini LLM API
 - **[OpenTelemetry](https://opentelemetry.io/)** — Observability framework
 - **[Grafana LGTM](https://grafana.com/blog/2024/03/13/an-opentelemetry-backend-in-a-docker-image-introducing-grafana/otel-lgtm/)** — All-in-one observability stack (Loki + Grafana + Tempo + Mimir)

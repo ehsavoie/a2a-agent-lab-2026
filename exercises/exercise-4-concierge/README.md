@@ -48,7 +48,7 @@ exercise-4-concierge/
 
 - Exercise 1 **Session Agent** running on port **8080**
 - Exercise 3 **Travel Tips Agent** running on port **9000**
-- Ollama running on port **11434**
+- `GOOGLE_AI_GEMINI_API_KEY` environment variable set
 
 ## How to Run
 

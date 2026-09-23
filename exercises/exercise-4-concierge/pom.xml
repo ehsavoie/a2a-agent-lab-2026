@@ -4,36 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.devconf</groupId>
+    <parent>
+        <groupId>dev.devconf</groupId>
+        <artifactId>a2a-agent-lab</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
     <artifactId>concierge-agent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <name>DevConf Concierge Agent (Quarkus)</name>
-
-    <properties>
-        <maven.compiler.release>21</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <quarkus.platform.version>3.39.4</quarkus.platform.version>
-        <quarkus-langchain4j.version>1.14.0.CR3</quarkus-langchain4j.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.quarkus.platform</groupId>
-                <artifactId>quarkus-bom</artifactId>
-                <version>${quarkus.platform.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.quarkiverse.langchain4j</groupId>
-                <artifactId>quarkus-langchain4j-bom</artifactId>
-                <version>${quarkus-langchain4j.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- Quarkus Core -->
@@ -46,10 +25,10 @@
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
 
-        <!-- LangChain4j with OpenAI -->
+        <!-- LangChain4j with Google AI Gemini -->
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
-            <artifactId>quarkus-langchain4j-openai</artifactId>
+            <artifactId>quarkus-langchain4j-ai-gemini</artifactId>
         </dependency>
 
         <!-- LangChain4j Agentic support (supervisor, A2A client agents) -->

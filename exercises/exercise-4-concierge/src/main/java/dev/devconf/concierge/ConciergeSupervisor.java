@@ -2,6 +2,8 @@ package dev.devconf.concierge;
 
 import dev.langchain4j.agentic.declarative.SupervisorAgent;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
 
 public interface ConciergeSupervisor {
 
@@ -28,5 +30,6 @@ public interface ConciergeSupervisor {
                     TravelA2AAgent.class
             }
     )
-    String concierge(String query);
+    @UserMessage("{query}")
+    String concierge(@V("query") String query);
 }

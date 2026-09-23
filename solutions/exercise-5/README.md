@@ -11,7 +11,7 @@ The full source lives in `../../exercises/exercise-5-expense-agent/`:
 |------|---------|
 | `ExpenseTool.java` | `@Tool` methods for logging expenses, processing receipts, compliance checks |
 | `ExpenseService.java` | AI Service interface for expense operations |
-| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with OllamaChatModel |
+| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with GoogleAiGeminiChatModel |
 | `ExpenseAgentCardProducer.java` | Port-offset-aware AgentCard with multi-transport auto-detection |
 | `ExpenseAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
 | `persistence.xml` | JPA persistence unit for PostgreSQL-backed task/notification stores |

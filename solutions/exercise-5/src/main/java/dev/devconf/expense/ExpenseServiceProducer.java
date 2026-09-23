@@ -1,6 +1,6 @@
 package dev.devconf.expense;
 
-import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.service.AiServices;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -9,19 +9,19 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class ExpenseServiceProducer {
 
-    @ConfigProperty(name = "ollama.base-url", defaultValue = "http://localhost:11434")
-    String ollamaBaseUrl;
+    @ConfigProperty(name = "gemini.api-key")
+    String geminiApiKey;
 
-    @ConfigProperty(name = "ollama.model-name", defaultValue = "granite4:350m")
-    String ollamaModelName;
+    @ConfigProperty(name = "gemini.model-name", defaultValue = "gemini-2.5-flash")
+    String geminiModelName;
 
     private ExpenseService expenseService;
 
     @PostConstruct
     void init() {
-        OllamaChatModel chatModel = OllamaChatModel.builder()
-                .baseUrl(ollamaBaseUrl)
-                .modelName(ollamaModelName)
+        GoogleAiGeminiChatModel chatModel = GoogleAiGeminiChatModel.builder()
+                .apiKey(geminiApiKey)
+                .modelName(geminiModelName)
                 .temperature(0.7)
                 .timeout(java.time.Duration.ofSeconds(120))
                 .build();

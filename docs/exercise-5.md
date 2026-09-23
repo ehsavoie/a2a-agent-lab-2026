@@ -97,9 +97,9 @@ public class ExpenseServiceProducer {
 
     @PostConstruct
     void init() {
-        OllamaChatModel chatModel = OllamaChatModel.builder()
-                .baseUrl(ollamaBaseUrl)
-                .modelName(ollamaModelName)
+        GoogleAiGeminiChatModel chatModel = GoogleAiGeminiChatModel.builder()
+                .apiKey(geminiApiKey)
+                .modelName(geminiModelName)
                 .build();
 
         expenseService = AiServices.builder(ExpenseService.class)
@@ -410,7 +410,7 @@ DevSphere Orchestrator
 This gives you:
 - **Total latency**: How long the full request took
 - **Per-agent latency**: How long each specialist agent took
-- **LLM call duration**: How much time was spent in Ollama
+- **LLM call duration**: How much time was spent in Google AI Gemini
 - **Network overhead**: The gap between spans shows serialization/network time
 
 ---
@@ -513,7 +513,7 @@ In two hours, you built a **production-grade A2A agent ecosystem**:
 
 > **Troubleshooting:**
 >
-> - **"Connection refused" on Ollama**: Make sure `podman-compose up -d` is running and the model has been pulled. Check with `curl http://localhost:11434/api/tags`.
-> - **Empty responses**: The first LLM call can be slow while Ollama loads the model. Increase the timeout if needed.
+> - **"API key not valid"**: Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set with a valid Google AI Studio API key.
+> - **Empty responses**: The first LLM call can be slow. Increase the timeout if needed.
 > - **Port 8082 conflict**: Make sure you're starting WildFly with `-Djboss.socket.binding.port-offset=2`.
 > - **No traces in Grafana**: Verify the LGTM stack is running on port 3000 (Grafana) and OTLP collector is on port 4317. Check that all agents have OTel configured correctly.

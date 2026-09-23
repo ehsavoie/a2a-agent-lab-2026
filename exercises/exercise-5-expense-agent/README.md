@@ -6,7 +6,7 @@ The **Expense & Compliance Agent** standardizes receipts and session attendance 
 
 - **Runtime:** WildFly 41 (Jakarta EE) with enterprise features
 - **A2A SDK:** `a2a-jakarta-jsonrpc` / `a2a-jakarta-rest` / `a2a-jakarta-grpc` (via Maven profiles)
-- **LLM:** LangChain4j + Ollama (Qwen3)
+- **LLM:** LangChain4j + Google AI Gemini
 - **Persistence:** JPA-backed TaskStore + PushNotificationConfigStore (PostgreSQL)
 - **Replication:** Kafka replicated queue manager for multi-node deployment
 - **Port:** 8082 (WildFly with port offset 2)
@@ -97,7 +97,7 @@ curl -s -X POST http://localhost:8082/ \
 |------|---------|
 | `ExpenseTool.java` | `@Tool` methods for logging expenses, processing receipts, compliance checks |
 | `ExpenseService.java` | AI Service interface for expense operations |
-| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with OllamaChatModel |
+| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with GoogleAiGeminiChatModel |
 | `ExpenseAgentCardProducer.java` | Port-offset-aware AgentCard with multi-transport auto-detection |
 | `ExpenseAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
 | `persistence.xml` | JPA persistence unit for JpaTask + JpaPushNotificationConfig |

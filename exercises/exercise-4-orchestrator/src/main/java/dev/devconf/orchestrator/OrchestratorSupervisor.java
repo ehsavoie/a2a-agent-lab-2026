@@ -2,6 +2,8 @@ package dev.devconf.orchestrator;
 
 import dev.langchain4j.agentic.declarative.SupervisorAgent;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.service.V;
 
 public interface OrchestratorSupervisor {
 
@@ -30,5 +32,6 @@ public interface OrchestratorSupervisor {
                     ExpenseA2AAgent.class
             }
     )
-    String orchestrate(String query);
+    @UserMessage("{query}")
+    String orchestrate(@V("query") String query);
 }

@@ -9,7 +9,7 @@ The conference organizers need an AI agent that helps attendees find the right s
 - A **Quarkus + LangChain4j** A2A agent running on port 8080
 - An **AgentCard** advertising the agent's skills via `/.well-known/agent-card.json`
 - An **AgentExecutor** that receives A2A messages and returns structured responses
-- LLM-powered **session search** using Ollama/Qwen3 with tool calling against the conference schedule
+- LLM-powered **session search** using Google AI Gemini with tool calling against the conference schedule
 
 ## Key A2A Concepts
 
@@ -30,19 +30,16 @@ src/main/java/dev/devconf/session/
 └── SessionAgentExecutorProducer.java # CDI producer for the AgentExecutor (message handling)
 
 src/main/resources/
-└── application.properties           # Ollama URL, model, port, agent metadata
+└── application.properties           # Gemini API key, model, port, agent metadata
 ```
 
 ## Prerequisites
 
-Ollama must be running with the `granite4:350m` model pulled. From the repo root:
+Set your Google AI Gemini API key:
 
 ```bash
-podman-compose up -d
-podman logs -f devconf-ollama-pull   # Wait for "success"
+export GOOGLE_AI_GEMINI_API_KEY=your-api-key-here
 ```
-
-Verify: `curl http://localhost:11434/api/tags` should list `granite4:350m`.
 
 ## How to Run
 

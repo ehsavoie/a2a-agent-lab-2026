@@ -10,11 +10,11 @@ The complete working **Venue & On-Site Operations Agent** built with Spring Boot
 | `VenueService.java` | LangChain4j AI Service interface with `@SystemMessage` |
 | `VenueAgentConfig.java` | Spring `@Configuration` with `@Bean` for AgentCard + AgentExecutor (using `AiServices.builder`) |
 | `VenueAgentApplication.java` | Spring Boot main class |
-| `application.properties` | Port 8081, LangChain4j Ollama config, agent metadata |
+| `application.properties` | Port 8081, LangChain4j Gemini config, agent metadata |
 
 ## Prerequisites
 
-- Ollama running on `localhost:11434` with the `granite4:350m` model pulled
+- `GOOGLE_AI_GEMINI_API_KEY` environment variable set with a valid Google AI Studio API key
 - JDK 21+, Maven 3.9+
 
 ## How to Run

@@ -64,7 +64,7 @@ cd exercises/exercise-4-orchestrator
 
 The `pom.xml` is set up with the same Quarkus stack used across the lab:
 - Quarkus (Arc, REST, Jackson)
-- LangChain4j with Ollama
+- LangChain4j with Google AI Gemini
 - A2A Java SDK (server + client)
 
 Check `src/main/resources/application.properties`:
@@ -72,9 +72,9 @@ Check `src/main/resources/application.properties`:
 ```properties
 quarkus.http.port=8090
 
-# Ollama
-quarkus.langchain4j.ollama.base-url=http://localhost:11434
-quarkus.langchain4j.ollama.chat-model.model-id=granite4:350m
+# Google AI Gemini
+quarkus.langchain4j.ai.gemini.api-key=${GOOGLE_AI_GEMINI_API_KEY}
+quarkus.langchain4j.ai.gemini.chat-model.model-id=gemini-2.5-flash
 
 # Agent URLs for discovery
 orchestrator.agent-urls=http://localhost:8080,http://localhost:8081,http://localhost:9000,http://localhost:8082

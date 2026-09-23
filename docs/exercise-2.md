@@ -75,7 +75,7 @@ cd exercises/exercise-2-venue-agent
 
 Check `pom.xml` — key dependencies:
 - `spring-boot-starter-web` — embedded HTTP server
-- `langchain4j-ollama-spring-boot-starter` — LangChain4j with Ollama
+- `langchain4j-google-ai-gemini-spring-boot-starter` — LangChain4j with Google AI Gemini
 - `a2a-spring-boot-starter-server-rest` — A2A REST transport for Spring Boot
 
 ---
@@ -191,10 +191,9 @@ Check `src/main/resources/application.properties`:
 ```properties
 server.port=8081
 
-langchain4j.ollama.chat-model.base-url=http://localhost:11434
-langchain4j.ollama.chat-model.model-name=granite4:350m
-langchain4j.ollama.chat-model.temperature=0.7
-langchain4j.ollama.chat-model.timeout=PT60S
+langchain4j.google-ai-gemini.chat-model.api-key=${GOOGLE_AI_GEMINI_API_KEY}
+langchain4j.google-ai-gemini.chat-model.model-name=gemini-2.5-flash
+langchain4j.google-ai-gemini.chat-model.temperature=0.7
 
 a2a.agent.name=Venue & On-Site Operations Agent
 a2a.agent.description=Manages real-time venue operations including IoT room capacity, indoor mapping, and catering tracking
@@ -202,7 +201,7 @@ a2a.agent.version=1.0.0
 a2a.agent.url=http://localhost:8081
 ```
 
-Make sure Ollama is running with the granite model, then start:
+Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set, then start:
 
 ```bash
 mvn spring-boot:run
@@ -328,6 +327,6 @@ At this point you should have:
 
 > **Troubleshooting:**
 >
-> - **"Connection refused" on Ollama**: Make sure `podman-compose up -d` is running and the model has been pulled.
+> - **"API key not valid"**: Make sure your `GOOGLE_AI_GEMINI_API_KEY` environment variable is set with a valid Google AI Studio API key.
 > - **Port conflict**: Make sure no other service is running on port 8081.
-> - **LangChain4j auto-config issues**: Ensure `langchain4j-ollama-spring-boot-starter` is in your classpath — it auto-configures the `ChatModel` bean that `AiServices.builder()` uses.
+> - **LangChain4j auto-config issues**: Ensure `langchain4j-google-ai-gemini-spring-boot-starter` is in your classpath — it auto-configures the `ChatModel` bean that `AiServices.builder()` uses.

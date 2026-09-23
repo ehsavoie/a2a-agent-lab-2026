@@ -4,16 +4,22 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.devconf</groupId>
+    <parent>
+        <groupId>dev.devconf</groupId>
+        <artifactId>a2a-agent-lab</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
     <artifactId>a2a-lab-exercises</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>A2A Agent Lab - Exercises</name>
     <description>Parent aggregator for all Java exercise modules</description>
 
     <modules>
         <module>exercise-1-schedule-advisor</module>
+        <module>exercise-1-session-agent</module>
         <module>exercise-2-venue-agent</module>
+        <module>exercise-4-concierge</module>
         <module>exercise-4-orchestrator</module>
         <module>exercise-5-expense-agent</module>
     </modules>

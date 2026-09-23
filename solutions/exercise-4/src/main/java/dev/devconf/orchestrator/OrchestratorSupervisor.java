@@ -3,6 +3,7 @@ package dev.devconf.orchestrator;
 import dev.langchain4j.agentic.declarative.SupervisorAgent;
 import dev.langchain4j.agentic.supervisor.SupervisorResponseStrategy;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
 
 public interface OrchestratorSupervisor {
@@ -22,15 +23,17 @@ public interface OrchestratorSupervisor {
             - Include specific, actionable details (times, rooms, directions).
             - Do NOT mention internal agent names or system architecture.
             """)
+    @UserMessage("Can you answer the attendee request: {{request}}")
     @SupervisorAgent(
             name = "DevSphere Orchestrator",
             description = "Orchestrates specialist agents to answer complex, multi-domain questions about Devoxx Belgium 2026",
-            responseStrategy= SupervisorResponseStrategy.LAST,
+            responseStrategy= SupervisorResponseStrategy.SUMMARY,
             subAgents = {
                     ScheduleAdvisorA2AAgent.class,
                     VenueA2AAgent.class,
                     TravelA2AAgent.class
-            }
+            },
+            outputKey = "response"
     )
-    String orchestrate(@V("query") String query);
+    String orchestrate(@V("request") String request);
 }

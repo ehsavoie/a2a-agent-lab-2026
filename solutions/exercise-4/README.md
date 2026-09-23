@@ -14,11 +14,11 @@ The full source lives in `../../exercises/exercise-4-orchestrator/`:
 | `ResponseAggregator.java` | LangChain4j AI Service that synthesizes multi-agent responses |
 | `OrchestratorAgentCardProducer.java` | AgentCard with skill "general-conference-assistant" |
 | `OrchestratorAgentExecutorProducer.java` | Orchestration loop: decompose → dispatch → aggregate |
-| `application.properties` | Port 8090, agent URLs, Ollama config |
+| `application.properties` | Port 8090, agent URLs, Gemini config |
 
 ## Prerequisites
 
-- Ollama running on `localhost:11434` with the `granite4:350m` model
+- `GOOGLE_AI_GEMINI_API_KEY` environment variable set with a valid Google AI Studio API key
 - **Schedule & Content Advisor** running on port **8080** (Exercise 1)
 - **Venue & On-Site Operations Agent** running on port **8081** (Exercise 2)
 - **Travel & Logistics Agent** running on port **9000** (Exercise 3)
