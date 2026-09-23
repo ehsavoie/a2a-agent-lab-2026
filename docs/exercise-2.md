@@ -133,12 +133,6 @@ public class VenueAgentConfig {
                 .build();
     }
 
-    private static final String SYSTEM_INSTRUCTION = """
-            You are the DevConf 2026 Venue & On-Site Operations Agent.
-            You manage real-time venue information including room capacity
-            via IoT sensors, indoor navigation, and catering queue tracking.
-            """;
-
     @Bean
     public VenueService venueService(ChatModel model, VenueTool venueTool) {
         return AiServices.builder(VenueService.class)
@@ -189,6 +183,8 @@ public class VenueAgentConfig {
     }
 }
 ```
+
+The system message is declared with `@SystemMessage` in `VenueService.java`.
 
 Compare this with Exercise 1:
 - `@Bean` replaces `@Produces`
@@ -270,11 +266,11 @@ You should get a confirmation with a unique pass ID.
 
 ### 5d. Retrieve a Task by ID
 
-The `SendMessage` response includes a `taskId`. You can retrieve the full task state at any time using the REST `GetTask` endpoint:
+The REST `SendMessage` response includes a task ID at `task.id`. You can retrieve the full task state at any time using the REST `GetTask` endpoint:
 
 ```bash
-# Replace <taskId> with the taskId from the SendMessage response
-curl -s http://localhost:8081/tasks/<taskId> \
+TASK_ID="<id from task.id>" # Replace the placeholder with the SendMessage response value
+curl -s "http://localhost:8081/tasks/${TASK_ID}" \
   -H 'A2A-Version: 1.0' | jq .
 ```
 
@@ -308,17 +304,17 @@ curl -s -X POST http://localhost:8080/ \
   -H 'Content-Type: application/json' \
   -H 'A2A-Version: 1.0' \
   -d '{"jsonrpc":"2.0","method":"SendMessage","params":{"message":{"messageId":"msg-1","role":"ROLE_USER","parts":[{"text":"What agentic AI sessions are available on October 7?"}]}},"id":"1"}' \
-  | jq .result.status.state
+  | jq .result.task.status.state
 
 # Ask the Venue Agent about room capacity (REST)
 curl -s -X POST http://localhost:8081/message:send \
   -H 'Content-Type: application/json' \
   -H 'A2A-Version: 1.0' \
   -d '{"message":{"messageId":"msg-1","role":"ROLE_USER","parts":[{"text":"Is Hall B full?"}]}}' \
-  | jq .result.status.state
+  | jq .task.status.state
 ```
 
-Both should return `"completed"` — different skills, different frameworks, same protocol.
+Both should return `"TASK_STATE_COMPLETED"` — different skills, different frameworks, same protocol.
 
 ---
 
