@@ -1,6 +1,6 @@
 # Solution: Exercise 4 — Expense & Compliance Agent (WildFly Enterprise) + Observability
 
-The complete working **Expense & Compliance Agent** deployed on WildFly 41 with enterprise features (JPA persistence, Kafka replication, multi-transport support) plus **OpenTelemetry** integration across all agents.
+The complete working **Expense & Compliance Agent** deployed on WildFly 41 with enterprise features (JPA persistence, Kafka replication, multi-transport support), plus configuration snippets for adding **OpenTelemetry** across the agents.
 
 ## What's Included
 
@@ -33,22 +33,38 @@ Configuration snippets in `../../exercises/exercise-4-observability/`:
 | `quarkus-otel-properties.properties` | Orchestrator `application.properties` | Configures OTLP exporter → LGTM |
 | `spring-otel-pom-additions.xml` | Venue Agent `pom.xml` | Adds actuator + micrometer OTel bridge |
 | `spring-otel-properties.properties` | Venue Agent `application.properties` | Configures trace export → LGTM |
+| `python-otel-requirements.txt` | Travel Agent optional dependencies | Lists the packages needed for OTel tracing |
 | `python_otel_setup.py` | Travel Agent `travel_agent.py` | OTel initialization |
 
 ## Prerequisites
 
-- All agents from Exercises 1-3 running
+- For the full-system run, the script starts agents from Exercises 1-3 and the Exercise 5 Orchestrator. They are not needed to run the Expense Agent alone.
 - `OPENAI_API_KEY` set to an OpenAI API key with API billing enabled for `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
-- **LGTM stack** running (started by `podman-compose up -d`) — Grafana on port **3000**
+- Shared PostgreSQL, Kafka, and LGTM services running from the [development compose file](../../exercises/exercise-5-orchestrator/podman-compose.yml) — Grafana on port **3000**, Kafka on **9092**
+
+Start them from the repository root:
+
+```bash
+cd exercises/exercise-5-orchestrator
+podman-compose up -d
+podman exec devconf-kafka /opt/kafka/bin/kafka-topics.sh --create --if-not-exists \
+  --topic replicated-events --bootstrap-server localhost:9092 --partitions 1
+cd ../../solutions/exercise-4
+```
 
 ## How to Run the Expense Agent
 
 ```bash
 export OPENAI_API_KEY=your-api-key-here
+export POSTGRESQL_DATABASE=devconf
+export POSTGRESQL_USER=devconf
+export POSTGRESQL_PASSWORD=devconf
+# Full-system demo (starts agents from Exercises 1-5):
 ./run-full-system.sh
-# Or manually:
+# Or run only the Expense Agent:
 cd ../../exercises/exercise-4-expense-agent
 mvn package -Pjsonrpc
+cp target/expense-agent-1.0.0-SNAPSHOT.war target/wildfly/standalone/deployments/ROOT.war
 ./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2
 ```
 

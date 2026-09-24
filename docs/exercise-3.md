@@ -1,6 +1,6 @@
 # Exercise 3: Cross-Language — The Travel & Logistics Agent (15 min)
 
-> _"Maya's flight was delayed by two hours. She opens her DevSphere app and types: 'How do I get to the venue quickly?' The Travel & Logistics Agent — written in Python — compares a Bolt rideshare (35 min, €45) vs the disrupted NMBS train (55 min, €12) and recommends the rideshare. Language doesn't matter — A2A is a wire protocol."_
+> _"My plane ran late, and I am at Brussels Airport. How can I get to the convention center quickly?" The Travel & Logistics Agent — written in Python — compares a Bolt rideshare (35 min, €45) with the disrupted NMBS train (55 min, €12) and recommends the rideshare._
 
 ## Overview
 
@@ -11,7 +11,7 @@ In this exercise you will prove that A2A is truly language-independent. You will
 - Call it from your Java A2A client
 - Call your Java Schedule & Content Advisor from a Python client
 
-The key learning: **A2A is a wire protocol** — any language that speaks JSON-RPC over HTTP can participate in the mesh. Your Java agents and this Python agent are fully interoperable.
+The key learning: **A2A lets agents implemented in different languages interoperate.** This Python agent exposes the HTTP+JSON transport, while the Schedule & Content Advisor accepts JSON-RPC; the Python SDK client supports both bindings.
 
 ---
 
@@ -57,7 +57,7 @@ Open `travel_agent.py` and walk through it. You'll recognize the same A2A concep
 
 ### Travel & Logistics Data
 
-The agent has an expanded knowledge base covering Maya's full travel lifecycle:
+The agent has an expanded knowledge base covering an attendee's travel needs:
 
 ```python
 TRAVEL_DATA = {
@@ -112,7 +112,7 @@ def get_transit_options(query: str) -> str:
     lines.append(f"Recommendation: {best_option} is the fastest option today (~{best_time} min).")
 ```
 
-This is what makes Maya's scenario work: the NMBS train is normally 35 minutes, but today's track works between Mechelen and Antwerp bump it to 55 minutes — so the Bolt rideshare at 35 minutes wins.
+This is what makes the delayed-plane scenario work: the NMBS train is normally 35 minutes, but today's track works between Mechelen and Antwerp bump it to 55 minutes — so the Bolt rideshare at 35 minutes wins.
 
 ### Receipt Extraction (Key for Exercise 5)
 
@@ -209,7 +209,7 @@ curl -s http://localhost:9000/.well-known/agent-card.json | python -m json.tool
 
 You should see the AgentCard with skills like `flight-status`, `transit-routes`, `receipt-extraction` — the same JSON structure as your Java agents.
 
-### Test Maya's scenario: transit comparison (REST transport)
+### Test the delayed-plane scenario: transit comparison (HTTP+JSON transport)
 
 ```bash
 curl -s -X POST http://localhost:9000/message:send \
@@ -219,7 +219,7 @@ curl -s -X POST http://localhost:9000/message:send \
     "message": {
       "messageId": "msg-1",
       "role": "ROLE_USER",
-      "parts": [{"text": "My flight was delayed. How do I get to Kinepolis Antwerp quickly?"}]
+      "parts": [{"text": "My plane ran late, and I am at Brussels Airport. How can I get to the convention center quickly?"}]
     }
   }' | python -m json.tool
 ```
@@ -247,36 +247,35 @@ You should see a structured receipt payload with vendor, amount (EUR), date, and
 
 ## Step 4: Java → Python
 
-Now let's call the Python agent from Java. Make sure your Schedule & Content Advisor from Exercise 1 is still running on port 8080.
+Now let's call the Python agent from Java. Make sure your Schedule & Content Advisor from Exercise 1 is still running on port 8080. It requires `OPENAI_API_KEY`; the Python Travel Agent does not. See the [Schedule & Content Advisor quick start](../exercises/exercise-1-schedule-advisor/README.md#quick-start) for its setup.
 
-You can use `jshell` or add this as a test class. Here's the A2A client call:
+The checked-in Java client uses the Java SDK's `Client` and REST transport. Its setup in [`TravelAgentClient.java`](../exercises/exercise-3-travel-agent-python/java-client/src/main/java/dev/devconf/travel/TravelAgentClient.java) looks like this:
 
 ```java
-import org.a2aproject.sdk.spec.*;
-import org.a2aproject.sdk.client.A2AClient;
-import java.util.List;
+import org.a2aproject.sdk.A2A;
+import org.a2aproject.sdk.client.Client;
+import org.a2aproject.sdk.client.transport.rest.RestTransport;
+import org.a2aproject.sdk.client.transport.rest.RestTransportConfigBuilder;
+import org.a2aproject.sdk.spec.AgentCard;
+import org.a2aproject.sdk.spec.Message;
 
-// Connect to the Python Travel & Logistics Agent
-A2AClient travelClient = A2AClient.builder()
-    .url("http://localhost:9000")
+AgentCard card = A2A.getAgentCard("http://localhost:9000");
+Client client = Client.builder(card)
+    .withTransport(RestTransport.class, new RestTransportConfigBuilder())
     .build();
 
-// Fetch its AgentCard — same structure as your Java agents
-AgentCard card = travelClient.getAgentCard();
-System.out.println("Agent: " + card.name());
-System.out.println("Skills: " + card.skills());
-
-// Send a message
-Message message = Message.builder()
-    .role("user")
-    .parts(List.of(new TextPart("How do I get from the airport to the venue?")))
-    .build();
-
-Task result = travelClient.sendMessage(message);
-System.out.println("Response: " + result);
+Message message = A2A.toUserMessage(
+    "My plane ran late, and I am at Brussels Airport. How can I get to the convention center quickly?");
 ```
 
-The key insight: **the Java A2A client code is identical whether the server is Java or Python.** The client doesn't know or care about the server's implementation language.
+The client sends messages asynchronously and handles task or message events. Run the checked-in client from the repository root:
+
+```bash
+cd exercises/exercise-3-travel-agent-python/java-client
+mvn compile exec:java
+```
+
+It fetches the AgentCard and sends transit, flight-status, and receipt queries. The SDK client uses the same A2A model when it calls agents implemented in different languages.
 
 ---
 
@@ -306,26 +305,27 @@ Python → Java A2A Interop Test
    Python client → Java A2A agent → response received
 ```
 
-Open `test_interop.py` to see how it works — it's a simple HTTP client that speaks the A2A JSON-RPC protocol:
+Open `test_interop.py` to see how it works — it creates a client with the A2A Python SDK, builds a `SendMessageRequest`, and consumes the SDK's response stream:
 
 ```python
-async def send_message(base_url: str, text: str) -> dict:
-    payload = {
-        "jsonrpc": "2.0",
-        "method": "SendMessage",
-        "params": {
-            "message": {
-                "messageId": "msg-1",
-                "role": "ROLE_USER",
-                "parts": [{"text": text}],
-            }
-        },
-        "id": "py-test-1",
-    }
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        response = await client.post(base_url, json=payload)
-        return response.json()
+config = ClientConfig(
+    httpx_client=httpx.AsyncClient(timeout=httpx.Timeout(600.0)),
+    supported_protocol_bindings=[TransportProtocol.HTTP_JSON, TransportProtocol.JSONRPC],
+    streaming=False,
+)
+async with await create_client(java_agent_url, client_config=config) as client:
+    request = SendMessageRequest(
+        message=Message(
+            message_id=str(uuid.uuid4()),
+            role=Role.ROLE_USER,
+            parts=[Part(text=query)],
+        ),
+    )
+    async for response in client.send_message(request):
+        ...  # The script handles task responses and direct messages.
 ```
+
+If the Java agent returns a task that is still working, the script polls it until it reaches a terminal state and reports an error if the task fails or has no response payload.
 
 ---
 
@@ -337,13 +337,13 @@ You now have:
 - **Python → Java** communication using the same protocol
 - **Receipt extraction** that outputs structured data for cross-agent handoff (Exercise 5)
 
-All agents — regardless of language — advertise their capabilities through AgentCards and handle messages through the same JSON-RPC protocol. The mesh is now truly polyglot.
+All agents — regardless of language — advertise their capabilities through AgentCards and exchange A2A messages over compatible HTTP bindings. Here, the Python agent uses HTTP+JSON and the Schedule & Content Advisor uses JSON-RPC.
 
 ### Running agents so far
 
 | Agent | Language | Framework | Port | Status |
 |-------|----------|-----------|------|--------|
-| Schedule & Content Advisor | Java | Jakarta EE / Java A2A SDK | 8080 | Running from Exercise 1 |
+| Schedule & Content Advisor | Java | Quarkus / Java A2A SDK (JSON-RPC) | 8080 | Running from Exercise 1 |
 | Venue & On-Site Operations Agent | Java | Spring Boot | 8081 | Running from Exercise 2 |
 | **Travel & Logistics Agent** | **Python** | **a2a-sdk** | **9000** | **New in this exercise** |
 
@@ -351,4 +351,4 @@ Keep all three agents running — the Orchestrator in Exercise 4 will coordinate
 
 ---
 
-> **Maya's journey so far:** The Travel & Logistics Agent has told Maya that a Bolt rideshare is 35 minutes from Brussels Airport to Kinepolis Antwerp (€45), much faster than the disrupted NMBS train (55 min). Her estimated arrival at the venue: 9:45 AM. This arrival time will be passed to the Schedule & Content Advisor (via the Orchestrator) to filter out sessions she's already missed.
+> **Travel scenario so far:** Your plane ran late, and you are at Brussels Airport. The Travel & Logistics Agent recommends a Bolt rideshare to Kinepolis Antwerp (35 min, €45), faster than the disrupted NMBS train (55 min, €12). The larger orchestration scenario uses 9:45 AM as the arrival time passed to the Schedule & Content Advisor; the Travel Agent returns travel durations and does not calculate that wall-clock arrival.

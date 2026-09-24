@@ -2,7 +2,7 @@
 
 **Time:** 15 minutes
 
-> _Maya's flight was delayed by two hours. She needs to know: "How do I get to the venue quickly?" The Travel & Logistics Agent compares rideshare, train, and taxi options — factoring in a transit disruption on the airport express — and recommends a Bolt rideshare for the 35-minute trip._
+> _"My plane ran late, and I am at Brussels Airport. How can I get to the convention center quickly?" The Travel & Logistics Agent compares rideshare, train, and taxi options — factoring in a transit disruption on the airport express — and recommends a Bolt rideshare for the 35-minute trip._
 
 ## What You Build
 
@@ -58,7 +58,7 @@ curl http://localhost:9000/.well-known/agent-card.json | python3 -m json.tool
 
 You should see the agent's name, skills (`flight-status`, `transit-routes`, `hotel-search`, `receipt-extraction`, `restaurant-search`, `local-tips`), and capabilities.
 
-**2. Send a transit query (Maya's scenario):**
+**2. Send a transit query:**
 
 ```bash
 curl -s -X POST http://localhost:9000/message:send \
