@@ -20,6 +20,12 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  kafka:
+    image: docker.io/apache/kafka:4.1.0
+    container_name: devconf-kafka
+    ports:
+      - "9092:9092"
+
   lgtm:
     image: docker.io/grafana/otel-lgtm:latest
     container_name: devconf-lgtm
