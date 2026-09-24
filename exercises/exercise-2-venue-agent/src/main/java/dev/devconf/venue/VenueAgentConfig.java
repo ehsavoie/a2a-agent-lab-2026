@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.openai.OpenAiResponsesChatModel;
 import dev.langchain4j.service.AiServices;
 
 import org.a2aproject.sdk.server.agentexecution.AgentExecutor;
@@ -38,6 +39,20 @@ public class VenueAgentConfig {
 
     @Value("${a2a.agent.url}")
     private String agentUrl;
+
+    @Bean
+    public ChatModel chatModel(
+            @Value("${langchain4j.open-ai.chat-model.api-key}") String apiKey,
+            @Value("${langchain4j.open-ai.chat-model.log-requests}") boolean logRequests,
+            @Value("${langchain4j.open-ai.chat-model.log-responses}") boolean logResponses) {
+        return OpenAiResponsesChatModel.builder()
+                .apiKey(apiKey)
+                .modelName("gpt-6-luna")
+                .reasoningEffort("medium")
+                .logRequests(logRequests)
+                .logResponses(logResponses)
+                .build();
+    }
 
     @Bean
     public VenueService venueService(ChatModel model, VenueTool venueTool) {
@@ -117,7 +132,7 @@ public class VenueAgentConfig {
                     emitter.addArtifact(
                             Collections.singletonList(new TextPart("Error: " + e.getMessage())),
                             null, "error", null);
-                    emitter.complete();
+                    emitter.fail();
                 }
             }
 

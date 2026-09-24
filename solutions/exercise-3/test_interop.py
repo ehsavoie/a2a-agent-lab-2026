@@ -96,17 +96,20 @@ async def main():
         print("\n3. Final result:")
         if task:
             print(f"   Task ID: {task.id}")
-            print(f"   State:   {TaskState.Name(task.status.state)}")
-            if task.artifacts:
+            task_state = TaskState.Name(task.status.state)
+            print(f"   State:   {task_state}")
+            if task.status.state != TaskState.TASK_STATE_COMPLETED:
+                raise RuntimeError(f"Java agent task ended in {task_state}.")
+            if task.artifacts and any(artifact.parts for artifact in task.artifacts):
                 for i, artifact in enumerate(task.artifacts):
                     print(f"   Artifact[{i}]: {MessageToDict(artifact)}")
             else:
-                print("   No artifacts in task.")
-        elif message_response:
+                raise RuntimeError("Java agent task completed without an artifact payload.")
+        elif message_response and message_response.parts:
             print("   Direct message response:")
             print(f"   {MessageToDict(message_response)}")
         else:
-            print("   No task or message in response.")
+            raise RuntimeError("No task or message payload received from the Java agent.")
 
     print("\n" + "=" * 60)
     print("✅ Cross-language interop successful!")

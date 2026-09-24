@@ -2,11 +2,20 @@
 
 The **Schedule & Content Advisor** deep-scans the Devoxx Belgium 2026 session catalog, speaker bios, and domain tracks. It matches attendee skill levels and interests to specific talks.
 
-Built with **Quarkus**, the **A2A Java SDK reference implementation** (`a2a-java-sdk-reference-jsonrpc`), and **Quarkus LangChain4j** with Ollama for native `@RegisterAiService` tool calling.
+Built with **Quarkus**, the **A2A Java SDK reference implementation** (`a2a-java-sdk-reference-jsonrpc`), and **Quarkus LangChain4j** with OpenAI GPT-6 Luna via the Responses API at medium reasoning effort for native `@RegisterAiService` tool calling.
 
 ## Quick Start
 
+Requires JDK 21+, Maven 3.9+, and an OpenAI API key with API billing enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+
 ```bash
+export OPENAI_API_KEY=your-api-key-here
+```
+
+```bash
+# From the repository root
+cd exercises/exercise-1-schedule-advisor
+
 # Start in dev mode (hot-reload on port 8080)
 mvn quarkus:dev
 
@@ -64,7 +73,7 @@ curl -s -X POST http://localhost:8080/ \
 | `ScheduleService.java` | `@RegisterAiService(tools = ScheduleTool.class)` — Quarkus auto-wires the LLM with the schedule tools |
 | `ScheduleAgentCardProducer.java` | CDI `@Produces @PublicAgentCard` for the A2A AgentCard |
 | `ScheduleAgentExecutorProducer.java` | CDI `@Produces` for the AgentExecutor (message handling) |
-| `application.properties` | Quarkus HTTP port, Ollama config, session data path, agent identity |
+| `application.properties` | Quarkus HTTP port, OpenAI model and reasoning config, session data path, agent identity |
 
 ## How It Works
 
@@ -87,3 +96,11 @@ User message → A2A JSON-RPC transport
 | `session-search` | Search sessions by topic, technology, speaker, or track |
 | `session-recommend` | Personalized recommendations based on interests and availability |
 | `speaker-info` | Speaker information and their sessions |
+
+## Companion Project
+
+The companion Session Agent project is in [exercise-1-session-agent](../exercise-1-session-agent/README.md).
+
+## Full Instructions
+
+See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the Exercise 1 walkthrough. It describes a Jakarta EE/WildFly version; this checked-in project uses Quarkus as shown above.

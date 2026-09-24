@@ -2,7 +2,7 @@
 
 **Time:** 15 minutes
 
-> _Maya's flight was delayed by two hours. She needs to know: "How do I get to the venue quickly?" The Travel & Logistics Agent compares rideshare, train, and taxi options — factoring in a transit disruption on the airport express — and recommends a Bolt rideshare in 15 minutes._
+> _Maya's flight was delayed by two hours. She needs to know: "How do I get to the venue quickly?" The Travel & Logistics Agent compares rideshare, train, and taxi options — factoring in a transit disruption on the airport express — and recommends a Bolt rideshare for the 35-minute trip._
 
 ## What You Build
 
@@ -23,7 +23,8 @@ A2A is a wire protocol — **any language, any framework**. A Python agent joins
 exercise-3-travel-agent-python/
 ├── pyproject.toml      # Dependencies: a2a-sdk, uvicorn, httpx
 ├── travel_agent.py     # Agent implementation (AgentCard, handler, data)
-└── test_interop.py     # Cross-language test: Python → Java Schedule Agent
+├── test_interop.py     # Cross-language test: Python → Java Schedule Agent
+└── java-client/        # Java → Python A2A interop client
 ```
 
 ## Prerequisites
@@ -31,11 +32,12 @@ exercise-3-travel-agent-python/
 - Python 3.11+
 - `pip` or `uv`
 - Exercise 1 Schedule & Content Advisor running on port 8080 (for the cross-language test)
+- JDK 21+ and Maven 3.9+ (for the Java → Python client)
 
 ## How to Run
 
 ```bash
-cd exercise-3-travel-agent-python
+cd exercises/exercise-3-travel-agent-python
 
 # Install dependencies
 pip install -e .
@@ -59,52 +61,49 @@ You should see the agent's name, skills (`flight-status`, `transit-routes`, `hot
 **2. Send a transit query (Maya's scenario):**
 
 ```bash
-curl -s -X POST http://localhost:9000/ \
+curl -s -X POST http://localhost:9000/message:send \
   -H "Content-Type: application/json" \
   -H "A2A-Version: 1.0" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "How do I get from the airport to the venue quickly?"}]
-      }
-    },
-    "id": "1"
+    "message": {
+      "messageId": "msg-1",
+      "role": "ROLE_USER",
+      "parts": [{"text": "My plane ran late, and I am at Brussels Airport. How can I get to the convention center quickly?"}]
+    }
   }' | python3 -m json.tool
 ```
 
 **3. Test receipt extraction:**
 
 ```bash
-curl -s -X POST http://localhost:9000/ \
+curl -s -X POST http://localhost:9000/message:send \
   -H "Content-Type: application/json" \
   -H "A2A-Version: 1.0" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "Log my taxi receipt for $42.50"}]
-      }
-    },
-    "id": "2"
+    "message": {
+      "messageId": "msg-1",
+      "role": "ROLE_USER",
+      "parts": [{"text": "Log my taxi receipt for $42.50"}]
+    }
   }' | python3 -m json.tool
 ```
 
 ## Cross-Language Test
 
-With the Java Schedule & Content Advisor running on port 8080:
+For Python → Java interop, start the [Schedule & Content Advisor](../exercise-1-schedule-advisor/README.md#quick-start) on port 8080. In another terminal, from this project directory, run:
 
 ```bash
 python test_interop.py
 ```
 
 This fetches the Java agent's AgentCard and sends it a query — proving Python-to-Java A2A interop.
+
+For Java → Python interop, keep the Travel Agent running on port 9000 and run the client in another terminal:
+
+```bash
+cd exercises/exercise-3-travel-agent-python/java-client
+mvn compile exec:java
+```
 
 ## Full Instructions
 

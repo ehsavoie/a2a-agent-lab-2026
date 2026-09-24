@@ -15,7 +15,7 @@ It is 8:15 AM on Day 1. Maya lands at the airport, but her flight was delayed by
 Here's how the mesh resolves her request in real-time:
 
 1. **Edge Routing & Decomposition** — The Quarkus Orchestrator parses Maya's intent, inspects the active AgentCard registry, and splits the prompt into sub-tasks
-2. **Travel & Transit** — The Python Travel Agent compares transit options and determines a rideshare is 15 min faster than the delayed airport express train
+2. **Travel & Transit** — The Python Travel Agent compares transit options and determines a rideshare is 20 min faster than the delayed airport express train
 3. **Session Matching** — The Quarkus Schedule Advisor filters out morning sessions (Maya arrives at 9:45 AM) and finds a 10:15 AM session on "Scaling Vector Indexing in Enterprise Meshes"
 4. **Venue Check** — The Spring Boot Venue Agent checks Hall B's real-time IoT sensors, confirms 60% capacity, and reserves a fast-track entry pass
 5. **Expense Log** — The WildFly Expense Agent processes Maya's taxi receipt into an audit-ready reimbursement entry
@@ -153,7 +153,7 @@ sequenceDiagram
     O->>M: "Here's your plan, Maya:<br/>🚕 Take a rideshare (25 min, $35)...<br/>📅 Catch the 10:15 AM Vector Indexing talk...<br/>💰 Taxi receipt logged as EXP-A1B2C3D4..."
 ```
 
-### Sequence 4: Enterprise Agent (Exercise 5 — JPA + Kafka)
+### Sequence 4: Enterprise Agent (Exercise 4 — JPA + Kafka)
 
 The Expense Agent uses enterprise features for production-grade persistence and multi-node support:
 
@@ -189,6 +189,7 @@ sequenceDiagram
 - **Podman** with `podman-compose`
 - **curl** or **httpie** for testing
 - A terminal with at least 4 tabs/panes
+- An OpenAI API key with API billing enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ## Quick Start
 
@@ -197,14 +198,13 @@ sequenceDiagram
 git clone <repo-url>
 cd a2a-agent-lab-2026
 
-# 2. Start infrastructure (Ollama + Grafana LGTM)
-podman-compose up -d
+# 2. Start infrastructure (Grafana LGTM)
+podman-compose -f exercises/exercise-5-orchestrator/podman-compose.yml up -d
 
-# 3. Wait for Ollama to be ready and the model to be pulled
-podman logs -f devconf-ollama-pull
+# 3. Set your OpenAI API key (used with gpt-6-luna at medium reasoning effort)
+export OPENAI_API_KEY=your-api-key-here
 
 # 4. Verify
-curl http://localhost:11434/api/tags          # Should list 'granite4:350m'
 open http://localhost:3000                     # Grafana UI (admin/admin)
 ```
 
@@ -215,8 +215,8 @@ open http://localhost:3000                     # Grafana UI (admin/admin)
 | 1 | [Your First A2A Agent](exercises/exercise-1-schedule-advisor/) | 30 min | Schedule & Content Advisor | Quarkus + `@RegisterAiService` |
 | 2 | [Cross-Runtime Agents](exercises/exercise-2-venue-agent/) | 20 min | Venue & On-Site Operations | Spring Boot + LangChain4j |
 | 3 | [Cross-Language Interop](exercises/exercise-3-travel-agent-python/) | 15 min | Travel & Logistics Agent | Python A2A SDK |
-| 4 | [The Orchestrator](exercises/exercise-4-orchestrator/) | 25 min | Orchestrator & Concierge | Quarkus + Multi-Agent |
-| 5 | [Enterprise Day-2](exercises/exercise-5-expense-agent/) | 20 min | Expense & Compliance Agent + OpenTelemetry | WildFly 41 Enterprise (JPA + Kafka) |
+| 4 | [Enterprise Day-2](exercises/exercise-4-expense-agent/) | 20 min | Expense & Compliance Agent + OpenTelemetry | WildFly 41 Enterprise (JPA + Kafka) |
+| 5 | [The Orchestrator](exercises/exercise-5-orchestrator/) | 25 min | Orchestrator & Concierge | Quarkus + Multi-Agent |
 
 Each exercise adds a new agent to the DevSphere mesh. If you fall behind, check the `solutions/` directory for complete working code at each checkpoint.
 
@@ -261,6 +261,6 @@ mvn compile
 - **[Quarkus](https://quarkus.io/)** — Supersonic Subatomic Java framework
 - **[Spring Boot](https://spring.io/projects/spring-boot)** — Java application framework
 - **[WildFly](https://www.wildfly.org/)** — Jakarta EE application server
-- **[Ollama](https://ollama.ai/)** — Local LLM runner
+- **[OpenAI API](https://developers.openai.com/api/docs/models/gpt-6-luna)** — GPT-6 Luna via the Responses API
 - **[OpenTelemetry](https://opentelemetry.io/)** — Observability framework
 - **[Grafana LGTM](https://grafana.com/blog/2024/03/13/an-opentelemetry-backend-in-a-docker-image-introducing-grafana/otel-lgtm/)** — All-in-one observability stack (Loki + Grafana + Tempo + Mimir)

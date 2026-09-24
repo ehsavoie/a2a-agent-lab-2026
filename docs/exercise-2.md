@@ -75,7 +75,7 @@ cd exercises/exercise-2-venue-agent
 
 Check `pom.xml` — key dependencies:
 - `spring-boot-starter-web` — embedded HTTP server
-- `langchain4j-ollama-spring-boot-starter` — LangChain4j with Ollama
+- `langchain4j-open-ai` — LangChain4j with the OpenAI Responses API
 - `a2a-spring-boot-starter-server-rest` — A2A REST transport for Spring Boot
 
 ---
@@ -119,11 +119,19 @@ Open `src/main/java/dev/devconf/venue/VenueAgentConfig.java`:
 @Configuration
 public class VenueAgentConfig {
 
-    private static final String SYSTEM_INSTRUCTION = """
-            You are the DevConf 2026 Venue & On-Site Operations Agent.
-            You manage real-time venue information including room capacity
-            via IoT sensors, indoor navigation, and catering queue tracking.
-            """;
+    @Bean
+    public ChatModel chatModel(
+            @Value("${langchain4j.open-ai.chat-model.api-key}") String apiKey,
+            @Value("${langchain4j.open-ai.chat-model.log-requests}") boolean logRequests,
+            @Value("${langchain4j.open-ai.chat-model.log-responses}") boolean logResponses) {
+        return OpenAiResponsesChatModel.builder()
+                .apiKey(apiKey)
+                .modelName("gpt-6-luna")
+                .reasoningEffort("medium")
+                .logRequests(logRequests)
+                .logResponses(logResponses)
+                .build();
+    }
 
     @Bean
     public VenueService venueService(ChatModel model, VenueTool venueTool) {
@@ -176,6 +184,8 @@ public class VenueAgentConfig {
 }
 ```
 
+The system message is declared with `@SystemMessage` in `VenueService.java`.
+
 Compare this with Exercise 1:
 - `@Bean` replaces `@Produces`
 - `@Value` replaces `@ConfigProperty`
@@ -191,10 +201,9 @@ Check `src/main/resources/application.properties`:
 ```properties
 server.port=8081
 
-langchain4j.ollama.chat-model.base-url=http://localhost:11434
-langchain4j.ollama.chat-model.model-name=granite4:350m
-langchain4j.ollama.chat-model.temperature=0.7
-langchain4j.ollama.chat-model.timeout=PT60S
+langchain4j.open-ai.chat-model.api-key=${OPENAI_API_KEY}
+langchain4j.open-ai.chat-model.log-requests=true
+langchain4j.open-ai.chat-model.log-responses=true
 
 a2a.agent.name=Venue & On-Site Operations Agent
 a2a.agent.description=Manages real-time venue operations including IoT room capacity, indoor mapping, and catering tracking
@@ -202,9 +211,10 @@ a2a.agent.version=1.0.0
 a2a.agent.url=http://localhost:8081
 ```
 
-Make sure Ollama is running with the granite model, then start:
+Create an OpenAI API key with API billing enabled and export it before starting. This configuration uses `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ```bash
+export OPENAI_API_KEY=your-api-key-here
 mvn spring-boot:run
 ```
 
@@ -256,11 +266,11 @@ You should get a confirmation with a unique pass ID.
 
 ### 5d. Retrieve a Task by ID
 
-The `SendMessage` response includes a `taskId`. You can retrieve the full task state at any time using the REST `GetTask` endpoint:
+The REST `SendMessage` response includes a task ID at `task.id`. You can retrieve the full task state at any time using the REST `GetTask` endpoint:
 
 ```bash
-# Replace <taskId> with the taskId from the SendMessage response
-curl -s http://localhost:8081/tasks/<taskId> \
+TASK_ID="<id from task.id>" # Replace the placeholder with the SendMessage response value
+curl -s "http://localhost:8081/tasks/${TASK_ID}" \
   -H 'A2A-Version: 1.0' | jq .
 ```
 
@@ -294,17 +304,17 @@ curl -s -X POST http://localhost:8080/ \
   -H 'Content-Type: application/json' \
   -H 'A2A-Version: 1.0' \
   -d '{"jsonrpc":"2.0","method":"SendMessage","params":{"message":{"messageId":"msg-1","role":"ROLE_USER","parts":[{"text":"What agentic AI sessions are available on October 7?"}]}},"id":"1"}' \
-  | jq .result.status.state
+  | jq .result.task.status.state
 
 # Ask the Venue Agent about room capacity (REST)
 curl -s -X POST http://localhost:8081/message:send \
   -H 'Content-Type: application/json' \
   -H 'A2A-Version: 1.0' \
   -d '{"message":{"messageId":"msg-1","role":"ROLE_USER","parts":[{"text":"Is Hall B full?"}]}}' \
-  | jq .result.status.state
+  | jq .task.status.state
 ```
 
-Both should return `"completed"` — different skills, different frameworks, same protocol.
+Both should return `"TASK_STATE_COMPLETED"` — different skills, different frameworks, same protocol.
 
 ---
 
@@ -328,6 +338,6 @@ At this point you should have:
 
 > **Troubleshooting:**
 >
-> - **"Connection refused" on Ollama**: Make sure `podman-compose up -d` is running and the model has been pulled.
+> - **Authentication or billing error**: Check `OPENAI_API_KEY` and confirm API billing is enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 > - **Port conflict**: Make sure no other service is running on port 8081.
-> - **LangChain4j auto-config issues**: Ensure `langchain4j-ollama-spring-boot-starter` is in your classpath — it auto-configures the `ChatModel` bean that `AiServices.builder()` uses.
+> - **Missing `ChatModel` bean**: Ensure `VenueAgentConfig` creates the `OpenAiResponsesChatModel` bean used by `AiServices.builder()` and `langchain4j-open-ai` is on the classpath.

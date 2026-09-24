@@ -10,19 +10,27 @@ The complete working **Venue & On-Site Operations Agent** built with Spring Boot
 | `VenueService.java` | LangChain4j AI Service interface with `@SystemMessage` |
 | `VenueAgentConfig.java` | Spring `@Configuration` with `@Bean` for AgentCard + AgentExecutor (using `AiServices.builder`) |
 | `VenueAgentApplication.java` | Spring Boot main class |
-| `application.properties` | Port 8081, LangChain4j Ollama config, agent metadata |
+| `application.properties` | Port 8081, OpenAI model and reasoning config, agent metadata |
 
 ## Prerequisites
 
-- Ollama running on `localhost:11434` with the `granite4:350m` model pulled
+- `OPENAI_API_KEY` environment variable set with an OpenAI API key with API billing enabled for `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 - JDK 21+, Maven 3.9+
 
 ## How to Run
 
 ```bash
-./run-all.sh
-# Or manually:
+export OPENAI_API_KEY=your-api-key-here
+# From the repository root, run the matching solution:
+cd solutions/exercise-2
 mvn spring-boot:run
+```
+
+`run-all.sh` launches the exercise project under `exercises/`. From the repository root, use it to run that version instead:
+
+```bash
+export OPENAI_API_KEY=your-api-key-here
+./solutions/exercise-2/run-all.sh
 ```
 
 ## How to Verify

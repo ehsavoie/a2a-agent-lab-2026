@@ -12,6 +12,10 @@ target/
 *.iml
 .vscode/
 
+# Local tooling
+.lince-dashboard
+.serena/
+
 # Python
 __pycache__/
 *.pyc

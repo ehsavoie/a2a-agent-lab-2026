@@ -112,6 +112,7 @@ public class SessionTool {
             String date,
             String time,
             int duration,
+            String level,
             String description,
             List<String> tags
     ) {}

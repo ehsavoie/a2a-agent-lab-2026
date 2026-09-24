@@ -9,7 +9,7 @@ The conference organizers need an AI agent that helps attendees find the right s
 - A **Quarkus + LangChain4j** A2A agent running on port 8080
 - An **AgentCard** advertising the agent's skills via `/.well-known/agent-card.json`
 - An **AgentExecutor** that receives A2A messages and returns structured responses
-- LLM-powered **session search** using Ollama/Qwen3 with tool calling against the conference schedule
+- LLM-powered **session search** using OpenAI GPT-6 Luna through the Responses API with medium reasoning effort and tool calling against the conference schedule
 
 ## Key A2A Concepts
 
@@ -30,24 +30,22 @@ src/main/java/dev/devconf/session/
 └── SessionAgentExecutorProducer.java # CDI producer for the AgentExecutor (message handling)
 
 src/main/resources/
-└── application.properties           # Ollama URL, model, port, agent metadata
+└── application.properties           # OpenAI API key, model, reasoning effort, port, agent metadata
 ```
 
 ## Prerequisites
 
-Ollama must be running with the `granite4:350m` model pulled. From the repo root:
+Set an OpenAI API key with API billing enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ```bash
-podman-compose up -d
-podman logs -f devconf-ollama-pull   # Wait for "success"
+export OPENAI_API_KEY=your-api-key-here
 ```
-
-Verify: `curl http://localhost:11434/api/tags` should list `granite4:350m`.
 
 ## How to Run
 
 ```bash
-cd exercise-1-session-agent
+# From the repository root:
+cd exercises/exercise-1-session-agent
 mvn quarkus:dev
 ```
 
@@ -86,26 +84,32 @@ A successful response looks like:
   "jsonrpc": "2.0",
   "id": "1",
   "result": {
-    "id": "<task-id>",
-    "status": {
-      "state": "completed"
-    },
-    "artifacts": [
-      {
-        "parts": [
-          {
-            "text": "Here are the AI-related sessions at DevConf 2026..."
-          }
-        ]
-      }
-    ]
+    "task": {
+      "id": "<task-id>",
+      "status": {
+        "state": "TASK_STATE_COMPLETED"
+      },
+      "artifacts": [
+        {
+          "parts": [
+            {
+              "text": "Here are the AI-related sessions at DevConf 2026..."
+            }
+          ]
+        }
+      ]
+    }
   }
 }
 ```
 
-- `status.state` is `completed`
-- `artifacts[0].parts[0].text` contains session recommendations
+- `result.task.status.state` is `TASK_STATE_COMPLETED`
+- `result.task.artifacts[0].parts[0].text` contains session recommendations
 
-## Step-by-Step Guide
+## Companion Project
 
-See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the full walkthrough.
+The companion Schedule & Content Advisor project is in [exercise-1-schedule-advisor](../exercise-1-schedule-advisor/README.md).
+
+## Full Instructions
+
+See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the Exercise 1 walkthrough. It covers the companion Schedule & Content Advisor project, not this Session Recommender.

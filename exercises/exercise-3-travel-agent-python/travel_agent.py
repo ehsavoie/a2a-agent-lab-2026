@@ -319,13 +319,22 @@ def get_transit_options(query: str) -> str:
 def search_hotels(query: str) -> str:
     query_lower = query.lower()
     matches = []
-    for h in TRAVEL_DATA["hotels"]:
-        if (
-            any(w in h["name"].lower() for w in query_lower.split())
-            or "cheap" in query_lower and "$" in h["price_per_night"][:2]
-            or "luxury" in query_lower and h["rating"] >= 4.7
-        ):
-            matches.append(h)
+    if "cheap" in query_lower:
+        matches = [
+            h for h in TRAVEL_DATA["hotels"]
+            if float(h["price_per_night"].lstrip("€$")) <= 100
+        ]
+    elif "luxury" in query_lower:
+        matches = [h for h in TRAVEL_DATA["hotels"] if h["rating"] >= 4.7]
+    else:
+        search_terms = [
+            word for word in query_lower.split()
+            if word not in {"a", "an", "the", "find", "me", "hotel", "hotels", "near", "close", "to", "venue"}
+        ]
+        matches = [
+            h for h in TRAVEL_DATA["hotels"]
+            if any(term in h["name"].lower() for term in search_terms)
+        ]
 
     if not matches:
         matches = TRAVEL_DATA["hotels"]
@@ -436,6 +445,18 @@ def extract_receipt(query: str) -> str:
 
 def answer_query(query: str) -> str:
     query_lower = query.lower()
+
+    asking_for_directions = any(
+        phrase in query_lower
+        for phrase in ["how do i get", "how can i get", "how do we get", "how can she get",
+                       "quickest way to", "fastest way to", "directions to"]
+    )
+    mentions_destination = any(
+        place in query_lower
+        for place in ["airport", "venue", "kinepolis", "antwerp", "station", "tram", "convention center"]
+    )
+    if asking_for_directions and mentions_destination:
+        return f"Here are your transit options:\n\n{get_transit_options(query)}"
 
     if any(w in query_lower for w in ["flight", "delay", "gate", "landing", "arrive", "arrival"]):
         return f"Here's the flight status information:\n\n{check_flight_status(query)}"

@@ -1,62 +1,45 @@
-# Solution: Exercise 5 — Expense & Compliance Agent (WildFly Enterprise) + Observability
+# Solution: Exercise 5 — Orchestrator & Concierge (Quarkus)
 
-The complete working **Expense & Compliance Agent** deployed on WildFly 41 with enterprise features (JPA persistence, Kafka replication, multi-transport support) plus **OpenTelemetry** integration across all agents.
+The complete working **Orchestrator & Concierge** — a dynamic router that discovers agents, decomposes complex queries into sub-tasks, dispatches them to specialist agents, and aggregates the results.
 
 ## What's Included
 
-### Expense Agent
-The full source lives in `../../exercises/exercise-5-expense-agent/`:
+The full source lives in `../../exercises/exercise-5-orchestrator/`:
 
 | File | Purpose |
 |------|---------|
-| `ExpenseTool.java` | `@Tool` methods for logging expenses, processing receipts, compliance checks |
-| `ExpenseService.java` | AI Service interface for expense operations |
-| `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with OllamaChatModel |
-| `ExpenseAgentCardProducer.java` | Port-offset-aware AgentCard with multi-transport auto-detection |
-| `ExpenseAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
-| `persistence.xml` | JPA persistence unit for PostgreSQL-backed task/notification stores |
-| `microprofile-config.properties` | Kafka SmallRye Reactive Messaging configuration |
-
-### Enterprise Features
-
-- **JPA TaskStore** — Tasks persisted in PostgreSQL instead of in-memory
-- **JPA PushNotificationConfigStore** — Notification configs persisted in PostgreSQL
-- **Replicated Queue Manager** — Multi-node task queue via Kafka broadcast events
-- **Multi-Transport** — JSON-RPC, REST, or gRPC via Maven profiles (`-Pjsonrpc`, `-Prest`, `-Pgrpc`)
-
-### Observability
-Configuration snippets in `../../exercises/exercise-5-observability/`:
-
-| File | Target | What It Does |
-|------|--------|-------------|
-| `quarkus-otel-pom-additions.xml` | Orchestrator `pom.xml` | Adds `quarkus-opentelemetry` dependency |
-| `quarkus-otel-properties.properties` | Orchestrator `application.properties` | Configures OTLP exporter → LGTM |
-| `spring-otel-pom-additions.xml` | Venue Agent `pom.xml` | Adds actuator + micrometer OTel bridge |
-| `spring-otel-properties.properties` | Venue Agent `application.properties` | Configures trace export → LGTM |
-| `python_otel_setup.py` | Travel Agent `travel_agent.py` | OTel initialization |
+| `AgentDiscoveryService.java` | Fetches AgentCards from configured URLs, builds agent registry |
+| `SubTask.java` | Record: `(agentName, query)` — one sub-task targeting one agent |
+| `QueryDecomposer.java` | LangChain4j AI Service that splits queries into `SubTask`s |
+| `ResponseAggregator.java` | LangChain4j AI Service that synthesizes multi-agent responses |
+| `OrchestratorAgentCardProducer.java` | AgentCard with skill "general-conference-assistant" |
+| `OrchestratorAgentExecutorProducer.java` | Orchestration loop: decompose → dispatch → aggregate |
+| `application.properties` | Port 8090, agent URLs, OpenAI model and reasoning config |
 
 ## Prerequisites
 
-- All agents from Exercises 1-4 running
-- **LGTM stack** running (started by `podman-compose up -d`) — Grafana on port **3000**
+- `OPENAI_API_KEY` environment variable set with an OpenAI API key with API billing enabled for `gpt-6-luna` through the Responses API at medium reasoning effort. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+- **Schedule & Content Advisor** running on port **8080** (Exercise 1)
+- **Venue & On-Site Operations Agent** running on port **8081** (Exercise 2)
+- **Travel & Logistics Agent** running on port **9000** (Exercise 3)
 
-## How to Run the Expense Agent
+## How to Run
 
 ```bash
-./run-full-system.sh
+export OPENAI_API_KEY=your-api-key-here
+./run.sh
 # Or manually:
-cd ../../exercises/exercise-5-expense-agent
-mvn package -Pjsonrpc
-./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2
+cd ../../exercises/exercise-5-orchestrator
+mvn quarkus:dev
 ```
 
-The Expense Agent starts on **port 8082** (WildFly with port offset 2).
+The Orchestrator starts on **port 8090**.
 
 ## How to Verify
 
 ```bash
-# Log an expense
-curl -s -X POST http://localhost:8082/ \
+# Maya's full scenario
+curl -s --max-time 120 -X POST http://localhost:8090/ \
   -H "Content-Type: application/json" \
   -H "A2A-Version: 1.0" \
   -d '{
@@ -66,12 +49,9 @@ curl -s -X POST http://localhost:8082/ \
       "message": {
         "messageId": "msg-1",
         "role": "ROLE_USER",
-        "parts": [{"text": "Log my taxi receipt: $35 from Airport Express Taxi on 2026-10-07 for transportation to the venue"}]
+        "parts": [{"text": "My flight was delayed so I missed the morning shuttle. I'\''m interested in agentic AI and Java agents—what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?"}]
       }
     },
     "id": "1"
   }' | python3 -m json.tool
-
-# Check Grafana (Explore → Tempo for traces)
-open http://localhost:3000
 ```

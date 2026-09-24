@@ -140,6 +140,6 @@ public class ScheduleTool {
     public record Session(
         String id, String title, String speaker, String track,
         String room, String date, String time, int duration,
-        String description, List<String> tags
+        String level, String description, List<String> tags
     ) {}
 }
