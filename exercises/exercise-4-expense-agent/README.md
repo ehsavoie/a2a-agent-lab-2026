@@ -43,11 +43,34 @@ The `AgentCardProducer` auto-detects which transports are on the classpath and a
 
 Set an OpenAI API key with API billing enabled before starting the agent. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
+The shared PostgreSQL, Kafka, and Grafana services are defined in the [development compose file](../exercise-5-orchestrator/podman-compose.yml). From the repository root, start them with:
+
+```bash
+cd exercises/exercise-5-orchestrator
+podman-compose up -d
+cd ../exercise-4-expense-agent
+```
+
+After Kafka has had a few seconds to start, create the replicated-events topic:
+
+```bash
+podman exec devconf-kafka /opt/kafka/bin/kafka-topics.sh --create --if-not-exists \
+  --topic replicated-events --bootstrap-server localhost:9092 --partitions 1
+```
+
+Before starting WildFly, set the PostgreSQL credentials used by that compose file. Kafka listens on `localhost:9092` for the replicated queue manager.
+
 ```bash
 export OPENAI_API_KEY=your-api-key-here
+export POSTGRESQL_DATABASE=devconf
+export POSTGRESQL_USER=devconf
+export POSTGRESQL_PASSWORD=devconf
 
 # Build with JSON-RPC transport
 mvn package -Pjsonrpc
+
+# Refresh the deployed WAR when target/wildfly already exists
+cp target/expense-agent-1.0.0-SNAPSHOT.war target/wildfly/standalone/deployments/ROOT.war
 
 # Start WildFly on port 8082 (base port 8080 + offset 2)
 ./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2

@@ -28,7 +28,7 @@ This directory contains configuration snippets and code to **add on top of** the
 
 | Agent | Framework | Port | Config to apply |
 |-------|-----------|------|-----------------|
-| Schedule & Content Advisor | WildFly (Java A2A SDK) | 8080 | Java A2A SDK OTel (manual spans) |
+| Schedule & Content Advisor | Quarkus | 8080 | `quarkus-otel-*` files |
 | Venue & On-Site Operations Agent | Spring Boot | 8081 | `spring-otel-*` files |
 | Travel & Logistics Agent | Python | 9000 | `python_otel_setup.py` |
 | Orchestrator & Concierge | Quarkus | 8090 | `quarkus-otel-*` files |
@@ -41,10 +41,11 @@ This directory contains configuration snippets and code to **add on top of** the
 
 ## How to Apply
 
-### Quarkus Agent (Orchestrator — Exercise 5)
+### Quarkus Agents (Schedule Advisor — Exercise 1; Orchestrator — Exercise 5)
 
 1. Add the dependency from `quarkus-otel-pom-additions.xml` to the agent's `pom.xml`
-2. Append the properties from `quarkus-otel-properties.properties` to `application.properties`
+2. Append the properties from `quarkus-otel-properties.properties` to `application.properties`, omitting
+   `quarkus.otel.instrument.rest-client`, which Quarkus 3.39.4 does not recognize.
 3. Restart with `mvn quarkus:dev`
 
 ### Spring Boot Agent (Venue Agent — Exercise 2)
@@ -59,13 +60,13 @@ This directory contains configuration snippets and code to **add on top of** the
 2. Add the code from `python_otel_setup.py` to `travel_agent.py` (before `main()`)
 3. Restart
 
-### Java A2A SDK Agents (Schedule Advisor + Expense Agent — Exercises 1 & 4)
+### WildFly Java A2A SDK Agent (Expense Agent — Exercise 4)
 
 Java A2A SDK agents use manual OTel spans. See `TracedAgentExecutor.java` for the pattern — wrap the `execute()` method in a custom span and inject a `Tracer` from the OTel API.
 
 ### Custom Spans (Optional)
 
-Replace the anonymous `AgentExecutor` in any agent's executor producer with `TracedAgentExecutor.java` to get fine-grained spans around LLM calls.
+Replace the anonymous `AgentExecutor` in an agent's executor producer with an adapted `TracedAgentExecutor.java` to get fine-grained spans around LLM calls. The checked-in example is written for `SessionService`; adapt the service type, imports, package, and producer wiring for other agents.
 
 ## How to Verify
 

@@ -198,7 +198,7 @@ sequenceDiagram
 git clone <repo-url>
 cd a2a-agent-lab-2026
 
-# 2. Start infrastructure (Grafana LGTM)
+# 2. Start infrastructure (PostgreSQL, Kafka, and Grafana LGTM)
 podman-compose -f exercises/exercise-5-orchestrator/podman-compose.yml up -d
 
 # 3. Set your OpenAI API key (used with gpt-6-luna at medium reasoning effort)
