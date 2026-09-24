@@ -10,7 +10,7 @@ OpenTelemetry tracing across all agents (Quarkus, Spring Boot, WildFly/Java A2A 
 
 ## What's in This Directory
 
-This directory contains configuration snippets and code to **add on top of** the agents built in Exercises 1-3.
+This directory contains configuration snippets and code to **add on top of** the agents built in Exercises 1-5.
 
 | File | Description |
 |------|-------------|
@@ -46,12 +46,14 @@ This directory contains configuration snippets and code to **add on top of** the
 1. Add the dependency from `quarkus-otel-pom-additions.xml` to the agent's `pom.xml`
 2. Append the properties from `quarkus-otel-properties.properties` to `application.properties`, omitting
    `quarkus.otel.instrument.rest-client`, which Quarkus 3.39.4 does not recognize.
+   For the Orchestrator, set `quarkus.otel.service.name=DevSphere Orchestrator`; it has no `a2a.agent.name` property.
 3. Restart with `mvn quarkus:dev`
 
 ### Spring Boot Agent (Venue Agent — Exercise 2)
 
 1. Add the dependencies from `spring-otel-pom-additions.xml` to `pom.xml`
-2. Append the properties from `spring-otel-properties.properties` to `application.properties`
+2. Append the properties from `spring-otel-properties.properties` to `application.properties` and set
+   `spring.application.name=Venue & On-Site Operations Agent`.
 3. Restart
 
 ### Python Agent (Travel Agent — Exercise 3)
@@ -73,7 +75,8 @@ Replace the anonymous `AgentExecutor` in an agent's executor producer with an ad
 1. Open Grafana at **http://localhost:3000** (login: admin/admin)
 2. Send a complex query to the Orchestrator on port 8090
 3. Navigate to **Explore → Tempo** and search for traces from **"DevSphere Orchestrator"**
-4. Open the trace — you should see the full call chain:
+4. Open a trace. Agent and LLM spans depend on the instrumentation configured for each agent; the Expense Agent's custom spans appear only after adapting and wiring `TracedAgentExecutor.java`.
+   With those changes in place, the call chain can include:
    - `Orchestrator → Schedule Advisor` (session query dispatch)
    - `Orchestrator → Venue Agent` (room capacity check)
    - `Orchestrator → Travel Agent` (transit routing)

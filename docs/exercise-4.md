@@ -29,7 +29,7 @@ Navigate to the exercise directory:
 cd exercises/exercise-4-expense-agent
 ```
 
-This is another **WildFly 40 + Java A2A SDK** agent — the same pattern you learned in Exercise 1 with the Schedule Advisor.
+This is another **WildFly 41 + Java A2A SDK** agent — the same pattern you learned in Exercise 1 with the Schedule Advisor.
 
 ### Step 1: The ExpenseTool
 
@@ -158,8 +158,11 @@ The `ExpenseAgentExecutorProducer` follows the identical pattern from Exercise 1
 ```bash
 cd exercises/exercise-4-expense-agent
 
-# Build the WAR and provision WildFly
-mvn package
+# Build the JSON-RPC WAR and provision WildFly
+mvn package -Pjsonrpc
+
+# If target/wildfly already exists, refresh its deployed WAR
+cp target/expense-agent-1.0.0-SNAPSHOT.war target/wildfly/standalone/deployments/ROOT.war
 
 # Start WildFly with port offset (HTTP on 8082)
 ./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2
@@ -243,15 +246,11 @@ Maya sees: "Your $45 taxi expense has been logged (ID: EXP-A1B2C3D4). Compliant 
 
 In a production system, the Travel Agent would extract receipt details (OCR / structured extraction), then the Orchestrator would pass that structured data to the Expense Agent via A2A. The `receipt-processing` skill is specifically designed for this cross-agent handoff pattern.
 
-### Update the Orchestrator
+### Connect the Orchestrator
 
-Add the Expense Agent to the Orchestrator's discovery list. In `exercises/exercise-5-orchestrator/src/main/resources/application.properties`:
+The Expense Agent client is already configured in `exercises/exercise-5-orchestrator/src/main/java/dev/devconf/orchestrator/ExpenseA2AAgent.java` with the URL `http://localhost:8082`. No `concierge.agent-urls` property is used. Start or restart the Orchestrator after confirming the Expense Agent is listening on port 8082.
 
-```properties
-concierge.agent-urls=http://localhost:8080,http://localhost:8081,http://localhost:9000,http://localhost:8082
-```
-
-Restart the Orchestrator, then test the full flow:
+Then test the full flow:
 
 ```bash
 curl -s -X POST http://localhost:8090/ \
@@ -292,15 +291,16 @@ Add the `quarkus-opentelemetry` dependency to `exercises/exercise-5-orchestrator
 
 > You can find this snippet in `exercises/exercise-4-observability/quarkus-otel-pom-additions.xml`.
 
-Add OTel configuration to `application.properties`:
+Add OTel configuration to `application.properties`. For the Orchestrator, use the explicit service name below because it does not define `a2a.agent.name`:
 
 ```properties
 quarkus.otel.enabled=true
 quarkus.otel.exporter.otlp.traces.endpoint=http://localhost:4317
-quarkus.otel.service.name=${a2a.agent.name}
+quarkus.otel.service.name=DevSphere Orchestrator
 quarkus.otel.instrument.rest=true
-quarkus.otel.instrument.rest-client=true
 ```
+
+To trace the Schedule Advisor too, add the same dependency and Quarkus settings to `exercises/exercise-1-schedule-advisor`; there, `quarkus.otel.service.name=${a2a.agent.name}` resolves to its configured name.
 
 ### Add OpenTelemetry to the Spring Boot Venue Agent
 
@@ -333,7 +333,7 @@ spring.application.name=Venue & On-Site Operations Agent
 ### Add OpenTelemetry to the Python Travel Agent
 
 ```bash
-cd exercises/exercise-3-travel-agent
+cd exercises/exercise-3-travel-agent-python
 pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc
 ```
 
@@ -368,7 +368,7 @@ async def execute(self, context, event_queue):
 
 ### Custom Spans for LLM Calls
 
-See `exercises/exercise-4-observability/TracedAgentExecutor.java` for a drop-in replacement that adds fine-grained spans around LLM calls:
+See `exercises/exercise-4-observability/TracedAgentExecutor.java` for an example to adapt and wire into an agent's executor producer to add fine-grained spans around LLM calls. The checked-in example is written for `SessionService`; it is not a drop-in replacement for the Expense Agent's executor:
 
 ```java
 Span llmSpan = tracer.spanBuilder("langchain4j.chat").startSpan();
@@ -380,7 +380,7 @@ try (Scope llmScope = llmSpan.makeCurrent()) {
 }
 ```
 
-Restart all agents after adding OTel configuration.
+Restart all agents after adding OTel configuration. The Expense Agent does not emit the custom spans shown below until its executor is adapted and wired with an OpenTelemetry `Tracer`.
 
 ---
 
@@ -408,7 +408,7 @@ curl -s -X POST http://localhost:8090/ \
   }'
 ```
 
-In Grafana, select **"DevSphere Orchestrator"** and click **Find Traces**. You should see:
+In Grafana, select **"DevSphere Orchestrator"** and click **Find Traces**. With the agent instrumentation configured, you should see:
 
 ```
 DevSphere Orchestrator
