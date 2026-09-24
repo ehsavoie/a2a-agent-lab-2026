@@ -22,6 +22,7 @@ public class ExpenseAgentExecutorProducer {
     ExpenseServiceProducer expenseServiceProducer;
 
     @Produces
+    @ApplicationScoped
     public AgentExecutor agentExecutor() {
         return new AgentExecutor() {
 
@@ -42,7 +43,7 @@ public class ExpenseAgentExecutorProducer {
                     emitter.addArtifact(
                             Collections.singletonList(new TextPart("Error: " + e.getMessage())),
                             null, "error", null);
-                    emitter.complete();
+                    emitter.fail();
                 }
             }
 
