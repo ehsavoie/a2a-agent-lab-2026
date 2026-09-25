@@ -6,14 +6,13 @@
 
     <parent>
         <groupId>dev.devconf</groupId>
-        <artifactId>a2a-agent-lab</artifactId>
+        <artifactId>orchestrator-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>solution-schedule-advisor</artifactId>
-    <name>DevSphere Schedule &amp; Content Advisor (Quarkus Solution)</name>
-    <description>A2A agent using the A2A Java SDK reference implementation on Quarkus with LangChain4j tool calling</description>
+    <artifactId>orchestrator</artifactId>
+    <name>DevSphere Orchestrator(Quarkus Exercice)</name>
 
     <dependencies>
         <!-- Quarkus Core -->
@@ -26,17 +25,52 @@
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
 
-        <!-- LangChain4j with OpenAI (Quarkus integration) -->
+        <!-- LangChain4j with OpenAI -->
         <dependency>
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-openai</artifactId>
         </dependency>
 
-        <!-- A2A Java SDK — reference implementation (JSON-RPC on Quarkus) -->
+        <!-- LangChain4j Agentic support (supervisor, A2A client agents) -->
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-agentic</artifactId>
+        </dependency>
+
+        <!-- A2A client implementation for @A2AClientAgent -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-agentic-a2a</artifactId>
+            <version>1.21.0-beta31-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-agentic</artifactId>
+            <version>1.21.0-beta31-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- A2A client transports (JSON-RPC + REST) -->
         <dependency>
             <groupId>org.a2aproject.sdk</groupId>
-            <artifactId>a2a-java-sdk-reference-jsonrpc</artifactId>
-            <version>${a2a-sdk.version}</version>
+            <artifactId>a2a-java-sdk-client-transport-jsonrpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.a2aproject.sdk</groupId>
+            <artifactId>a2a-java-sdk-client-transport-rest</artifactId>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -62,6 +96,7 @@
                 <version>3.13.0</version>
                 <configuration>
                     <release>21</release>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
         </plugins>

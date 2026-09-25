@@ -11,8 +11,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>solution-schedule-advisor</artifactId>
-    <name>DevSphere Schedule &amp; Content Advisor (Quarkus Solution)</name>
+    <artifactId>travel-agent-java</artifactId>
+    <name>DevSphere Travel &amp; Logistics Agent (Quarkus)</name>
     <description>A2A agent using the A2A Java SDK reference implementation on Quarkus with LangChain4j tool calling</description>
 
     <dependencies>

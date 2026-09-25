@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run the Exercise 3 Travel & Logistics Agent (Python)
-cd "$(dirname "$0")/../../exercises/exercise-3-travel-agent-python"
+cd "$(dirname "$0")"
 
 echo "Installing dependencies..."
 pip install -e . --quiet 2>/dev/null

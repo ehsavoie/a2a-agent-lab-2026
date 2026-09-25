@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Run the Exercise 4 Orchestrator & Concierge (Quarkus)
-cd "$(dirname "$0")/../../exercises/exercise-4-orchestrator"
+# Run the Exercise 5 Orchestrator & Concierge (Quarkus)
+cd "$(dirname "$0")"
 
 echo "============================================"
 echo "  DevSphere Orchestrator & Concierge"

@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>schedule-advisor</artifactId>
-    <name>DevSphere Schedule &amp; Content Advisor (Quarkus)</name>
+    <name>DevSphere Schedule &amp; Content Advisor (Quarkus Exercice)</name>
     <description>A2A agent using the A2A Java SDK reference implementation on Quarkus with LangChain4j tool calling</description>
 
     <dependencies>

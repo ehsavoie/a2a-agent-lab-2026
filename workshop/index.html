@@ -1620,7 +1620,7 @@ Java &rarr; Python A2A Interop Client
         <span class="step-number" style="background: var(--accent-purple);">1</span>
         <span class="step-title">Build the Expense &amp; Compliance Agent (Java A2A SDK)</span>
     </div>
-    <p>A Jakarta EE enterprise agent on WildFly 41 with JPA persistence, Kafka replication, and multi-transport support that standardizes receipts into corporate audit-ready expense logs.</p>
+    <p>A Jakarta EE enterprise agent on WildFly 41 with JPA persistence (PostgreSQL), Kafka replication, and multi-transport support that standardizes receipts into corporate audit-ready expense logs. Uses LangChain4j with the OpenAI Responses API.</p>
 </div>
 
 <details class="solution">
@@ -1659,8 +1659,48 @@ Java &rarr; Python A2A Interop Client
     </div>
 </details>
 
+<details class="solution">
+    <summary>Show ExpenseServiceProducer.java</summary>
+    <div class="solution-body">
+<pre><code>@ApplicationScoped
+public class ExpenseServiceProducer {
+
+    @Inject @ConfigProperty(name = "openai.api-key")
+    String openAiApiKey;
+
+    @Inject @ConfigProperty(name = "openai.model-name", defaultValue = "gpt-6-luna")
+    String openAiModelName;
+
+    @PostConstruct
+    void init() {
+        OpenAiResponsesChatModel chatModel = OpenAiResponsesChatModel.builder()
+                .httpClientBuilder(HttpClientBuilderLoader.loadHttpClientBuilder()
+                        .readTimeout(Duration.ofSeconds(120)))
+                .apiKey(openAiApiKey)
+                .modelName(openAiModelName)
+                .reasoningEffort("medium")
+                .build();
+
+        expenseService = AiServices.builder(ExpenseService.class)
+                .chatModel(chatModel)
+                .tools(new ExpenseTool())
+                .build();
+    }
+}</code></pre>
+    </div>
+</details>
+
+<h4>Start infrastructure (PostgreSQL + Grafana LGTM)</h4>
+<pre><code>cd exercises/exercise-5-orchestrator
+podman-compose up -d
+cd ../exercise-4-expense-agent</code></pre>
+
 <h4>Build &amp; Run on port 8082</h4>
-<pre><code>cd exercises/exercise-4-expense-agent
+<pre><code>export OPENAI_API_KEY=your-api-key-here
+export POSTGRESQL_DATABASE=devconf
+export POSTGRESQL_USER=devconf
+export POSTGRESQL_PASSWORD=devconf
+
 mvn package -Pjsonrpc
 ./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2</code></pre>
 
