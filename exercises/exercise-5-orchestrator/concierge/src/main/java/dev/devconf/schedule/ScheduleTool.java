@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class ScheduleTool {
 
-    @ConfigProperty(name = "session.data.path", defaultValue = "../../conference-data/sessions.json")
+    @ConfigProperty(name = "session.data.path", defaultValue = "../../../conference-data/sessions.json")
     String sessionDataPath;
 
     private List<Session> sessions;

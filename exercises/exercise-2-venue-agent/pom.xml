@@ -5,22 +5,32 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
-        <relativePath/>
+        <groupId>dev.devconf</groupId>
+        <artifactId>a2a-agent-lab</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <groupId>dev.devconf</groupId>
     <artifactId>venue-agent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <name>DevSphere Venue &amp; On-Site Operations Agent (Spring Boot)</name>
+    <name>DevSphere Venue &amp; On-Site Operations Agent (Spring Boot Exercice)</name>
 
     <properties>
         <java.version>21</java.version>
-        <langchain4j.version>1.20.0-beta30</langchain4j.version>
+        <spring-boot.version>3.5.0</spring-boot.version>
         <spring-a2a.version>0.1.2</spring-a2a.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Boot Web -->
@@ -33,12 +43,12 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-spring-boot-starter</artifactId>
-            <version>${langchain4j.version}</version>
+            <version>1.20.0-beta30</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
-            <version>1.20.0</version>
+            <version>${langchain4j.version}</version>
         </dependency>
 
         <!-- A2A Spring Boot REST Server (Sh1bari) -->
@@ -61,6 +71,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
             </plugin>
         </plugins>
     </build>

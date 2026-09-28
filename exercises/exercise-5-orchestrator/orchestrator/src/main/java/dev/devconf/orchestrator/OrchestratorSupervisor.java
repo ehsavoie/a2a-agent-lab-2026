@@ -4,6 +4,7 @@ import dev.langchain4j.agentic.declarative.AgentListenerSupplier;
 import dev.langchain4j.agentic.declarative.SupervisorAgent;
 import dev.langchain4j.agentic.observability.AgentListener;
 import dev.langchain4j.agentic.scope.ResultWithAgenticScope;
+import dev.langchain4j.agentic.supervisor.SupervisorResponseStrategy;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
 import dev.langchain4j.service.V;
@@ -34,6 +35,8 @@ public interface OrchestratorSupervisor {
     @SupervisorAgent(
             name = "DevSphere Orchestrator",
             description = "Orchestrates specialist agents to answer complex, multi-domain questions about Devoxx Belgium 2026",
+            outputKey = "response",
+            responseStrategy = SupervisorResponseStrategy.SUMMARY,
             subAgents = {
                     ScheduleAdvisorA2AAgent.class,
                     VenueA2AAgent.class,

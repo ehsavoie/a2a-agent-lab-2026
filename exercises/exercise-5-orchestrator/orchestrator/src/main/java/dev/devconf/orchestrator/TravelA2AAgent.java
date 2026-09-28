@@ -12,7 +12,7 @@ public interface TravelA2AAgent {
             a2aServerUrl = "http://localhost:8080/.well-known/travel/agent-card.json",
             name = "Travel & Logistics Agent",
             description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
-            outputKey = "response"
+            outputKey = "travel-response"
     )
     ResultWithAgenticScope<String> ask(@V("query") String query, @A2AContextId @V("contextId") String contextId, @A2ATaskId @V("taskId") String taskId);
 }

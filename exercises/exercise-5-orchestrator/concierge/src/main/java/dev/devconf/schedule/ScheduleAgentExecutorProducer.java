@@ -57,7 +57,9 @@ public class ScheduleAgentExecutorProducer {
     }
 
     private String extractText(Message message) {
-        if (message == null || message.parts() == null) return "";
+        if (message == null || message.parts() == null) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
         for (Part<?> part : message.parts()) {
             if (part instanceof TextPart textPart) {

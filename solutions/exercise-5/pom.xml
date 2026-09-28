@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>solution-orchestrator</artifactId>
-    <name>DevSphere Orchestrator &amp; Concierge (Quarkus)</name>
+    <name>DevSphere Orchestrator &amp; Concierge (Quarkus Solution)</name>
 
     <dependencies>
         <!-- Quarkus Core -->

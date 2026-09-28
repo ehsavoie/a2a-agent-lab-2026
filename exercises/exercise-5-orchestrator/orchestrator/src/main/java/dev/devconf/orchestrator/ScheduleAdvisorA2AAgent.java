@@ -12,7 +12,7 @@ public interface ScheduleAdvisorA2AAgent {
             a2aServerUrl = "http://localhost:8080/.well-known/schedule/agent-card.json",
             name = "Schedule & Content Advisor",
             description = "Answers questions about conference sessions, schedules, speakers, and talk content",
-            outputKey = "response"
+            outputKey = "schedule-response"
     )
     ResultWithAgenticScope<String> ask(@V("query") String query, @A2AContextId @V("contextId") String contextId, @A2ATaskId @V("taskId") String taskId);
 }

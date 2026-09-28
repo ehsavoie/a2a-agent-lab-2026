@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>travel-agent-java</artifactId>
-    <name>DevSphere Travel &amp; Logistics Agent (Quarkus)</name>
+    <name>DevSphere Travel &amp; Logistics Agent (Quarkus Exercice)</name>
     <description>A2A agent using the A2A Java SDK reference implementation on Quarkus with LangChain4j tool calling</description>
 
     <dependencies>
@@ -36,7 +36,6 @@
         <dependency>
             <groupId>org.a2aproject.sdk</groupId>
             <artifactId>a2a-java-sdk-reference-jsonrpc</artifactId>
-            <version>${a2a-sdk.version}</version>
         </dependency>
     </dependencies>
 

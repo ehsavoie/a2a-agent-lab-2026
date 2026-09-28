@@ -1,5 +1,6 @@
 package dev.devconf.orchestrator;
 
+import dev.langchain4j.agentic.scope.AgenticScope;
 import java.util.logging.Logger;
 
 import jakarta.inject.Inject;
@@ -24,7 +25,8 @@ public class OrchestratorResource {
     public QueryResponse query(QueryRequest request) {
         LOG.info("Received query: " + request.query());
         LOG.info("Supervisor class: " + supervisor.getClass().getName());
-        String response = supervisor.orchestrate(request.query()).result();
+        AgenticScope scope = supervisor.orchestrate(request.query()).agenticScope();
+        String response = scope.readState("response").toString() ;
         LOG.info("Supervisor response: " + response);
         return new QueryResponse(response);
     }
