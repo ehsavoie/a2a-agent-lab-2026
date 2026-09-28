@@ -601,7 +601,7 @@
     <div class="hero-badge">2-Hour Hands-On Lab</div>
     <h1>A2A <span class="highlight">Agent Lab</span></h1>
     <p class="subtitle">
-        Build <strong>DevSphere</strong> &mdash; a production-grade multi-agent concierge with Java, Python, LangChain4j, Spring AI, and the A2A protocol. Five agents, three runtimes, one observable mesh.
+        Build <strong>DevSphere</strong> &mdash; a production-grade multi-agent concierge with Java, Python, LangChain4j, spring-a2a, and the A2A protocol. Five agents, three runtimes, one observable mesh.
     </p>
 </div>
 
@@ -612,7 +612,7 @@
 <div class="callout tip">
     <div class="callout-title">&#127916; The Scenario: &ldquo;The Flight Delay &amp; Keynote Clash&rdquo;</div>
     <p>It is 8:15 AM on Day 1. <strong>Maya</strong> lands at the airport, but her flight was delayed by two hours. She opens her DevSphere app and types:</p>
-    <p><em>&ldquo;My flight was delayed so I missed the morning shuttle. I&rsquo;m interested in agentic AI and Java agents&mdash;what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?&rdquo;</em></p>
+    <p><em>&ldquo;My flight was delayed so I missed the morning shuttle. I&rsquo;m interested in agentic AI and Java agents&mdash;what talks should I catch on the 5th of October, how do I get to the venue quickly, and can you log my taxi receipt?&rdquo;</em></p>
     <p>Every exercise you build brings one more piece of Maya&rsquo;s answer online.</p>
 </div>
 
@@ -625,7 +625,7 @@
     <div class="card">
         <div class="card-icon">&#127970;</div>
         <h4>Exercise 2: Venue Agent</h4>
-        <p>Spring Boot + Spring AI agent managing IoT room capacity, indoor mapping, and fast-track entry passes.</p>
+        <p>Spring Boot + LangChain4j agent managing IoT room capacity, indoor mapping, and fast-track entry passes.</p>
     </div>
     <div class="card">
         <div class="card-icon">&#9992;</div>
@@ -635,7 +635,7 @@
     <div class="card">
         <div class="card-icon">&#128176;</div>
         <h4>Exercise 4: Expense + OTel</h4>
-        <p>WildFly Enterprise expense agent (JPA, Kafka, multi-transport) with cross-agent handoff, plus OpenTelemetry tracing with the Grafana LGTM stack.</p>
+        <p>WildFly Enterprise expense agent with compliance validation, cross-agent data handoff, plus OpenTelemetry tracing with the Grafana LGTM stack.</p>
     </div>
     <div class="card">
         <div class="card-icon">&#129504;</div>
@@ -689,7 +689,7 @@
         <tr><td><strong>JDK</strong></td><td>21+</td><td>Java development</td></tr>
         <tr><td><strong>Maven</strong></td><td>3.9+</td><td>Build tool</td></tr>
         <tr><td><strong>Python</strong></td><td>3.11+</td><td>Exercise 3 (Travel Agent)</td></tr>
-        <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>PostgreSQL + Grafana LGTM infrastructure</td></tr>
+        <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>Grafana LGTM observability infrastructure</td></tr>
         <tr><td><strong>OpenAI API key</strong></td><td>API billing enabled</td><td>Java LLM exercises</td></tr>
         <tr><td><strong>curl</strong></td><td>any</td><td>API testing</td></tr>
         <tr><td><strong>IDE</strong></td><td>IntelliJ / VS Code / etc.</td><td>Code editor</td></tr>
@@ -709,7 +709,6 @@ podman-compose up -d</code></pre>
 
 <p>This starts:</p>
 <ul>
-    <li><strong>PostgreSQL</strong> on port <code>5432</code> &mdash; database used by the Expense Agent</li>
     <li><strong>Grafana LGTM</strong> on port <code>3000</code> (Grafana UI) and <code>4317</code> (OTLP) &mdash; logs, traces, and metrics via Loki, Tempo, and Mimir</li>
 </ul>
 
@@ -733,12 +732,14 @@ mvn install -DskipTests</code></pre>
   conference-data/sessions.json        &larr; Shared conference data
   exercises/                           &larr; All exercise projects
     exercise-1-schedule-advisor/       &larr; Quarkus + A2A Java SDK
-    exercise-2-venue-agent/            &larr; Spring Boot + Spring AI
+    exercise-2-venue-agent/            &larr; Spring Boot + LangChain4j + spring-a2a
     exercise-3-travel-agent-python/    &larr; Python A2A SDK
-    exercise-4-expense-agent/          &larr; WildFly 41 Enterprise (JPA, Kafka)
-    exercise-4-observability/          &larr; OTel configuration snippets
-    exercise-5-orchestrator/           &larr; Quarkus Native Orchestrator
-      podman-compose.yml               &larr; PostgreSQL + Grafana LGTM
+    exercise-3-travel-agent-java/      &larr; Java A2A SDK (Quarkus)
+    exercise-4-expense-agent/          &larr; WildFly 41 Enterprise (Jakarta EE)
+    exercise-5-orchestrator/           &larr; Multi-project Quarkus Orchestrator
+      concierge/                       &larr; Multi-tenant: Schedule + Venue + Travel
+      orchestrator/                    &larr; Supervisor + @A2AClientAgent + REST UI
+      podman-compose.yml               &larr; Grafana LGTM (OTel observability)
   solutions/                           &larr; Complete solutions + scripts</code></pre>
 </section>
 
@@ -765,17 +766,17 @@ mvn install -DskipTests</code></pre>
                        User (Maya)
                            |
                 +----------v-----------+
-                |  Orchestrator &amp;      |  Port 8090 (Quarkus)
-                |  Concierge           |
+                |  Orchestrator        |  Port 8090 (Quarkus)
+                |  @SupervisorAgent    |
                 +---+------+------+---+
                     |      |      |
            +--------+      |      +--------+
            |               |               |
 +----------v-----+ +------v------+ +------v----------+
 | Schedule &amp;     | | Venue &amp;     | | Travel &amp;        |
-| Content Advisor| | On-Site Ops | | Logistics Agent |
-| :8080 (Quarkus)| | :8081 (SBt) | | :9000 (Python)  |
-+----------------+ +-------------+ +-----------------+
+| Content Advisor| | On-Site Ops | | Logistics       |
+|                | |             | |                 |
++--[Concierge :8080 (Quarkus, multi-tenant)]---------+
 
   +------------------+
   | Expense &amp;        |  (standalone agent,
@@ -783,8 +784,8 @@ mvn install -DskipTests</code></pre>
   | :8082 (WF Ent.)  |
   +------------------+
 
-Specialist agents: AgentCard + JSON-RPC + A2A SDK
-Orchestrator: REST app + Web UI, calls agents via A2A
+Concierge: multi-tenant Quarkus app, all specialist agents on :8080
+Orchestrator: REST app + Web UI, @A2AClientAgent per agent-card path
 All traces: OpenTelemetry &rarr; Grafana/Tempo (:3000)
 </pre>
 </div>
@@ -1580,7 +1581,7 @@ Java &rarr; Python A2A Interop Client
 
 <ul class="checklist">
     <li>Python Travel &amp; Logistics Agent running on port 9000</li>
-    <li>Java &rarr; Python communication via the A2A Java SDK client</li>
+    <li>Java &rarr; Python communication via the A2A Java SDK client (<code>java-client/</code>)</li>
     <li>Python &rarr; Java communication via <code>test_interop.py</code></li>
     <li>Transit comparison and receipt extraction working</li>
 </ul>
@@ -1591,14 +1592,15 @@ Java &rarr; Python A2A Interop Client
     </thead>
     <tbody>
         <tr><td>Schedule &amp; Content Advisor</td><td>Java</td><td>Quarkus + A2A Java SDK</td><td>8080</td></tr>
-        <tr><td>Venue &amp; On-Site Operations</td><td>Java</td><td>Spring Boot</td><td>8081</td></tr>
-        <tr><td><strong>Travel &amp; Logistics</strong></td><td><strong>Python</strong></td><td><strong>A2A Python SDK</strong></td><td><strong>9000</strong></td></tr>
+        <tr><td>Venue &amp; On-Site Operations</td><td>Java</td><td>Spring Boot + spring-a2a + LangChain4j</td><td>8081</td></tr>
+        <tr><td><strong>Travel &amp; Logistics (Python)</strong></td><td><strong>Python</strong></td><td><strong>A2A Python SDK</strong></td><td><strong>9000</strong></td></tr>
+        <tr><td>Travel &amp; Logistics (Java)</td><td>Java</td><td>Quarkus + A2A Java SDK</td><td>(standalone client)</td></tr>
     </tbody>
 </table>
 
 <div class="callout success">
     <div class="callout-title">&#9989; Key takeaway</div>
-    <p><strong>A2A is a wire protocol.</strong> Any language that speaks JSON-RPC over HTTP can participate in the mesh. Keep all three agents running for Exercise 5.</p>
+    <p><strong>A2A is a wire protocol.</strong> Any language that speaks JSON-RPC over HTTP can participate in the mesh. In Exercise 5, the Travel agent is bundled inside the Concierge &mdash; no need to keep it running separately.</p>
 </div>
 </section>
 
@@ -1620,7 +1622,7 @@ Java &rarr; Python A2A Interop Client
         <span class="step-number" style="background: var(--accent-purple);">1</span>
         <span class="step-title">Build the Expense &amp; Compliance Agent (Java A2A SDK)</span>
     </div>
-    <p>A Jakarta EE enterprise agent on WildFly 41 with JPA persistence (PostgreSQL), Kafka replication, and multi-transport support that standardizes receipts into corporate audit-ready expense logs. Uses LangChain4j with the OpenAI Responses API.</p>
+    <p>A Jakarta EE enterprise agent on WildFly 41 that standardizes receipts into corporate audit-ready expense logs with compliance validation. Uses LangChain4j with the OpenAI Responses API and in-memory expense tracking.</p>
 </div>
 
 <details class="solution">
@@ -1690,16 +1692,13 @@ public class ExpenseServiceProducer {
     </div>
 </details>
 
-<h4>Start infrastructure (PostgreSQL + Grafana LGTM)</h4>
+<h4>Start infrastructure (Grafana LGTM)</h4>
 <pre><code>cd exercises/exercise-5-orchestrator
 podman-compose up -d
 cd ../exercise-4-expense-agent</code></pre>
 
 <h4>Build &amp; Run on port 8082</h4>
 <pre><code>export OPENAI_API_KEY=your-api-key-here
-export POSTGRESQL_DATABASE=devconf
-export POSTGRESQL_USER=devconf
-export POSTGRESQL_PASSWORD=devconf
 
 mvn package -Pjsonrpc
 ./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2</code></pre>
@@ -1769,14 +1768,14 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
 
 <p>Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> (login: admin/admin), navigate to <strong>Explore &rarr; Tempo</strong>, and send Maya&rsquo;s full query. You should see:</p>
 
-<pre><code>DevSphere Orchestrator
-  POST / (incoming request)
-    orchestrator.execute
-      langchain4j.chat (QueryDecomposer)        &larr; LLM ~2-5s
-      POST http://localhost:8080/             &larr; Schedule Advisor
-      POST http://localhost:8081/             &larr; Venue Agent
-      POST http://localhost:9000/                &larr; Travel Agent
-      langchain4j.chat (ResponseAggregator)      &larr; LLM ~2-5s</code></pre>
+<pre><code>DevSphere Orchestrator :8090
+  POST /api/query (incoming request)
+    supervisor.orchestrate
+      langchain4j.chat (@SupervisorAgent)        &larr; LLM decides which agents to call
+      POST http://localhost:8080/ (.../schedule) &larr; Schedule Advisor (Concierge)
+      POST http://localhost:8080/ (.../venue)    &larr; Venue Agent (Concierge)
+      POST http://localhost:8080/ (.../travel)   &larr; Travel Agent (Concierge)
+      langchain4j.chat (response synthesis)      &larr; LLM ~2-5s</code></pre>
 
 <h3>Distributed State &amp; Load Balancing (Discussion)</h3>
 
@@ -1813,12 +1812,15 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
 |                                                           |
 |         +--------- Orchestrator ---------+                |
 |         |          :8090 (Quarkus)       |                |
-|         |                                |                |
-|  +------v---------+ +------v------+ +---v-------------+  |
-|  | Schedule &amp;     | | Venue &amp;     | | Travel &amp;        |  |
-|  | Content Advisor| | On-Site Ops | | Logistics Agent |  |
-|  | :8080 (Quarkus)| | :8081 (SBt) | | :9000 (Python)  |  |
-|  +-----------------+ +-------------+ +-----------------+  |
+|         |   @SupervisorAgent             |                |
+|         |   @A2AClientAgent x 3          |                |
+|         +----------+---------+-----------+                |
+|                    |         |                            |
+|         +----------v---------v-----------+                |
+|         |  Concierge  :8080 (Quarkus)    |                |
+|         |  Schedule + Venue + Travel     |                |
+|         |  agents (multi-tenant)         |                |
+|         +----------------------------------+               |
 |                                                           |
 |  +------------------+                                     |
 |  | Expense &amp;        |  (standalone, not orchestrated)     |
@@ -1849,21 +1851,28 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
   Browser / curl
        |
        v  POST /api/query
-  +-------------------------------+
-  |  Orchestrator (Quarkus) :8090 |
-  |  REST app + Web UI            |
-  |                               |
-  |  @SupervisorAgent             |
-  |   LLM decides which agents   |
-  |   to call, then synthesizes   |
-  |   the final answer            |
-  |                               |
-  |  @A2AClientAgent sub-agents   |
-  |  +--------+ +------+ +-----+ |
-  |  |Schedule| |Travel| |Venue| |
-  |  |:8080   | |:9000 | |:8081| |
-  |  +--------+ +------+ +-----+ |
-  +-------------------------------+
+  +------------------------------------+
+  |  Orchestrator (Quarkus) :8090      |
+  |  REST app + Web UI                 |
+  |                                    |
+  |  @SupervisorAgent                  |
+  |   LLM decides which agents to call |
+  |   then synthesizes the final answer|
+  |                                    |
+  |  @A2AClientAgent sub-agents        |
+  |  (all point to Concierge :8080)    |
+  |  /.well-known/schedule/agent-card  |
+  |  /.well-known/venue/agent-card     |
+  |  /.well-known/travel/agent-card    |
+  +------------------------------------+
+       |
+       v
+  +------------------------------------+
+  |  Concierge (Quarkus) :8080         |
+  |  Multi-tenant: Schedule + Venue +  |
+  |  Travel agents, each with its own  |
+  |  AgentCard path                    |
+  +------------------------------------+
 </pre>
 </div>
 
@@ -1883,22 +1892,31 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
 <details class="solution">
     <summary>Show ScheduleAdvisorA2AAgent.java (one per remote agent)</summary>
     <div class="solution-body">
-<pre><code>import dev.langchain4j.agentic.declarative.A2AClientAgent;
+<pre><code>import dev.langchain4j.agentic.a2a.A2AContextId;
+import dev.langchain4j.agentic.a2a.A2ATaskId;
+import dev.langchain4j.agentic.declarative.A2AClientAgent;
+import dev.langchain4j.agentic.scope.ResultWithAgenticScope;
 import dev.langchain4j.service.V;
 
 public interface ScheduleAdvisorA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8080",
+            a2aServerUrl = "http://localhost:8080/.well-known/schedule/agent-card.json",
             name = "Schedule &amp; Content Advisor",
             description = "Answers questions about conference sessions, schedules, speakers, and talk content",
-            outputKey = "response"
+            outputKey = "schedule-response"
     )
-    String ask(@V("query") String query);
+    ResultWithAgenticScope&lt;String&gt; ask(
+        @V("query") String query,
+        @A2AContextId @V("contextId") String contextId,
+        @A2ATaskId @V("taskId") String taskId
+    );
 }
 
-// Similarly: VenueA2AAgent, TravelA2AAgent, ExpenseA2AAgent
-// Each points to a different agent URL</code></pre>
+// Similarly:
+//   VenueA2AAgent   → /.well-known/venue/agent-card.json
+//   TravelA2AAgent  → /.well-known/travel/agent-card.json
+// All pointing to the Concierge on :8080</code></pre>
     </div>
 </details>
 </section>
@@ -1925,17 +1943,19 @@ public interface ScheduleAdvisorA2AAgent {
             Use the available agents to gather information, then synthesize
             a clear, helpful response.
             """)
+    @UserMessage("Can you answer the attendee request: {{request}}")
     @SupervisorAgent(
             name = "DevSphere Orchestrator",
-            description = "Orchestrates specialist agents to answer complex, multi-domain questions",
+            description = "Orchestrates specialist agents to answer complex, multi-domain questions about Devoxx Belgium 2026",
+            outputKey = "response",
+            responseStrategy = SupervisorResponseStrategy.SUMMARY,
             subAgents = {
                     ScheduleAdvisorA2AAgent.class,
                     VenueA2AAgent.class,
-                    TravelA2AAgent.class,
-                    ExpenseA2AAgent.class
+                    TravelA2AAgent.class
             }
     )
-    String orchestrate(String query);
+    ResultWithAgenticScope&lt;String&gt; orchestrate(@V("request") String query);
 }</code></pre>
     </div>
 </details>
@@ -1970,7 +1990,8 @@ public class OrchestratorResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public QueryResponse query(QueryRequest request) {
-        String response = supervisor.orchestrate(request.query());
+        AgenticScope scope = supervisor.orchestrate(request.query()).agenticScope();
+        String response = scope.readState("response").toString();
         return new QueryResponse(response);
     }
 
@@ -1989,20 +2010,22 @@ public class OrchestratorResource {
         <span class="step-title">Test the Orchestrator</span>
     </div>
 
-    <h4>Make sure these agents are running</h4>
+    <h4>Make sure these processes are running</h4>
     <table>
-        <thead><tr><th>Terminal</th><th>Agent</th><th>Port</th></tr></thead>
+        <thead><tr><th>Terminal</th><th>Process</th><th>Port</th></tr></thead>
         <tbody>
-            <tr><td>Tab 1</td><td>Schedule &amp; Content Advisor (Quarkus)</td><td>8080</td></tr>
-            <tr><td>Tab 2</td><td>Venue &amp; On-Site Operations (Spring Boot)</td><td>8081</td></tr>
-            <tr><td>Tab 3</td><td>Travel &amp; Logistics (Python)</td><td>9000</td></tr>
-            <tr><td>Tab 4</td><td>Expense &amp; Compliance (WildFly)</td><td>8082</td></tr>
-            <tr><td>Tab 5</td><td><strong>Orchestrator &amp; Concierge (Quarkus)</strong></td><td><strong>8090</strong></td></tr>
+            <tr><td>Tab 1</td><td>Concierge (Quarkus, Schedule + Venue + Travel agents)</td><td>8080</td></tr>
+            <tr><td>Tab 2</td><td>Expense &amp; Compliance (WildFly)</td><td>8082</td></tr>
+            <tr><td>Tab 3</td><td><strong>Orchestrator (Quarkus)</strong></td><td><strong>8090</strong></td></tr>
         </tbody>
     </table>
 
+    <h4>Start the Concierge (specialist agents)</h4>
+    <pre><code>cd exercises/exercise-5-orchestrator/concierge
+mvn quarkus:dev</code></pre>
+
     <h4>Start the Orchestrator</h4>
-    <pre><code>cd exercises/exercise-5-orchestrator
+    <pre><code>cd exercises/exercise-5-orchestrator/orchestrator
 mvn quarkus:dev</code></pre>
 
     <h4>Send Maya&rsquo;s full scenario (curl)</h4>
@@ -2017,8 +2040,9 @@ mvn quarkus:dev</code></pre>
 <h3>Checkpoint</h3>
 
 <ul class="checklist">
+    <li>Concierge running on port 8080 (Schedule, Venue, and Travel agents at separate <code>/.well-known/*</code> paths)</li>
     <li>Orchestrator running on port 8090 with web UI at the root</li>
-    <li><code>@A2AClientAgent</code> interfaces wrap each remote A2A agent</li>
+    <li><code>@A2AClientAgent</code> interfaces point to each agent&rsquo;s specific AgentCard URL on the concierge</li>
     <li><code>@SupervisorAgent</code> lets the LLM autonomously select and call agents</li>
     <li>Single unified response synthesized from multiple agent answers</li>
     <li><code>POST /api/query</code> returns a JSON response</li>
@@ -2026,7 +2050,7 @@ mvn quarkus:dev</code></pre>
 
 <div class="callout success">
     <div class="callout-title">&#9989; Key takeaway</div>
-    <p><strong>LangChain4j + A2A:</strong> the <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> annotations replace hundreds of lines of manual orchestration code. The Orchestrator doesn&rsquo;t know how any agent is implemented &mdash; it only knows what each agent can do (from the AgentCard) and how to talk to it (via A2A). The orchestrator itself is just a REST app &mdash; only the downstream agents speak A2A.</p>
+    <p><strong>LangChain4j + A2A:</strong> the <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> annotations replace hundreds of lines of manual orchestration code. The Concierge bundles all specialist agents into one Quarkus app using multi-tenancy &mdash; each with its own AgentCard path. The Orchestrator doesn&rsquo;t know how any agent is implemented; it only reads the AgentCard and communicates via A2A.</p>
 </div>
 </section>
 
@@ -2054,7 +2078,7 @@ mvn quarkus:dev</code></pre>
     </div>
     <div class="timeline-item purple">
         <strong>Exercise 4 &mdash; Expense &amp; Compliance + Observability</strong>
-        <p>WildFly Enterprise agent (JPA, Kafka, multi-transport) with cross-agent data handoff and OpenTelemetry tracing in Grafana</p>
+        <p>WildFly Enterprise expense agent with compliance validation, cross-agent data handoff, and OpenTelemetry tracing in Grafana</p>
     </div>
     <div class="timeline-item red">
         <strong>Exercise 5 &mdash; Orchestrator &amp; Concierge</strong>

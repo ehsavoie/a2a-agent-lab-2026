@@ -30,6 +30,11 @@ public class ExpenseAgentExecutorProducer {
             public void execute(RequestContext context, AgentEmitter emitter) throws A2AError {
                 String userText = extractText(context.getMessage());
 
+                boolean isNewTask = context.getTask() == null;
+                if (isNewTask) {
+                    emitter.submit();
+                }
+
                 emitter.startWork();
 
                 try {
