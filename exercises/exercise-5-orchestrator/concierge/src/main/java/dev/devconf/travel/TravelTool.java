@@ -219,29 +219,32 @@ public class TravelTool {
         String vendor = "Unknown vendor";
         String amount = "0.00";
         String currency = "EUR";
-        String category = "transportation";
+        if (description.contains("$")) {
+            currency = "$";
+        }
+        String category = "Transportation";
         String date = LocalDate.now().toString();
 
         if (q.contains("taxi") || q.contains("cab")) {
             vendor = "Antwerp Taxi Service";
             amount = "65.00";
-            category = "ground_transportation";
+            category = "Transportation";
         } else if (q.contains("uber") || q.contains("bolt") || q.contains("rideshare") || q.contains("ride")) {
             vendor = "Bolt Belgium";
             amount = "45.00";
-            category = "ground_transportation";
+            category = "Transportation";
         } else if (q.contains("train") || q.contains("tram") || q.contains("rail") || q.contains("nmbs") || q.contains("sncb")) {
             vendor = "NMBS/SNCB Belgian Railways";
             amount = "12.00";
-            category = "public_transit";
+            category = "Transportation";
         } else if (q.contains("hotel") || q.contains("room")) {
             vendor = "Holiday Inn Express Antwerp";
             amount = "99.00";
-            category = "lodging";
+            category = "Accommodation";
         } else if (q.contains("food") || q.contains("restaurant") || q.contains("meal") || q.contains("dinner") || q.contains("lunch")) {
             vendor = "Balls & Glory Antwerp";
             amount = "18.50";
-            category = "meals";
+            category = "Meals";
         }
 
         for (String word : q.split("\\s+")) {
