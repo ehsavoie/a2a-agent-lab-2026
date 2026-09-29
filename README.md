@@ -232,7 +232,7 @@ mvn compile
 ## Key Technologies
 
 - **[A2A Protocol](https://google.github.io/A2A/)** — Open standard for agent-to-agent communication
-- **[A2A Java SDK](https://github.com/a2aproject/a2a-java-sdk)** — Java implementation of the A2A protocol
+- **[A2A Java SDK](https://github.com/a2aproject/a2a-java)** — Java implementation of the A2A protocol
 - **[LangChain4j](https://docs.langchain4j.dev/)** — Java framework for LLM-powered applications
 - **[A2A Jakarta EE SDK](https://github.com/wildfly-extras/a2a-jakarta)** — A2A integration for Jakarta EE / WildFly
 - **[Quarkus](https://quarkus.io/)** — Supersonic Subatomic Java framework

@@ -330,9 +330,9 @@ In two hours, you built a **production-grade A2A agent ecosystem**:
 ### Resources
 
 - [A2A Protocol Specification](https://google.github.io/A2A/)
-- [A2A Java SDK](https://github.com/a2aproject/a2a-java-sdk)
+- [A2A Java SDK](https://github.com/a2aproject/a2a-java)
 - [A2A Jakarta EE SDK (Java A2A SDK)](https://github.com/wildfly-extras/a2a-jakarta)
-- [A2A Python SDK](https://github.com/a2aproject/a2a-python-sdk)
+- [A2A Python SDK](https://github.com/a2aproject/a2a-python)
 - [A2A Samples](https://github.com/a2aproject/a2a-samples)
 - [LangChain4j Documentation](https://docs.langchain4j.dev/)
 
