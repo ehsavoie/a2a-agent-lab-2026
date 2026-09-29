@@ -10,7 +10,7 @@
 
 ## Overview
 
-In this exercise you will build the **Orchestrator & Concierge** — the primary edge router and user-facing gateway, built with **Quarkus Native** for sub-second cold starts and minimal memory overhead. It will:
+In this exercise you will build the **Orchestrator & Concierge** — the primary edge router and user-facing gateway, built with **Quarkus**. It will:
 
 1. **Discover** available agents by fetching their AgentCards across the mesh
 2. **Decompose** Maya's complex query into targeted sub-tasks using LangChain4j
@@ -400,13 +400,13 @@ This is the **power of A2A as a coordination protocol**: the Orchestrator doesn'
 | Venue & On-Site Ops | Spring Boot + LangChain4j | 8081 |
 | Travel & Logistics | Python A2A SDK | 9000 |
 | Expense & Compliance | Jakarta EE / Java A2A SDK | 8082 |
-| **Orchestrator & Concierge** | **Quarkus Native** | **8090** |
+| **Orchestrator & Concierge** | **Quarkus** | **8090** |
 
 ---
 
 > **Discussion: Why Quarkus Native for the Orchestrator?**
 >
-> The Orchestrator is the edge router — every user request hits it first. Quarkus Native gives you:
+> The Orchestrator is the edge router — every user request hits it first. A native build of Quarkus can provide:
 > - **Sub-second cold starts** — critical for auto-scaling in serverless or Kubernetes
 > - **Minimal memory footprint** — the Orchestrator coordinates but doesn't do heavy computation
 > - **Fast request routing** — native compilation eliminates JIT warmup
