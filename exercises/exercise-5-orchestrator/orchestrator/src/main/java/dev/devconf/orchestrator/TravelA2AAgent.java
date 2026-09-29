@@ -9,7 +9,8 @@ import dev.langchain4j.service.V;
 public interface TravelA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8080/.well-known/travel/agent-card.json",
+            a2aServerUrl = "http://localhost:8080/",
+            tenant = "travel",
             name = "Travel & Logistics Agent",
             description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
             outputKey = "travel-response"

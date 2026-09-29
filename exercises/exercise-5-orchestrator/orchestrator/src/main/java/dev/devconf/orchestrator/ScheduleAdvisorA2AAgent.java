@@ -9,7 +9,8 @@ import dev.langchain4j.service.V;
 public interface ScheduleAdvisorA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8080/.well-known/schedule/agent-card.json",
+            a2aServerUrl = "http://localhost:8080/",
+            tenant = "schedule",
             name = "Schedule & Content Advisor",
             description = "Answers questions about conference sessions, schedules, speakers, and talk content",
             outputKey = "schedule-response"

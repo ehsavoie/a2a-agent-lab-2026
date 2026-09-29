@@ -9,7 +9,8 @@ import dev.langchain4j.service.V;
 public interface VenueA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8080/.well-known/venue/agent-card.json",
+            a2aServerUrl = "http://localhost:8080/",
+            tenant = "venue",
             name = "Venue & On-Site Operations",
             description = "Provides information about venue layout, room capacities, facilities, and on-site operations",
             outputKey = "venue-response"
