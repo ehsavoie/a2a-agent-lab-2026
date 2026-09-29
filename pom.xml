@@ -53,13 +53,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-<!--            <dependency>
+            <dependency>
                 <groupId>dev.langchain4j</groupId>
                 <artifactId>langchain4j-bom</artifactId>
                 <version>${langchain4j.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>-->
+            </dependency>
             <dependency>
                 <groupId>org.a2aproject.sdk</groupId>
                 <artifactId>a2a-java-sdk-extras-bom</artifactId>

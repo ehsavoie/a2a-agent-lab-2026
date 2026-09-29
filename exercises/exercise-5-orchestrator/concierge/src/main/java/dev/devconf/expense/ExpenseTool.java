@@ -1,6 +1,7 @@
 package dev.devconf.expense;
 
 import dev.langchain4j.agent.tool.Tool;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.ArrayList;
@@ -23,6 +24,31 @@ public class ExpenseTool {
             "Supplies", 50.0);
 
     private final List<Expense> expenseLog = new ArrayList<>();
+
+    @PostConstruct
+    void seedExpenses() {
+        // Maya's existing expenses from the conference trip — mix of compliant and flagged
+        expenseLog.add(new Expense("EXP-MAYA001", "Bolt Belgium", 45.0, "EUR",
+                "2026-10-07", "Transportation",
+                "Airport taxi — Brussels Airport to Kinepolis Antwerp",
+                true, ""));
+        expenseLog.add(new Expense("EXP-MAYA002", "Bistro du Centre", 82.0, "EUR",
+                "2026-10-07", "Meals",
+                "Conference lunch Day 1",
+                false, "OVER LIMIT: EUR 82.00 exceeds EUR 75.00 cap for Meals"));
+        expenseLog.add(new Expense("EXP-MAYA003", "Crowne Plaza Antwerp", 185.0, "EUR",
+                "2026-10-07", "Accommodation",
+                "Hotel — night of October 7th",
+                true, ""));
+        expenseLog.add(new Expense("EXP-MAYA004", "Devoxx Belgium", 499.0, "EUR",
+                "2026-10-06", "Registration",
+                "Conference registration fee",
+                true, ""));
+        expenseLog.add(new Expense("EXP-MAYA005", "MediaMarkt Antwerp", 68.0, "EUR",
+                "2026-10-07", "Supplies",
+                "USB-C hub and presentation adapters",
+                false, "OVER LIMIT: EUR 68.00 exceeds EUR 50.00 cap for Supplies"));
+    }
 
     @Tool("Log and validate an expense entry against corporate compliance rules. " +
           "Requires: vendor name, amount (numeric), currency (ISO code or symbol, e.g. EUR, USD, $, €), " +
