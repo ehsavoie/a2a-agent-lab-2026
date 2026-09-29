@@ -8,7 +8,7 @@
 
 In this exercise you will:
 
-1. Build the **Expense & Compliance Agent** — a second Jakarta EE (Java A2A SDK) agent that standardizes receipts into audit-ready expense logs
+1. Build the **Expense & Compliance Agent** — a WildFly 41 (Jakarta EE / Java A2A SDK) agent that standardizes receipts into audit-ready expense logs
 2. Wire up **cross-agent data handoff** — the Travel Agent extracts receipt details, the Orchestrator routes them to the Expense Agent
 ---
 
@@ -301,27 +301,19 @@ You now have:
 ## The Complete DevSphere System
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                    DevSphere Concierge System                    │
-│                                                                  │
-│  ┌──────────────┐  ┌─────────────┐  ┌───────────────────────┐  │
-│  │ Orchestrator │  │  Schedule   │  │  Travel & Logistics   │  │
-│  │ & Concierge  │  │  & Content  │  │  Agent (Python)       │  │
-│  │ :8090 (Qkus) │──│  Advisor    │  │  :9000                │  │
-│  │              │  │  :8080(A2A) │  │                       │  │
-│  │              │  ├─────────────┤  ├───────────────────────┤  │
-│  │              │  │   Venue &   │  │  Expense &            │  │
-│  │              │──│  On-Site Ops│  │  Compliance Agent     │  │
-│  │              │  │  :8081(Boot)│  │  :8082 (A2A)         │  │
-│  └──────────────┘  └─────────────┘  └───────────────────────┘  │
-└──────────────────────────────────────────────────────────────────┘
+┌──────────────────────────┐      A2A JSON-RPC      ┌──────────────────────────┐
+│ Orchestrator              │ ─────────────────────► │ Concierge runtime         │
+│ Quarkus REST :8090        │                         │ Quarkus :8080              │
+│ POST /api/query           │                         │ Schedule · Travel tenants │
+└──────────────────────────┘                         │ Venue · Expense tenants  │
+                                                     └──────────────────────────┘
 ```
 
 ## What You Built Today
 
 In two hours, you built a **production-grade A2A agent ecosystem**:
 
-1. **Exercise 1** — Your first A2A agent: the Schedule & Content Advisor (Jakarta EE / Java A2A SDK), teaching AgentCard, AgentExecutor, and LLM tool calling
+1. **Exercise 1** — Your first A2A agent: the Schedule & Content Advisor (Quarkus + A2A Java SDK), teaching AgentCard, AgentExecutor, and LLM tool calling
 2. **Exercise 2** — The Venue & On-Site Operations Agent (Spring Boot + LangChain4j), proving A2A is runtime-agnostic
 3. **Exercise 3** — The Travel & Logistics Agent (Python), proving A2A is language-independent
 4. **Exercise 4** — The Expense & Compliance Agent (Java A2A SDK) for cross-agent data handoff

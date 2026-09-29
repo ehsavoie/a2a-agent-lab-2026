@@ -736,7 +736,7 @@ mvn install -DskipTests</code></pre>
       expense-agent/                   &larr; A2A agent (LangChain4j + compliance)
       expense-client/                  &larr; JAX-RS web app — A2A client of the agent
     exercise-5-orchestrator/           &larr; Multi-project Quarkus Orchestrator
-      concierge/                       &larr; Multi-tenant: Schedule + Venue + Travel
+      concierge/                       &larr; Multi-tenant: Schedule + Venue + Travel + Expense
       orchestrator/                    &larr; Supervisor + @A2AClientAgent + REST UI
       podman-compose.yml               &larr; Grafana LGTM (OTel observability)
   solutions/                           &larr; Complete solutions + scripts</code></pre>
@@ -1813,20 +1813,14 @@ extract_receipt(query)         &rarr;        processReceipt(receiptData)
 |         +--------- Orchestrator ---------+                |
 |         |          :8090 (Quarkus)       |                |
 |         |   @SupervisorAgent             |                |
-|         |   @A2AClientAgent x 3          |                |
+|         |   @A2AClientAgent x 4          |                |
 |         +----------+---------+-----------+                |
 |                    |         |                            |
 |         +----------v---------v-----------+                |
 |         |  Concierge  :8080 (Quarkus)    |                |
 |         |  Schedule + Venue + Travel     |                |
-|         |  agents (multi-tenant)         |                |
+|         |  + Expense agents (multi-tenant)|                |
 |         +----------------------------------+               |
-|                                                           |
-|  +------------------+                                     |
-|  | Expense &amp;        |  (standalone, not orchestrated)     |
-|  | Compliance       |                                     |
-|  | :8082 (WF Ent.)  |                                     |
-|  +------------------+                                     |
 |                                                           |
 |               +---------------+                           |
 |               | Grafana/LGTM  |  &larr; All traces here       |
@@ -1864,13 +1858,14 @@ extract_receipt(query)         &rarr;        processReceipt(receiptData)
   |  /.well-known/schedule/agent-card  |
   |  /.well-known/venue/agent-card     |
   |  /.well-known/travel/agent-card    |
+  |  /.well-known/expense/agent-card   |
   +------------------------------------+
        |
        v
   +------------------------------------+
   |  Concierge (Quarkus) :8080         |
   |  Multi-tenant: Schedule + Venue +  |
-  |  Travel agents, each with its own  |
+  |  Travel + Expense agents, each    |
   |  AgentCard path                    |
   +------------------------------------+
 </pre>
@@ -1916,6 +1911,7 @@ public interface ScheduleAdvisorA2AAgent {
 // Similarly:
 //   VenueA2AAgent   → /.well-known/venue/agent-card.json
 //   TravelA2AAgent  → /.well-known/travel/agent-card.json
+//   ExpenseA2AAgent → /.well-known/expense/agent-card.json
 // All pointing to the Concierge on :8080</code></pre>
     </div>
 </details>
@@ -1952,7 +1948,8 @@ public interface ScheduleAdvisorA2AAgent {
             subAgents = {
                     ScheduleAdvisorA2AAgent.class,
                     VenueA2AAgent.class,
-                    TravelA2AAgent.class
+                    TravelA2AAgent.class,
+                    ExpenseA2AAgent.class
             }
     )
     ResultWithAgenticScope&lt;String&gt; orchestrate(@V("request") String query);
@@ -2014,9 +2011,8 @@ public class OrchestratorResource {
     <table>
         <thead><tr><th>Terminal</th><th>Process</th><th>Port</th></tr></thead>
         <tbody>
-            <tr><td>Tab 1</td><td>Concierge (Quarkus, Schedule + Venue + Travel agents)</td><td>8080</td></tr>
-            <tr><td>Tab 2</td><td>Expense &amp; Compliance (WildFly)</td><td>8082</td></tr>
-            <tr><td>Tab 3</td><td><strong>Orchestrator (Quarkus)</strong></td><td><strong>8090</strong></td></tr>
+            <tr><td>Tab 1</td><td>Concierge (Quarkus, Schedule + Venue + Travel + Expense agents)</td><td>8080</td></tr>
+            <tr><td>Tab 2</td><td><strong>Orchestrator (Quarkus)</strong></td><td><strong>8090</strong></td></tr>
         </tbody>
     </table>
 
@@ -2031,7 +2027,7 @@ mvn quarkus:dev</code></pre>
     <h4>Send Maya&rsquo;s full scenario (curl)</h4>
     <pre><code>curl -s -X POST http://localhost:8090/api/query \
   -H "Content-Type: application/json" \
-  -d '{"query": "My flight was delayed. What sessions about LangChain4j or agentic patterns are available today, and how do I get to the venue quickly?"}' | jq .</code></pre>
+  -d '{"query": "My flight was delayed so I missed the morning shuttle. I am interested in agentic AI and Java agents. What talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?"}' | jq .</code></pre>
 
     <h4>Or use the Web UI</h4>
     <p>Open <a href="http://localhost:8090" target="_blank">http://localhost:8090</a> in your browser for an interactive chat interface.</p>
@@ -2040,7 +2036,7 @@ mvn quarkus:dev</code></pre>
 <h3>Checkpoint</h3>
 
 <ul class="checklist">
-    <li>Concierge running on port 8080 (Schedule, Venue, and Travel agents at separate <code>/.well-known/*</code> paths)</li>
+    <li>Concierge running on port 8080 (Schedule, Venue, Travel, and Expense agents at separate <code>/.well-known/*</code> paths)</li>
     <li>Orchestrator running on port 8090 with web UI at the root</li>
     <li><code>@A2AClientAgent</code> interfaces point to each agent&rsquo;s specific AgentCard URL on the concierge</li>
     <li><code>@SupervisorAgent</code> lets the LLM autonomously select and call agents</li>

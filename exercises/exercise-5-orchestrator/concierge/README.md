@@ -70,4 +70,4 @@ The companion Orchestrator project is in [the sibling orchestrator module](../RE
 
 ## Full Instructions
 
-See [../../docs/exercise-5.md](../../docs/exercise-5.md) for the complete step-by-step guide.
+See [../../../docs/exercise-5.md](../../../docs/exercise-5.md) for the complete step-by-step guide.

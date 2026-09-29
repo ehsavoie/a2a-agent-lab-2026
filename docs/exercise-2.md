@@ -328,7 +328,7 @@ At this point you should have:
 - [x] Two agents on two different frameworks, both speaking A2A
 - [x] The realization that **the AgentCard is the contract** — the framework is invisible to clients
 
-**You now have two agents in the mesh.** The Schedule Advisor knows about sessions. The Venue Agent knows about rooms, directions, and catering. Neither agent knows the other exists — but in Exercise 4, the Orchestrator will discover both and route queries to the right one.
+**You now have two agents in the mesh.** The Schedule Advisor knows about sessions. The Venue Agent knows about rooms, directions, and catering. Neither agent knows the other exists — but in Exercise 5, the Orchestrator will discover both and route queries to the right one.
 
 ---
 
