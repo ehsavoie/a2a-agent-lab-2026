@@ -1,7 +1,7 @@
 """
 DevSphere 2026 Travel & Logistics Agent — A2A Python Agent
 
-Connects to flight APIs, local transit, and hotel systems.
+Uses sample flight, transit, and hotel data.
 Handles travel logistics, transit comparison, and receipt extraction
 for expense reporting.
 """
@@ -539,7 +539,7 @@ def build_agent_card() -> AgentCard:
             AgentSkill(
                 id="transit-routes",
                 name="Transit Routes",
-                description="Get transit options from airport to venue with real-time disruption info.",
+                description="Get transit options from airport to venue with sample disruption info.",
                 tags=["transit", "airport", "rideshare", "train", "taxi"],
                 examples=[
                     "How do I get from Brussels Airport to Kinepolis Antwerp?",

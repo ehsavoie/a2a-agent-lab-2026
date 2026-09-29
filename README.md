@@ -229,7 +229,7 @@ The primary edge router and user-facing gateway. Leveraging Quarkus for sub-seco
 Deep-scans the summit's session catalog, speaker names and session details, and domain tracks. Matches attendee skill levels and interests to specific talks. Uses Quarkus LangChain4j's `@RegisterAiService` with `@Tool`-annotated CDI beans for native LLM tool calling.
 
 ### The Travel & Logistics Agent (Python A2A SDK)
-Connects to flight APIs, local transit, and hotel systems. Handles travel bookings, flight disruption monitoring, and commute routes to the venue. Built with the Python A2A SDK reference implementation.
+Uses sample flight, transit, and hotel data. Handles travel queries, flight disruption information, and commute routes to the venue. Built with the Python A2A SDK reference implementation.
 
 ### The Venue & On-Site Operations Agent (Spring Boot + LangChain4j)
 Robust enterprise microservice that manages real-time IoT room capacity sensors, indoor interactive mapping, and catering queue tracking.
