@@ -1,6 +1,6 @@
 # Exercise 1: Schedule & Content Advisor (Quarkus)
 
-The **Schedule & Content Advisor** deep-scans the Devoxx Belgium 2026 session catalog, speaker bios, and domain tracks. It matches attendee skill levels and interests to specific talks.
+The **Schedule & Content Advisor** deep-scans the Devoxx Belgium 2026 session catalog, speaker names and session details, and domain tracks. It matches attendee skill levels and interests to specific talks.
 
 Built with **Quarkus**, the **A2A Java SDK reference implementation** (`a2a-java-sdk-reference-jsonrpc`), and **Quarkus LangChain4j** with OpenAI GPT-6 Luna via the Responses API at medium reasoning effort for native `@RegisterAiService` tool calling.
 
@@ -97,10 +97,6 @@ User message → A2A JSON-RPC transport
 | `session-recommend` | Personalized recommendations based on interests and availability |
 | `speaker-info` | Speaker information and their sessions |
 
-## Companion Project
-
-The companion Session Agent project is in [exercise-1-session-agent](../exercise-1-session-agent/README.md).
-
 ## Full Instructions
 
-See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the Exercise 1 walkthrough. It describes a Jakarta EE/WildFly version; this checked-in project uses Quarkus as shown above.
+See [../../docs/exercise-1.md](../../docs/exercise-1.md) for the Exercise 1 walkthrough.

@@ -65,7 +65,7 @@ public class ScheduleAgentCardProducer {
                         .id("speaker-info")
                         .name("Speaker Information")
                         .description("Get information about conference speakers and their sessions.")
-                        .tags(List.of("speakers", "bios"))
+                        .tags(List.of("speakers", "sessions"))
                         .examples(List.of(
                             "Tell me about the speakers covering AI topics",
                             "Who is speaking about Quarkus?"))

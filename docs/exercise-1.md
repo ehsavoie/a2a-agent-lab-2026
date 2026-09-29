@@ -6,7 +6,7 @@
 
 ## Overview
 
-In this exercise you will build the first agent in the DevSphere mesh — the **Schedule & Content Advisor** — using **Jakarta EE** and the **A2A Jakarta EE SDK (Java A2A SDK)**. Deployed as a standard WAR on **WildFly 40**, it deep-scans the summit's session catalog, speaker bios, and domain tracks to match attendee interests to specific talks.
+In this exercise you will build the first agent in the DevSphere mesh — the **Schedule & Content Advisor** — using **Quarkus** and the **A2A Java SDK reference implementation**. Packaged as a runnable Quarkus application, it deep-scans the summit's session catalog, speaker names and session details, and domain tracks to match attendee interests to specific talks.
 
 By the end, your agent will:
 
@@ -24,7 +24,7 @@ By the end, your agent will:
 | **AgentExecutor** | The handler that receives A2A messages and produces responses |
 | **Task lifecycle** | How requests flow: `SUBMITTED` → `WORKING` → `COMPLETED` (or `FAILED`) |
 | **Message & Part model** | Messages carry a `role` (USER or AGENT) and an array of typed `Part` objects |
-| **Java A2A SDK** | The A2A Jakarta EE SDK — `a2a-jakarta-jsonrpc` — that provides the JSON-RPC transport on WildFly |
+| **Java A2A SDK** | The A2A Java SDK reference implementation — `a2a-java-sdk-reference-jsonrpc` — that provides the JSON-RPC transport |
 
 ---
 
@@ -78,35 +78,32 @@ cd exercises/exercise-1-schedule-advisor
 ```
 
 Key dependencies:
-- `a2a-jakarta-jsonrpc` — A2A Jakarta EE transport (JSON-RPC on JAX-RS)
-- `a2a-java-sdk-server-common` — A2A server-side SDK
-- `langchain4j` + `langchain4j-open-ai` — LangChain4j with OpenAI Responses API support
-- Jakarta EE APIs (CDI, JAX-RS) — provided by WildFly at runtime
+- `a2a-java-sdk-reference-jsonrpc` — A2A Java SDK reference implementation (JSON-RPC)
+- `quarkus-langchain4j-openai` — Quarkus LangChain4j integration with OpenAI Responses API support
+- `quarkus-arc` and `quarkus-rest-jackson` — CDI and JAX-RS support provided by Quarkus
 
-### WAR Packaging
+### Quarkus Packaging
 
-Unlike a Quarkus or Spring Boot agent, this agent is packaged as a **standard Jakarta EE WAR** and deployed on **WildFly 40**. The `wildfly-maven-plugin` provisions a complete WildFly server in `target/wildfly/` during `mvn package`:
+This agent is packaged as a **runnable Quarkus application**. The `quarkus-maven-plugin` builds it in `target/quarkus-app/` during `mvn package`:
 
 ```xml
-<packaging>war</packaging>
-
 <plugin>
-    <groupId>org.wildfly.plugins</groupId>
-    <artifactId>wildfly-maven-plugin</artifactId>
-    <configuration>
-        <feature-packs>
-            <feature-pack>
-                <groupId>org.wildfly</groupId>
-                <artifactId>wildfly-galleon-pack</artifactId>
-                <version>40.0.0.Final</version>
-            </feature-pack>
-        </feature-packs>
-        <name>ROOT.war</name>
-    </configuration>
+    <groupId>io.quarkus.platform</groupId>
+    <artifactId>quarkus-maven-plugin</artifactId>
+    <version>${quarkus.platform.version}</version>
+    <extensions>true</extensions>
+    <executions>
+        <execution>
+            <goals>
+                <goal>build</goal>
+                <goal>generate-code</goal>
+            </goals>
+        </execution>
+    </executions>
 </plugin>
 ```
 
-The `ROOT.war` deployment name means the agent is accessible at the root context path — no `/app` prefix.
+The Quarkus application serves the agent at the root context path — no `/app` prefix.
 
 ---
 
@@ -138,24 +135,33 @@ There are 203 real Devoxx Belgium 2026 sessions across 8 tracks (Agentic Enginee
 
 The `ScheduleTool` gives the LLM access to the real conference data. LangChain4j's `@Tool` annotation exposes methods as callable tools that the model can invoke.
 
-Create `src/main/java/dev/devconf/schedule/ScheduleTool.java`:
+Open `src/main/java/dev/devconf/schedule/ScheduleTool.java`:
 
 ```java
+@ApplicationScoped
 public class ScheduleTool {
+
+    @ConfigProperty(name = "session.data.path", defaultValue = "../../conference-data/sessions.json")
+    String sessionDataPath;
 
     private List<Session> sessions;
 
-    public ScheduleTool(String sessionDataPath) {
+    @PostConstruct
+    void init() {
         // Load sessions from JSON file using Jackson
         ObjectMapper mapper = new ObjectMapper();
         Path path = Path.of(sessionDataPath);
-        sessions = mapper.readValue(path.toFile(), new TypeReference<>() {});
+        try {
+            sessions = mapper.readValue(path.toFile(), new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load session data", e);
+        }
     }
 ```
 
 Five tools are exposed to the LLM:
 
-- **`searchSessions(String query)`** — Searches sessions by keyword match against title, track, speaker, description, and tags
+- **`searchSessions(String query)`** — Searches sessions by keyword match against title, track, speaker, level, description, and tags
 - **`listTracks()`** — Returns all distinct track names
 - **`getScheduleByDate(String date)`** — Returns the full schedule for a given day
 - **`filterSessionsAfterTime(String date, String time)`** — Returns sessions starting at or after a given time (for attendees arriving late, like Maya)
@@ -170,7 +176,7 @@ The `Session` record at the bottom maps directly to the JSON structure:
 ```java
 public record Session(
     String id, String title, String speaker, String track,
-    String room, String date, String time, int duration,
+    String room, String date, String time, int duration, String level,
     String description, List<String> tags
 ) {}
 ```
@@ -181,15 +187,18 @@ public record Session(
 
 The `ScheduleService` is a LangChain4j **AI Service** — an interface that LangChain4j implements at runtime by wiring together the LLM, tools, and system prompt.
 
-Create `src/main/java/dev/devconf/schedule/ScheduleService.java`:
+Open `src/main/java/dev/devconf/schedule/ScheduleService.java`:
 
 ```java
+@RegisterAiService(tools = ScheduleTool.class)
 public interface ScheduleService {
 
     @SystemMessage("""
-            You are the DevConf 2026 Schedule & Content Advisor — a knowledgeable
+            You are the Devoxx Belgium 2026 Schedule & Content Advisor — a knowledgeable
             assistant that helps conference attendees find the perfect sessions.
-            You deep-scan the summit's session catalog, speaker bios, and domain tracks.
+            You deep-scan the conference session catalog, speaker names and session details, and domain tracks.
+            The conference runs from Monday Oct 5 (university day) to Friday Oct 9
+            at Kinepolis, Antwerp.
             Match attendee skill levels and interests to specific talks.
 
             You have access to the full conference schedule through your tools.
@@ -201,63 +210,18 @@ public interface ScheduleService {
 }
 ```
 
-Since we are on plain Jakarta EE (not Quarkus), we cannot use `@RegisterAiService`. Instead, we wire the AI Service programmatically in a CDI producer.
+Quarkus uses `@RegisterAiService` to register the `ScheduleService` as a CDI bean and wire it to the configured model and tools.
 
 ---
 
 ## Step 5: Wire the AI Service with CDI
 
-Create `src/main/java/dev/devconf/schedule/ScheduleServiceProducer.java`:
-
-```java
-import dev.langchain4j.http.client.HttpClientBuilderLoader;
-import dev.langchain4j.model.openai.OpenAiResponsesChatModel;
-import java.time.Duration;
-
-@ApplicationScoped
-public class ScheduleServiceProducer {
-
-    @ConfigProperty(name = "openai.api-key")
-    String openaiApiKey;
-
-    @ConfigProperty(name = "openai.model-name", defaultValue = "gpt-6-luna")
-    String openaiModelName;
-
-    @ConfigProperty(name = "session.data.path",
-                    defaultValue = "../../conference-data/sessions.json")
-    String sessionDataPath;
-
-    private ScheduleService scheduleService;
-
-    @PostConstruct
-    void init() {
-        OpenAiResponsesChatModel chatModel = OpenAiResponsesChatModel.builder()
-                .httpClientBuilder(HttpClientBuilderLoader.loadHttpClientBuilder()
-                        .readTimeout(Duration.ofSeconds(120)))
-                .apiKey(openaiApiKey)
-                .modelName(openaiModelName)
-                .reasoningEffort("medium")
-                .build();
-
-        ScheduleTool scheduleTool = new ScheduleTool(sessionDataPath);
-
-        scheduleService = AiServices.builder(ScheduleService.class)
-                .chatModel(chatModel)
-                .tools(scheduleTool)
-                .build();
-    }
-
-    @Produces
-    public ScheduleService getScheduleService() {
-        return scheduleService;
-    }
-}
-```
+The `@RegisterAiService` annotation on `ScheduleService` wires the AI Service with CDI. The model and OpenAI settings are configured in `src/main/resources/application.properties`.
 
 Key points:
-- `@ConfigProperty` injects values from `META-INF/microprofile-config.properties` (MicroProfile Config, provided by WildFly)
-- The `ScheduleTool` is created manually (not as a CDI bean) and passed to `AiServices.builder()`
-- The `ScheduleService` proxy is produced as a CDI bean for injection elsewhere
+- Quarkus reads the model settings from `application.properties`
+- `ScheduleTool` is a CDI bean and is registered as a tool with `@RegisterAiService(tools = ScheduleTool.class)`
+- Quarkus registers the `ScheduleService` as a CDI bean for injection elsewhere
 
 ---
 
@@ -265,7 +229,7 @@ Key points:
 
 The AgentCard is how your agent introduces itself to the A2A world. We produce it using CDI.
 
-Create `src/main/java/dev/devconf/schedule/ScheduleAgentCardProducer.java`:
+Open `src/main/java/dev/devconf/schedule/ScheduleAgentCardProducer.java`:
 
 ```java
 @ApplicationScoped
@@ -310,7 +274,7 @@ public class ScheduleAgentCardProducer {
                         .id("speaker-info")
                         .name("Speaker Information")
                         .description("Get information about conference speakers and their sessions.")
-                        .tags(List.of("speakers", "bios"))
+                        .tags(List.of("speakers", "sessions"))
                         .examples(List.of("Who is speaking about Quarkus?"))
                         .build()
                 ))
@@ -326,7 +290,7 @@ Key points:
 - `@PublicAgentCard` is an SDK qualifier that tells the A2A server to serve this card at `/.well-known/agent-card.json`
 - **Skills** are the most important part — they tell the Orchestrator and other agents what you can do
 
-> **Note:** Config values come from `META-INF/microprofile-config.properties`, making the agent easy to reconfigure for different environments without changing code.
+> **Note:** Config values come from `application.properties`, making the agent easy to reconfigure for different environments without changing code.
 
 ---
 
@@ -334,7 +298,7 @@ Key points:
 
 The `AgentExecutor` is where the real work happens. It receives incoming A2A messages and produces responses.
 
-Create `src/main/java/dev/devconf/schedule/ScheduleAgentExecutorProducer.java`:
+Open `src/main/java/dev/devconf/schedule/ScheduleAgentExecutorProducer.java`:
 
 ```java
 @ApplicationScoped
@@ -408,58 +372,56 @@ Client sends SendMessage
 
 ---
 
-## Step 8: Add the JAX-RS Application
+## Step 8: Use the A2A JSON-RPC Endpoint
 
-A minimal JAX-RS application class activates the REST endpoint:
-
-Create `src/main/java/dev/devconf/schedule/ScheduleApplication.java`:
-
-```java
-@ApplicationPath("/")
-public class ScheduleApplication extends Application {
-}
-```
+The `a2a-java-sdk-reference-jsonrpc` dependency provides the JSON-RPC endpoint at the root path `/`.
 
 ---
 
 ## Step 9: Configure and Run
 
-Check `src/main/resources/META-INF/microprofile-config.properties`:
+Check `src/main/resources/application.properties`:
 
 ```properties
+# Quarkus HTTP
+quarkus.http.port=8080
+
 # A2A authorization
 a2a.authorization.required=false
+
+# OpenAI Responses API LLM configuration
+quarkus.langchain4j.openai.api-key=${OPENAI_API_KEY}
+quarkus.langchain4j.openai.chat-model.mode=responses
+quarkus.langchain4j.openai.chat-model.model-name=gpt-6-luna
+quarkus.langchain4j.openai.chat-model.reasoning-effort=medium
+quarkus.langchain4j.openai.timeout=120s
 
 # Session data path
 session.data.path=../../conference-data/sessions.json
 
-# OpenAI Responses API LLM configuration (medium reasoning effort in the producer)
-openai.api-key=${OPENAI_API_KEY}
-openai.model-name=gpt-6-luna
-
 # A2A Agent Configuration
 a2a.agent.name=Schedule & Content Advisor
-a2a.agent.description=Deep-scans the DevConf session catalog and matches attendee interests to talks
+a2a.agent.description=Deep-scans the Devoxx Belgium 2026 session catalog and matches attendee interests to talks
 a2a.agent.version=1.0.0
 a2a.agent.url=http://localhost:8080
 ```
 
-Create an OpenAI API key with API billing enabled and export it before building. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+Create an OpenAI API key with API billing enabled and export it before starting. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
 ```bash
 export OPENAI_API_KEY=your-api-key-here
 
-# Build the WAR and provision WildFly
+# Build the Quarkus application
 mvn package -Dsession.data.path=$(pwd)/../../conference-data/sessions.json
 
-# Start WildFly (HTTP on port 8080)
-./target/wildfly/bin/standalone.sh \
-  -Dsession.data.path=$(pwd)/../../conference-data/sessions.json
+# Start Quarkus (HTTP on port 8080)
+java -Dsession.data.path=$(pwd)/../../conference-data/sessions.json \
+  -jar target/quarkus-app/quarkus-run.jar
 ```
 
-You should see WildFly start and the A2A agent card become available.
+You should see Quarkus start and the A2A agent card become available.
 
-> **Note:** The `wildfly-maven-plugin` provisions a complete WildFly server in `target/wildfly/` with just the layers needed to run your WAR. The `ROOT.war` deployment name means the agent is accessible at the root context path.
+> **Note:** The `quarkus-maven-plugin` packages the application in `target/quarkus-app/`. The Quarkus application serves the agent at the root context path.
 
 ---
 
@@ -476,7 +438,7 @@ You should see your agent's card with its name, skills, and capabilities:
 ```json
 {
   "name": "Schedule & Content Advisor",
-  "description": "Deep-scans the DevConf session catalog...",
+  "description": "Deep-scans the Devoxx Belgium 2026 session catalog...",
   "version": "1.0.0",
   "skills": [
     {
@@ -546,7 +508,7 @@ curl -s -X POST http://localhost:8080/ \
   }' | jq .result.task.artifacts[0].parts[0].text
 ```
 
-The LLM should use `filterSessionsAfterTime("2026-10-07", "09:45")` to exclude the 09:30 Welcome keynote and recommend sessions like "A Fleet of AI Agents, Each in Its Own Sandbox" (10:30 by Jean-Laurent de Morlhon), "Agentic Engineering Reconversion" (11:10 by Victor Rentea), and "A Year of Agentic AI Evolution" (14:00 by Mario Fusco).
+The LLM should use `filterSessionsAfterTime("2026-10-07", "09:45")` to exclude the 09:30 Welcome to Devoxx and recommend sessions like "A Fleet of AI Agents, Each in Its Own Sandbox" (10:30 by Jean-Laurent de Morlhon), "Agentic Engineering Reconversion" (11:10 by Victor Rentea), and "A Year of Agentic AI Evolution" (14:00 by Mario Fusco).
 
 ### 10d. Speaker Lookup
 
@@ -598,7 +560,7 @@ Once the task reaches `TASK_STATE_COMPLETED`, the response will contain the full
 
 At this point you should have:
 
-- [x] A running WildFly application on port 8080
+- [x] A running Quarkus application on port 8080
 - [x] An AgentCard served at `/.well-known/agent-card.json` with three skills
 - [x] A working `SendMessage` endpoint that answers session questions
 - [x] The LLM using tool calling to search real conference data (not hallucinating)
@@ -611,6 +573,6 @@ At this point you should have:
 > **Troubleshooting:**
 >
 > - **Authentication or billing error**: Check `OPENAI_API_KEY` and confirm API billing is enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
-> - **Empty responses**: The first LLM call can be slow. Increase the producer's HTTP read timeout in `ScheduleServiceProducer` if needed.
-> - **"No sessions found"**: Verify the `session.data.path` system property points correctly to `conference-data/sessions.json`. Pass it via `-Dsession.data.path=...` when starting WildFly.
-> - **Port conflict on 8080**: If another service is using port 8080, start WildFly with a port offset: `./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=10` and update `a2a.agent.url` accordingly.
+> - **Empty responses**: The first LLM call can be slow. Increase `quarkus.langchain4j.openai.timeout` in `application.properties` if needed.
+> - **"No sessions found"**: Verify the `session.data.path` system property points correctly to `conference-data/sessions.json`. Pass it via `-Dsession.data.path=...` when starting the Quarkus application.
+> - **Port conflict on 8080**: If another service is using port 8080, start Quarkus with `-Dquarkus.http.port=8090 -Da2a.agent.url=http://localhost:8090` and update the client URL accordingly.

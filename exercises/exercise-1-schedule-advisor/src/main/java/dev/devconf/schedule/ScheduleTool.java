@@ -54,6 +54,7 @@ public class ScheduleTool {
                 .filter(s -> s.title().toLowerCase().contains(q)
                         || s.track().toLowerCase().contains(q)
                         || s.speaker().toLowerCase().contains(q)
+                        || s.level().toLowerCase().contains(q)
                         || s.description().toLowerCase().contains(q)
                         || s.tags().stream().anyMatch(t -> t.toLowerCase().contains(q)))
                 .toList();
@@ -67,6 +68,7 @@ public class ScheduleTool {
             sb.append("  Track: ").append(s.track())
               .append(" | ").append(s.date()).append(" at ").append(s.time())
               .append(" (").append(s.duration()).append(" min)\n");
+            sb.append("  Level: ").append(s.level()).append("\n");
             sb.append("  Room: ").append(s.room()).append("\n\n");
         }
         return sb.toString();
@@ -90,7 +92,8 @@ public class ScheduleTool {
         for (Session s : day) {
             sb.append("- ").append(s.time()).append(" | **")
               .append(s.title()).append("** (").append(s.speaker())
-              .append(") - Room ").append(s.room()).append("\n");
+              .append(") - Room ").append(s.room())
+              .append(" | Level: ").append(s.level()).append("\n");
         }
         return sb.toString();
     }
@@ -110,6 +113,7 @@ public class ScheduleTool {
               .append(s.title()).append("** (").append(s.speaker())
               .append(") - ").append(s.track())
               .append(", Room ").append(s.room())
+              .append(" | Level: ").append(s.level())
               .append(" (").append(s.duration()).append(" min)\n");
             sb.append("  ").append(s.description()).append("\n\n");
         }

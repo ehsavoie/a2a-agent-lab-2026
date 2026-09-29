@@ -16,7 +16,7 @@ Here's how the mesh resolves her request in real-time:
 
 1. **Edge Routing & Decomposition** — The Quarkus Orchestrator parses Maya's intent, inspects the active AgentCard registry, and splits the prompt into sub-tasks
 2. **Travel & Transit** — The Python Travel Agent compares transit options and determines a rideshare is 20 min faster than the delayed airport express train
-3. **Session Matching** — The Quarkus Schedule Advisor filters out morning sessions (Maya arrives at 9:45 AM) and finds a 10:15 AM session on "Scaling Vector Indexing in Enterprise Meshes"
+3. **Session Matching** — The Quarkus Schedule Advisor filters out morning sessions (Maya arrives at 9:45 AM) and finds a 10:30 AM session on "A Fleet of AI Agents, Each in Its Own Sandbox: Inside Docker's Agentic Platform"
 4. **Venue Check** — The Spring Boot Venue Agent checks Hall B's real-time IoT sensors, confirms 60% capacity, and reserves a fast-track entry pass
 5. **Expense Log** — The WildFly Expense Agent processes Maya's taxi receipt into an audit-ready reimbursement entry
 
@@ -142,7 +142,7 @@ sequenceDiagram
     O->>T: POST / SendMessage<br/>"fastest route from airport to venue"
     O->>X: POST / SendMessage<br/>"log taxi receipt $35"
 
-    S-->>O: "10:15 AM - Scaling Vector Indexing...<br/>2:00 PM - Distributed AI Patterns..."
+    S-->>O: "10:30 AM - A Fleet of AI Agents...<br/>2:00 PM - A Year of Agentic AI Evolution..."
     T-->>O: "Rideshare: 25 min, $35<br/>Airport Express: delayed +40 min"
     X-->>O: "Expense logged: EXP-A1B2C3D4<br/>$35.00 Transportation — Compliant"
 
@@ -150,7 +150,7 @@ sequenceDiagram
     O->>LLM2: aggregate(originalQuery, allAgentResponses)
     LLM2-->>O: Unified natural-language answer
 
-    O->>M: "Here's your plan, Maya:<br/>🚕 Take a rideshare (25 min, $35)...<br/>📅 Catch the 10:15 AM Vector Indexing talk...<br/>💰 Taxi receipt logged as EXP-A1B2C3D4..."
+    O->>M: "Here's your plan, Maya:<br/>🚕 Take a rideshare (25 min, $35)...<br/>📅 Catch the 10:30 AM A Fleet of AI Agents talk...<br/>💰 Taxi receipt logged as EXP-A1B2C3D4..."
 ```
 
 ### Sequence 4: Enterprise Agent (Exercise 4 — JPA + Kafka)
@@ -226,7 +226,7 @@ Each exercise adds a new agent to the DevSphere mesh. If you fall behind, check 
 The primary edge router and user-facing gateway. Leveraging Quarkus for sub-second cold starts and minimal memory overhead, it receives user prompts, inspects AgentCard schemas across the mesh, and orchestrates multi-agent tasks. Uses two `@RegisterAiService` beans — one to decompose queries into sub-tasks, another to aggregate multi-agent responses.
 
 ### The Schedule & Content Advisor (Quarkus)
-Deep-scans the summit's session catalog, speaker bios, and domain tracks. Matches attendee skill levels and interests to specific talks. Uses Quarkus LangChain4j's `@RegisterAiService` with `@Tool`-annotated CDI beans for native LLM tool calling.
+Deep-scans the summit's session catalog, speaker names and session details, and domain tracks. Matches attendee skill levels and interests to specific talks. Uses Quarkus LangChain4j's `@RegisterAiService` with `@Tool`-annotated CDI beans for native LLM tool calling.
 
 ### The Travel & Logistics Agent (Python A2A SDK)
 Connects to flight APIs, local transit, and hotel systems. Handles travel bookings, flight disruption monitoring, and commute routes to the venue. Built with the Python A2A SDK reference implementation.
