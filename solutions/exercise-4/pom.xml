@@ -13,7 +13,8 @@
 
     <artifactId>solution-expense-agent</artifactId>
     <packaging>war</packaging>
-    <name>DevSphere Expense &amp; Compliance Agent (WildFly + Java A2A SDK)</name>
+    <name>DevSphere Expense &amp; Compliance Agent (WildFly + Jakarta A2A SDK Solution
+        )</name>
     <description>A2A agent that standardizes receipts into corporate audit-ready expense logs with compliance validation</description>
 
     <properties>

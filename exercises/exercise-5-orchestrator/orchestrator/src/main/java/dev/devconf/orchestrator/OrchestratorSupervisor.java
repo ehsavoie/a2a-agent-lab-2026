@@ -26,9 +26,10 @@ public interface OrchestratorSupervisor {
 
             Guidelines:
             - Route each aspect of the question to the appropriate agent.
+            - When the attendee mentions a receipt, taxi, meal, hotel bill, or any spending, always involve the Expense & Compliance Agent to log and validate it.
             - Organize your response by topic when covering multiple areas.
             - Use a warm, professional tone.
-            - Include specific, actionable details (times, rooms, directions).
+            - Include specific, actionable details (times, rooms, directions, expense IDs).
             - Do NOT mention internal agent names or system architecture.
             """)
     @UserMessage("Can you answer the attendee request: {{request}}")
@@ -40,8 +41,8 @@ public interface OrchestratorSupervisor {
             subAgents = {
                     ScheduleAdvisorA2AAgent.class,
                     VenueA2AAgent.class,
-                    TravelA2AAgent.class
-//                    ,ExpenseA2AAgent.class
+                    TravelA2AAgent.class,
+                    ExpenseA2AAgent.class
             }
     )
     ResultWithAgenticScope<String> orchestrate(@V("request") String query);
