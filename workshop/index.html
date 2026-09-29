@@ -541,18 +541,15 @@
     </div>
 
     <div class="sidebar-section">
-        <div class="sidebar-section-title">Exercise 4 &mdash; Expense + OTel</div>
+        <div class="sidebar-section-title">Exercise 4 &mdash; Expense Agent</div>
         <a href="#ex4-intro" class="sidebar-link">
-            <span class="step-num purple">1</span> Expense Agent
+            <span class="step-num purple">1</span> Overview
         </a>
         <a href="#ex4-step1" class="sidebar-link">
-            <span class="step-num purple">2</span> Cross-Agent Handoff
+            <span class="step-num purple">2</span> Agent + Client
         </a>
         <a href="#ex4-step2" class="sidebar-link">
-            <span class="step-num purple">3</span> OTel Setup
-        </a>
-        <a href="#ex4-step3" class="sidebar-link">
-            <span class="step-num purple">4</span> Grafana &amp; Production
+            <span class="step-num purple">3</span> Cross-Agent Handoff
         </a>
         <a href="#ex4-test" class="sidebar-link">
             <span class="step-num purple">&#10003;</span> Wrap-up
@@ -634,8 +631,8 @@
     </div>
     <div class="card">
         <div class="card-icon">&#128176;</div>
-        <h4>Exercise 4: Expense + OTel</h4>
-        <p>WildFly Enterprise expense agent with compliance validation, cross-agent data handoff, plus OpenTelemetry tracing with the Grafana LGTM stack.</p>
+        <h4>Exercise 4: Expense Agent</h4>
+        <p>WildFly Enterprise expense agent with compliance validation and cross-agent data handoff from the Travel Agent.</p>
     </div>
     <div class="card">
         <div class="card-icon">&#129504;</div>
@@ -664,7 +661,7 @@
     </div>
     <div class="timeline-item purple">
         <strong>Exercise 4 &mdash; 20 min</strong>
-        <p>Expense &amp; Compliance Agent (WildFly Enterprise) + OpenTelemetry tracing across the entire call chain in Grafana</p>
+        <p>Expense &amp; Compliance Agent: WildFly Enterprise, compliance validation, and cross-agent data handoff from the Travel Agent</p>
     </div>
     <div class="timeline-item red">
         <strong>Exercise 5 &mdash; 25 min</strong>
@@ -736,6 +733,8 @@ mvn install -DskipTests</code></pre>
     exercise-3-travel-agent-python/    &larr; Python A2A SDK
     exercise-3-travel-agent-java/      &larr; Java A2A SDK (Quarkus)
     exercise-4-expense-agent/          &larr; WildFly 41 Enterprise (Jakarta EE)
+      expense-agent/                   &larr; A2A agent (LangChain4j + compliance)
+      expense-client/                  &larr; JAX-RS web app — A2A client of the agent
     exercise-5-orchestrator/           &larr; Multi-project Quarkus Orchestrator
       concierge/                       &larr; Multi-tenant: Schedule + Venue + Travel
       orchestrator/                    &larr; Supervisor + @A2AClientAgent + REST UI
@@ -1609,7 +1608,7 @@ Java &rarr; Python A2A Interop Client
 <!-- EXERCISE 4: EXPENSE & COMPLIANCE + OBSERVABILITY              -->
 <!-- ============================================================ -->
 <section id="ex4-intro" class="section-anchor">
-<h2><span class="badge badge-purple">Exercise 4</span> Expense &amp; Compliance + Enterprise Observability <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(20 min)</span></h2>
+<h2><span class="badge badge-purple">Exercise 4</span> Expense &amp; Compliance Agent <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(20 min)</span></h2>
 
 
 <p><em>&ldquo;Maya uploads her taxi receipt photo. The Travel Agent extracts the fare details and the Expense &amp; Compliance Agent processes it into an audit-ready reimbursement entry. Meanwhile, the ops team watches the full trace in Grafana.&rdquo;</em></p>
@@ -1692,19 +1691,77 @@ public class ExpenseServiceProducer {
     </div>
 </details>
 
-<h4>Start infrastructure (Grafana LGTM)</h4>
-<pre><code>cd exercises/exercise-5-orchestrator
-podman-compose up -d
-cd ../exercise-4-expense-agent</code></pre>
-
-<h4>Build &amp; Run on port 8082</h4>
+<h4>Build &amp; Run the Expense Agent on port 8082</h4>
 <pre><code>export OPENAI_API_KEY=your-api-key-here
 
-mvn package -Pjsonrpc
+cd exercises/exercise-4-expense-agent/expense-agent
+mvn package
 ./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2</code></pre>
 
 <pre><code>curl -s http://localhost:8082/.well-known/agent-card.json | jq .name
 # &rarr; "Expense &amp; Compliance Agent"</code></pre>
+
+<h4>Send a receipt directly via JSON-RPC</h4>
+<pre><code>curl -s -X POST http://localhost:8082/ \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "SendMessage",
+    "params": {
+      "message": {
+        "messageId": "msg-1",
+        "role": "ROLE_USER",
+        "parts": [{"text": "Log a taxi expense: vendor Bolt Belgium, amount 45 EUR, date 2026-10-07, ground transportation"}]
+      }
+    },
+    "id": "test-1"
+  }' | jq .result.task.artifacts[0].parts[0].text</code></pre>
+
+<h4>Send a receipt directly via REST</h4>
+<pre><code>curl -s -X POST http://localhost:8082/message:send \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "message": {
+      "messageId": "msg-2",
+      "role": "ROLE_USER",
+      "parts": [{"text": "Log a taxi expense: vendor Bolt Belgium, amount 45 EUR, date 2026-10-07, ground transportation"}],
+      "metadata": {}
+    }
+  }' | jq '.task.artifacts[0].parts[0].text'</code></pre>
+
+<h4>Build &amp; Run the Expense Client on port 8083</h4>
+<p>The Expense Client is a JAX-RS web application on WildFly that calls the Expense Agent via the A2A Java SDK. It serves a browser UI at the root and exposes three REST endpoints:</p>
+<ul>
+    <li><code>POST /api/expense</code> &mdash; log a new expense (structured JSON fields)</li>
+    <li><code>GET /api/expense/summary</code> &mdash; fetch the full expense summary from the agent</li>
+    <li><code>GET /api/expense/compliance</code> &mdash; fetch the compliance status report from the agent</li>
+</ul>
+<pre><code>cd exercises/exercise-4-expense-agent/expense-client
+mvn package
+./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=3</code></pre>
+
+<h4>Browser UI</h4>
+<p>Open <a href="http://localhost:8083" target="_blank">http://localhost:8083</a> to use the Expense Portal &mdash; a web form that lets you fill in vendor, amount, currency, date, category, and description, then submit the expense to the agent. Two report buttons fetch the expense summary and compliance status in one click.</p>
+
+<h4>Log an expense through the client (curl)</h4>
+<pre><code>curl -s -X POST http://localhost:8083/api/expense \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vendor": "Bolt Belgium",
+    "amount": "45",
+    "currency": "EUR",
+    "date": "2026-10-07",
+    "category": "Transportation",
+    "description": "Taxi from Brussels Airport to Kinepolis Antwerp"
+  }' | jq .response</code></pre>
+
+<h4>Get expense summary</h4>
+<pre><code>curl -s http://localhost:8083/api/expense/summary | jq .response</code></pre>
+
+<h4>Get compliance status</h4>
+<pre><code>curl -s http://localhost:8083/api/expense/compliance | jq .response</code></pre>
 </section>
 
 <!-- Cross-Agent Handoff -->
@@ -1731,64 +1788,6 @@ extract_receipt(query)         &rarr;        processReceipt(receiptData)
 </div>
 </section>
 
-<!-- OTel Setup -->
-<section id="ex4-step3" class="section-anchor">
-<div class="step-box">
-    <div class="step-header">
-        <span class="step-number" style="background: var(--accent-purple);">3</span>
-        <span class="step-title">OpenTelemetry + Grafana LGTM</span>
-    </div>
-    <p>Add tracing to all agents so you can see the full distributed call chain.</p>
-</div>
-
-<h4>Quarkus Orchestrator</h4>
-<pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;io.quarkus&lt;/groupId&gt;
-    &lt;artifactId&gt;quarkus-opentelemetry&lt;/artifactId&gt;
-&lt;/dependency&gt;</code></pre>
-
-<pre><code>quarkus.otel.enabled=true
-quarkus.otel.exporter.otlp.traces.endpoint=http://localhost:4317
-quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
-
-<h4>Spring Boot Venue Agent</h4>
-<pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;io.micrometer&lt;/groupId&gt;
-    &lt;artifactId&gt;micrometer-tracing-bridge-otel&lt;/artifactId&gt;
-&lt;/dependency&gt;</code></pre>
-
-<h4>Python Travel Agent</h4>
-<pre><code>pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc</code></pre>
-
-<h4>Grafana Visualization</h4>
-
-<p>Open <a href="http://localhost:3000" target="_blank">http://localhost:3000</a> (login: admin/admin), navigate to <strong>Explore &rarr; Tempo</strong>, and send Maya&rsquo;s full query. You should see:</p>
-
-<pre><code>DevSphere Orchestrator :8090
-  POST /api/query (incoming request)
-    supervisor.orchestrate
-      langchain4j.chat (@SupervisorAgent)        &larr; LLM decides which agents to call
-      POST http://localhost:8080/ (.../schedule) &larr; Schedule Advisor (Concierge)
-      POST http://localhost:8080/ (.../venue)    &larr; Venue Agent (Concierge)
-      POST http://localhost:8080/ (.../travel)   &larr; Travel Agent (Concierge)
-      langchain4j.chat (response synthesis)      &larr; LLM ~2-5s</code></pre>
-
-<h3>Distributed State &amp; Load Balancing (Discussion)</h3>
-
-<table>
-    <thead><tr><th>Approach</th><th>Pros</th><th>Cons</th></tr></thead>
-    <tbody>
-        <tr><td><strong>Sticky sessions</strong> (route by contextId)</td><td>Simple, no shared state</td><td>Uneven load, lost state on failure</td></tr>
-        <tr><td><strong>Shared state store</strong> (Redis/DB)</td><td>Any replica can serve any request</td><td>Extra latency, another dependency</td></tr>
-        <tr><td><strong>Hybrid</strong></td><td>Best of both</td><td>More complex</td></tr>
-    </tbody>
-</table>
-</section>
-
 <!-- Wrap-up -->
 <section id="ex4-test" class="section-anchor">
 <div class="step-box">
@@ -1799,10 +1798,11 @@ quarkus.otel.service.name=DevSphere Orchestrator</code></pre>
 </div>
 
 <ul class="checklist">
-    <li>Expense &amp; Compliance Agent running on port 8082</li>
-    <li>Cross-agent data handoff (Travel &rarr; Expense) working</li>
-    <li>OpenTelemetry tracing across all agents (Java + Python)</li>
-    <li>Grafana/Tempo visualization of the full call chain</li>
+    <li>Expense Agent running on port 8082 (JSON-RPC + REST)</li>
+    <li>Expense Client running on port 8083 with browser UI at <a href="http://localhost:8083" target="_blank">http://localhost:8083</a></li>
+    <li><code>POST /api/expense</code> logs a structured expense via the A2A client</li>
+    <li><code>GET /api/expense/summary</code> and <code>/compliance</code> query the agent for reports</li>
+    <li>Receipts validated against compliance limits in the correct currency</li>
 </ul>
 
 <div class="arch-diagram">
@@ -2077,8 +2077,8 @@ mvn quarkus:dev</code></pre>
         <p>Python agent for flights, transit comparison, and receipt extraction &mdash; cross-language A2A</p>
     </div>
     <div class="timeline-item purple">
-        <strong>Exercise 4 &mdash; Expense &amp; Compliance + Observability</strong>
-        <p>WildFly Enterprise expense agent with compliance validation, cross-agent data handoff, and OpenTelemetry tracing in Grafana</p>
+        <strong>Exercise 4 &mdash; Expense &amp; Compliance Agent</strong>
+        <p>WildFly Enterprise expense agent with compliance validation and cross-agent data handoff from the Travel Agent</p>
     </div>
     <div class="timeline-item red">
         <strong>Exercise 5 &mdash; Orchestrator &amp; Concierge</strong>

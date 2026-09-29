@@ -1,0 +1,43 @@
+version: "3.8"
+
+# Infrastructure for Exercise 6 — Enterprise A2A Agent.
+# Provides PostgreSQL (JPA-backed TaskStore + PushNotificationConfigStore),
+# Kafka (ReplicatedQueueManager broadcast), and Grafana LGTM (OTel traces).
+#
+# Usage:
+#   cd exercises/exercise-6-enterprise
+#   podman-compose up -d
+#
+# Docker: docker compose up -d
+
+services:
+  postgresql:
+    image: docker.io/library/postgres:17
+    container_name: devconf-enterprise-postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=devconf
+      - POSTGRES_PASSWORD=devconf
+      - POSTGRES_DB=devconf
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  kafka:
+    image: docker.io/apache/kafka:4.1.0
+    container_name: devconf-enterprise-kafka
+    ports:
+      - "9092:9092"
+
+  lgtm:
+    image: docker.io/grafana/otel-lgtm:latest
+    container_name: devconf-enterprise-lgtm
+    ports:
+      - "3000:3000"     # Grafana UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+
+volumes:
+  pgdata:

@@ -21,5 +21,6 @@
         <module>exercise-3-travel-agent-java</module>
         <module>exercise-4-expense-agent</module>
         <module>exercise-5-orchestrator</module>
+        <module>exercise-6-enterprise</module>
     </modules>
 </project>
