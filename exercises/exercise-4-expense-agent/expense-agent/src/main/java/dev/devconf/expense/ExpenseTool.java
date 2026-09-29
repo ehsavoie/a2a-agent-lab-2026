@@ -2,9 +2,13 @@ package dev.devconf.expense;
 
 import dev.langchain4j.agent.tool.Tool;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,6 +35,17 @@ public class ExpenseTool {
         if (vendor == null || vendor.isBlank()) {
             return "REJECTED: vendor name is required.";
         }
+        if (currency == null || currency.isBlank()) {
+            return "REJECTED: currency is required.";
+        }
+        if (date == null || date.isBlank()) {
+            return "REJECTED: date is required.";
+        }
+        try {
+            LocalDate.parse(date);
+        } catch (DateTimeParseException e) {
+            return "REJECTED: date must use YYYY-MM-DD format.";
+        }
         if (!CATEGORIES.contains(category)) {
             return "REJECTED: invalid category '" + category
                    + "'. Valid categories: " + String.join(", ", CATEGORIES);
@@ -38,20 +53,34 @@ public class ExpenseTool {
 
         double parsedAmount;
         try {
-            parsedAmount = Double.parseDouble(amount.replaceAll("[^\\d.]", ""));
+            String normalizedAmount = amount == null ? "" : amount.replaceAll("[^\\d.\\-]", "");
+            parsedAmount = Double.parseDouble(normalizedAmount);
+            if (parsedAmount < 0) {
+                return "REJECTED: negative amounts are not valid expenses.";
+            }
         } catch (NumberFormatException e) {
             return "REJECTED: '" + amount + "' is not a valid amount.";
         }
 
-        String cur = (currency == null || currency.isBlank()) ? "?" : currency.strip();
+        String cur = currency.strip();
 
         Double limit = CATEGORY_LIMITS.get(category);
-        boolean compliant = limit == null || parsedAmount <= limit;
+        double amountForLimit = parsedAmount;
+        if ("Meals".equals(category)) {
+            amountForLimit += expenseLog.stream()
+                    .filter(e -> "Meals".equals(e.category())
+                            && Objects.equals(e.date(), date)
+                            && e.currency().equals(cur))
+                    .mapToDouble(Expense::amount)
+                    .sum();
+        }
+        boolean compliant = limit == null || amountForLimit <= limit;
         String flag = compliant
                 ? ""
-                : "OVER LIMIT: " + cur + " " + String.format("%.2f", parsedAmount)
+                : "OVER LIMIT: " + ("Meals".equals(category) ? "daily total " : "")
+                  + cur + " " + String.format("%.2f", amountForLimit)
                   + " exceeds " + cur + " " + String.format("%.2f", limit)
-                  + " cap for " + category;
+                  + ("Meals".equals(category) ? " daily cap" : " cap") + " for " + category;
 
         String id = "EXP-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         Expense expense = new Expense(id, vendor, parsedAmount, cur, date, category,
@@ -86,7 +115,7 @@ public class ExpenseTool {
         }
 
         if (category.isEmpty()) {
-            category = "Transportation";
+            return "REJECTED: receipt data must include a category.\nReceived:\n" + receiptData;
         }
         if (description.isEmpty()) {
             description = "Receipt processed from agent handoff";
@@ -111,28 +140,40 @@ public class ExpenseTool {
         }
         sb.append(":\n\n");
 
-        double grandTotal = 0;
+        Map<String, Double> grandTotalsByCurrency = new LinkedHashMap<>();
         for (String cat : CATEGORIES) {
             List<Expense> items = byCategory.getOrDefault(cat, List.of());
             if (items.isEmpty()) continue;
-            double catTotal = items.stream().mapToDouble(Expense::amount).sum();
-            grandTotal += catTotal;
-            String cur = items.get(0).currency();
-            sb.append("  ").append(cat).append(": ").append(cur).append(" ")
-              .append(String.format("%.2f", catTotal))
-              .append(" (").append(items.size()).append(" entries)\n");
-            for (Expense e : items) {
-                sb.append("    - ").append(e.vendor())
-                  .append(": ").append(e.currency()).append(" ")
-                  .append(String.format("%.2f", e.amount()))
-                  .append(" [").append(e.date()).append("]");
-                if (!e.compliant()) {
-                    sb.append(" ** FLAGGED **");
+            Map<String, List<Expense>> itemsByCurrency = items.stream()
+                    .collect(Collectors.groupingBy(Expense::currency, LinkedHashMap::new, Collectors.toList()));
+            for (Map.Entry<String, List<Expense>> currencyEntry : itemsByCurrency.entrySet()) {
+                String cur = currencyEntry.getKey();
+                List<Expense> currencyItems = currencyEntry.getValue();
+                double catTotal = currencyItems.stream().mapToDouble(Expense::amount).sum();
+                grandTotalsByCurrency.merge(cur, catTotal, Double::sum);
+                sb.append("  ").append(cat).append(": ").append(cur).append(" ")
+                  .append(String.format("%.2f", catTotal))
+                  .append(" (").append(currencyItems.size()).append(" entries)\n");
+                for (Expense e : currencyItems) {
+                    sb.append("    - ").append(e.vendor())
+                      .append(": ").append(e.currency()).append(" ")
+                      .append(String.format("%.2f", e.amount()))
+                      .append(" [").append(e.date()).append("]");
+                    if (!e.compliant()) {
+                        sb.append(" ** FLAGGED **");
+                    }
+                    sb.append("\n");
                 }
-                sb.append("\n");
             }
         }
-        sb.append("\n  GRAND TOTAL: ").append(String.format("%.2f", grandTotal));
+        sb.append("\n  GRAND TOTAL: ");
+        if (grandTotalsByCurrency.size() == 1) {
+            sb.append(String.format("%.2f", grandTotalsByCurrency.values().iterator().next()));
+        } else {
+            sb.append(grandTotalsByCurrency.entrySet().stream()
+                    .map(entry -> entry.getKey() + " " + String.format("%.2f", entry.getValue()))
+                    .collect(Collectors.joining(", ")));
+        }
         return sb.toString();
     }
 

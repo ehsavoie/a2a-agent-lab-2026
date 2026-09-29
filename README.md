@@ -44,8 +44,7 @@ Each exercise adds a new agent to the mesh. By the end, you'll have the complete
               ┌──────────────────┐
               │ Expense &        │
               │ Compliance Agent │
-              │ (WildFly         │
-              │  Enterprise)     │
+              │ (WildFly)        │
               │ :8082            │
               └──────────────────┘
 
@@ -59,7 +58,7 @@ All traces: OpenTelemetry → Grafana/Tempo (:3000)
 | 8081 | Venue & On-Site Operations | Spring Boot | `a2a-spring-boot-starter-server-rest` |
 | 9000 | Travel & Logistics | Python | `a2a-sdk` (Python) |
 | 8090 | Orchestrator & Concierge | Quarkus | `a2a-java-sdk-reference-jsonrpc` + `a2a-java-sdk-client` |
-| 8082 | Expense & Compliance | WildFly 41 (Enterprise) | `a2a-jakarta-jsonrpc` + JPA + Kafka |
+| 8082 | Expense & Compliance | WildFly 41 (Jakarta EE) | `a2a-jakarta-jsonrpc` + `a2a-jakarta-rest` |
 
 ## How It All Works
 
@@ -153,32 +152,27 @@ sequenceDiagram
     O->>M: "Here's your plan, Maya:<br/>🚕 Take a rideshare (25 min, $35)...<br/>📅 Catch the 10:30 AM A Fleet of AI Agents talk...<br/>💰 Taxi receipt logged as EXP-A1B2C3D4..."
 ```
 
-### Sequence 4: Enterprise Agent (Exercise 4 — JPA + Kafka)
+### Sequence 4: Expense Agent (Exercise 4 — Expense Logging)
 
-The Expense Agent uses enterprise features for production-grade persistence and multi-node support:
+The Expense Agent uses LangChain4j tools to validate and log expenses:
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant N1 as WildFly Node 1<br/>:8082
-    participant DB as PostgreSQL<br/>(JPA TaskStore)
-    participant K as Kafka<br/>(Replicated Events)
-    participant N2 as WildFly Node 2<br/>:8083
+    participant C as A2A Client
+    participant E as Expense Agent<br/>WildFly :8082
+    participant L as LangChain4j + OpenAI
+    participant T as ExpenseTool
 
-    C->>N1: POST / SendMessage
-    N1->>DB: INSERT Task (status: submitted)
-    N1->>N1: AgentExecutor.execute()
-    N1->>DB: UPDATE Task (status: working)
-    N1->>K: Publish task-updated event
-
-    K-->>N2: Receive task-updated event
-    N2->>DB: Read updated Task (cache sync)
-
-    N1->>DB: UPDATE Task (status: completed, artifacts)
-    N1->>K: Publish task-completed event
-    N1->>C: {"result": {"status": "completed", ...}}
-
-    Note over N1,N2: Both nodes share the same DB<br/>and stay in sync via Kafka events
+    C->>E: POST / SendMessage
+    E->>E: AgentExecutor.execute()
+    E->>E: Submit task (status: submitted)
+    E->>E: Start work (status: working)
+    E->>L: expenseService.chat(userText)
+    L->>T: logExpense() checks amount and policy
+    T-->>L: Expense confirmation
+    L-->>E: Agent response
+    E->>E: Add artifact and complete task
+    E->>C: Completed Task with expense artifact
 ```
 
 ## Prerequisites
@@ -215,7 +209,7 @@ open http://localhost:3000                     # Grafana UI (admin/admin)
 | 1 | [Your First A2A Agent](exercises/exercise-1-schedule-advisor/) | 30 min | Schedule & Content Advisor | Quarkus + `@RegisterAiService` |
 | 2 | [Cross-Runtime Agents](exercises/exercise-2-venue-agent/) | 20 min | Venue & On-Site Operations | Spring Boot + LangChain4j |
 | 3 | [Cross-Language Interop](exercises/exercise-3-travel-agent-python/) | 15 min | Travel & Logistics Agent | Python A2A SDK |
-| 4 | [Enterprise Day-2](exercises/exercise-4-expense-agent/) | 20 min | Expense & Compliance Agent + OpenTelemetry | WildFly 41 Enterprise (JPA + Kafka) |
+| 4 | [Expense & Compliance Agent](exercises/exercise-4-expense-agent/) | 20 min | Expense & Compliance Agent | WildFly 41 (Jakarta EE) |
 | 5 | [The Orchestrator](exercises/exercise-5-orchestrator/) | 25 min | Orchestrator & Concierge | Quarkus + Multi-Agent |
 
 Each exercise adds a new agent to the DevSphere mesh. If you fall behind, check the `solutions/` directory for complete working code at each checkpoint.
@@ -234,8 +228,8 @@ Uses sample flight, transit, and hotel data. Handles travel queries, flight disr
 ### The Venue & On-Site Operations Agent (Spring Boot + LangChain4j)
 Robust enterprise microservice that manages real-time IoT room capacity sensors, indoor interactive mapping, and catering queue tracking.
 
-### The Expense & Compliance Agent (WildFly Enterprise)
-Standardizes receipts and session attendance into corporate audit-ready expense logs. Deployed on WildFly 41 with enterprise-grade features: JPA-backed task persistence (PostgreSQL), push notification config store, and a Kafka-replicated queue manager for multi-node deployment. Supports multiple A2A transport protocols (JSON-RPC, REST, gRPC) via Maven profiles.
+### The Expense & Compliance Agent (WildFly 41 + Jakarta EE)
+Standardizes receipts into corporate audit-ready expense logs. Deployed on WildFly 41 and uses LangChain4j with OpenAI to process expense requests. Supports JSON-RPC and REST A2A transports.
 
 ## Building
 
