@@ -49,14 +49,14 @@ Each exercise adds a new agent to the mesh. By the end, you'll have the complete
               │ :8082            │
               └──────────────────┘
 
-All agents: AgentCard + JSON-RPC + A2A SDK
+All agents: AgentCard + A2A transport bindings + A2A SDK
 All traces: OpenTelemetry → Grafana/Tempo (:3000)
 ```
 
 | Port | Agent | Runtime | A2A SDK |
 |------|-------|---------|---------|
 | 8080 | Schedule & Content Advisor | Quarkus | `a2a-java-sdk-reference-jsonrpc` |
-| 8081 | Venue & On-Site Operations | Spring Boot | `a2a-java-sdk-reference-jsonrpc` |
+| 8081 | Venue & On-Site Operations | Spring Boot | `a2a-spring-boot-starter-server-rest` |
 | 9000 | Travel & Logistics | Python | `a2a-sdk` (Python) |
 | 8090 | Orchestrator & Concierge | Quarkus | `a2a-java-sdk-reference-jsonrpc` + `a2a-java-sdk-client` |
 | 8082 | Expense & Compliance | WildFly 41 (Enterprise) | `a2a-jakarta-jsonrpc` + JPA + Kafka |
