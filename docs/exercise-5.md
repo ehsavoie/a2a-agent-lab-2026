@@ -10,14 +10,14 @@
 
 ## Overview
 
-In this exercise you will build the **Orchestrator & Concierge** — the primary edge router and user-facing gateway, built with **Quarkus**. It will:
+In this exercise you will build the **Orchestrator & Concierge** with two **Quarkus** modules. The Orchestrator is the primary edge router and user-facing gateway. The Concierge runs the specialist agents as tenants in one runtime. Together they will:
 
-1. **Discover** available agents by fetching their AgentCards across the mesh
+1. **Select** specialist agents from the Orchestrator's configured A2A clients
 2. **Decompose** Maya's complex query into targeted sub-tasks using LangChain4j
-3. **Dispatch** each sub-task to the appropriate specialist agent via A2A
-4. **Aggregate** all responses into a single coherent answer
+3. **Dispatch** each sub-task to the appropriate Concierge tenant via A2A
+4. **Aggregate** the responses into a single answer
 
-This is where the A2A protocol truly shines: the Orchestrator doesn't need to know the internals of any agent — it only needs their AgentCard.
+The Concierge exposes separate AgentCards for its Schedule, Travel, Venue, and Expense tenants from one runtime. The Orchestrator uses those AgentCards to communicate with the specialist agents through A2A.
 
 ## Architecture
 
@@ -25,32 +25,29 @@ This is where the A2A protocol truly shines: the Orchestrator doesn't need to kn
                                 User (Maya)
                                     |
                           +---------v-----------+
-                          |   DevSphere         |  Port 8090 (Quarkus)
-                          |   Orchestrator      |
+                          | Orchestrator        |  REST :8090
+                          | Quarkus             |
                           +---------+-----------+
-                                    |
-              +----------+----------+----------+---------+
-              |          |                     |         |
-     +--------v---+ +----v--------+  +---------v--+ +---v-----------+
-     | Schedule & | | Venue &     |  | Travel &   | | Expense &     |
-     | Content    | | On-Site Ops |  | Logistics  | | Compliance    |
-     | Advisor    | | (Spring     |  | (Python)   | | (Jakarta EE)  |
-     | (Java A2A) | |  Boot)      |  | :9000      | | :8082         |
-     | :8080      | | :8081       |  +------------+ +---------------+
-     +------------+ +-------------+
+                                    | A2A JSON-RPC
+                          +---------v-----------+
+                          | Concierge           |  Quarkus :8080
+                          | Multi-tenant runtime|
+                          | Schedule · Travel  |
+                          | Venue · Expense   |
+                          +--------------------+
 ```
 
 ### How Maya's request is resolved
 
-1. **Edge Routing & Decomposition** — The Orchestrator receives the request, parses the intent using LangChain4j, inspects the active AgentCard registry, and splits the prompt into four sub-tasks.
+1. **Edge Routing & Decomposition** — The Orchestrator receives the request at `/api/query`. Its LangChain4j supervisor selects from its configured A2A clients and splits the prompt into relevant sub-tasks.
 
-2. **Session Matching (Schedule & Content Advisor)** — Knowing Maya will arrive around 9:45 AM, the Jakarta EE agent filters out early morning sessions and cross-references her interest in agentic AI and Java agents with the schedule.
+2. **Session Matching (Schedule & Content Advisor)** — The Schedule tenant searches for sessions matching Maya's interest in agentic AI and Java agents.
 
-3. **Travel & Transit (Travel & Logistics Agent)** — The Python agent determines the fastest route from the airport to the convention center and calculates an estimated arrival time.
+3. **Travel & Transit (Travel & Logistics Agent)** — The Travel tenant determines the fastest route from the airport to the convention center and calculates an estimated arrival time.
 
-4. **Venue Check (Venue & On-Site Operations Agent)** — The Spring Boot agent checks real-time IoT seating sensors for the recommended session rooms.
+4. **Venue Check (Venue & On-Site Operations Agent)** — If Maya asks about the venue, the Venue tenant can check real-time IoT seating sensors for session rooms.
 
-5. **Expense Logging (Expense & Compliance Agent)** — The Jakarta EE agent prepares an audit-ready entry for Maya's taxi receipt.
+5. **Expense Logging (Expense & Compliance Agent)** — The Expense tenant asks Maya for the receipt details needed to prepare an audit-ready entry.
 
 ---
 
@@ -62,12 +59,12 @@ Navigate to the Orchestrator project directory:
 cd exercises/exercise-5-orchestrator
 ```
 
-The `pom.xml` is set up with the same Quarkus stack used across the lab:
+The project contains separate `orchestrator` and `concierge` Quarkus modules. The Orchestrator uses:
 - Quarkus (Arc, REST, Jackson)
 - LangChain4j with OpenAI GPT-6 Luna through the Responses API at medium reasoning effort
-- A2A Java SDK (server + client)
+- LangChain4j Agentic support and A2A client transports
 
-Check `src/main/resources/application.properties`:
+Check `orchestrator/src/main/resources/application.properties`:
 
 ```properties
 quarkus.http.port=8090
@@ -78,17 +75,19 @@ quarkus.langchain4j.openai.chat-model.mode=responses
 quarkus.langchain4j.openai.chat-model.model-name=gpt-6-luna
 quarkus.langchain4j.openai.chat-model.reasoning-effort=medium
 
-# Agent URLs for discovery
-orchestrator.agent-urls=http://localhost:8080,http://localhost:8081,http://localhost:9000,http://localhost:8082
-
-# A2A Agent Identity
-a2a.agent.name=DevSphere Orchestrator
-a2a.agent.url=http://localhost:8090
+a2a.agent.url=http://localhost:8080
 ```
 
-Notice the `orchestrator.agent-urls` property — this lists the agents the Orchestrator will discover. In production, you'd use a service registry; for the lab, static URLs keep things simple.
+The four A2A client interfaces point to tenant AgentCards served by Concierge on port 8080:
 
-Before starting the Orchestrator, create an OpenAI API key with API billing enabled and export it:
+| Agent | AgentCard URL |
+|-------|---------------|
+| Schedule & Content Advisor | `http://localhost:8080/.well-known/schedule/agent-card.json` |
+| Travel & Logistics Agent | `http://localhost:8080/.well-known/travel/agent-card.json` |
+| Venue & On-Site Operations | `http://localhost:8080/.well-known/venue/agent-card.json` |
+| Expense & Compliance Agent | `http://localhost:8080/.well-known/expense/agent-card.json` |
+
+Set an OpenAI API key with API billing enabled in the terminal used to start each module:
 
 ```bash
 export OPENAI_API_KEY=your-api-key-here
@@ -98,281 +97,156 @@ ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier i
 
 ---
 
-## Step 2: Agent Discovery Service
+## Step 2: Configure the Concierge Tenant Clients
 
-Open `src/main/java/dev/devconf/orchestrator/AgentDiscoveryService.java`.
+The Concierge module serves the Schedule, Travel, Venue, and Expense agents as tenants in one Quarkus runtime. Each tenant has its own AgentCard, produced by its `*AgentCardProducer` class with a `@Tenant` name.
 
-This service fetches and caches the AgentCard from each known agent URL:
+The Orchestrator's A2A client interfaces point to those tenant AgentCards. For example, `orchestrator/src/main/java/dev/devconf/orchestrator/ScheduleAdvisorA2AAgent.java` declares:
 
 ```java
-@ApplicationScoped
-public class AgentDiscoveryService {
+@A2AClientAgent(
+        a2aServerUrl = "http://localhost:8080/.well-known/schedule/agent-card.json",
+        name = "Schedule & Content Advisor",
+        description = "Answers questions about conference sessions, schedules, speakers, and talk content",
+        outputKey = "schedule-response"
+)
+```
 
-    @ConfigProperty(name = "orchestrator.agent-urls")
-    List<String> agentUrls;
+The Travel, Venue, and Expense client interfaces use the corresponding `/travel/`, `/venue/`, and `/expense/` AgentCards on port 8080. The Exercise 1–4 standalone servers are not part of this Exercise 5 setup.
 
-    private final Map<String, AgentInfo> registry = new LinkedHashMap<>();
+You can inspect the tenant cards after starting Concierge:
 
-    public record AgentInfo(String name, String url,
-                            List<String> skills, String description) {}
+```bash
+curl -s http://localhost:8080/.well-known/schedule/agent-card.json | jq .
+curl -s http://localhost:8080/.well-known/travel/agent-card.json | jq .
+curl -s http://localhost:8080/.well-known/venue/agent-card.json | jq .
+curl -s http://localhost:8080/.well-known/expense/agent-card.json | jq .
+```
 
-    @PostConstruct
-    void discoverAgents() {
-        for (String baseUrl : agentUrls) {
-            // Fetch AgentCard from /.well-known/agent-card.json
-            String cardUrl = baseUrl + "/.well-known/agent-card.json";
-            HttpResponse<String> response = httpClient.send(
-                HttpRequest.newBuilder().uri(URI.create(cardUrl)).GET().build(),
-                HttpResponse.BodyHandlers.ofString());
+---
 
-            JsonNode card = mapper.readTree(response.body());
-            String name = card.path("name").asText();
-            List<String> skills = /* parse skills from card */;
-            registry.put(name, new AgentInfo(name, baseUrl, skills, ...));
+## Step 3: Orchestrator Supervisor
+
+Open `orchestrator/src/main/java/dev/devconf/orchestrator/OrchestratorSupervisor.java`.
+
+The LangChain4j `@SupervisorAgent` coordinates the fixed set of A2A client agents. Its system message describes how to route attendee requests, and its `subAgents` list names the Schedule, Venue, Travel, and Expense clients. The supervisor selects relevant agents for each request and summarizes their responses:
+
+```java
+@SupervisorAgent(
+        name = "DevSphere Orchestrator",
+        description = "Orchestrates specialist agents to answer complex, multi-domain questions about Devoxx Belgium 2026",
+        outputKey = "response",
+        responseStrategy = SupervisorResponseStrategy.SUMMARY,
+        subAgents = {
+                ScheduleAdvisorA2AAgent.class,
+                VenueA2AAgent.class,
+                TravelA2AAgent.class,
+                ExpenseA2AAgent.class
         }
+)
+ResultWithAgenticScope<String> orchestrate(@V("request") String query);
+```
+
+For Maya's request, the supervisor can use the Schedule, Travel, and Expense agents. It can also use Venue when the request needs venue information. Adding another tenant requires adding its A2A client to the Orchestrator's configured sub-agents.
+
+---
+
+## Step 4: A2A Client Agents
+
+Each client interface uses `@A2AClientAgent` to identify the specialist and its Concierge AgentCard. For example, `TravelA2AAgent` points to the Travel tenant and exposes an `ask` method to the supervisor:
+
+```java
+@A2AClientAgent(
+        a2aServerUrl = "http://localhost:8080/.well-known/travel/agent-card.json",
+        name = "Travel & Logistics Agent",
+        description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
+        outputKey = "travel-response"
+)
+ResultWithAgenticScope<String> ask(
+        @V("query") String query,
+        @A2AContextId @V("contextId") String contextId,
+        @A2ATaskId @V("taskId") String taskId);
+```
+
+The four specialist agents run as tenants in Concierge. LangChain4j uses the client interfaces to send each selected sub-task over A2A and return the agent responses to the supervisor.
+
+---
+
+## Step 5: The REST Request Flow
+
+Open `orchestrator/src/main/java/dev/devconf/orchestrator/OrchestratorResource.java`.
+
+The Orchestrator accepts a JSON request at `POST /api/query`, calls `OrchestratorSupervisor`, and returns the result in a JSON response:
+
+```java
+@Path("/api")
+public class OrchestratorResource {
+
+    @POST
+    @Path("/query")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public QueryResponse query(QueryRequest request) {
+        AgenticScope scope = supervisor.orchestrate(request.query()).agenticScope();
+        String response = scope.readState("response").toString();
+        return new QueryResponse(response);
     }
+
+    public record QueryRequest(String query) {}
+    public record QueryResponse(String response) {}
 }
 ```
 
-The discovery pattern:
-1. For each known URL, HTTP GET `/.well-known/agent-card.json`
-2. Parse the AgentCard to learn the agent's name, skills, and capabilities
-3. Store in a registry for fast lookup during query routing
-
-The `buildSkillsSummary()` method formats the registry for the LLM prompt:
-
-```
-Agent "Schedule & Content Advisor" (http://localhost:8080)
-  Description: Deep-scans the summit's session catalog...
-  Skills:
-    - Session Search: Search for sessions by topic, speaker, or track
-    - Session Recommendations: Get personalized recommendations
-    - Speaker Info: Look up speaker bios and expertise
-
-Agent "Travel & Logistics Agent" (http://localhost:9000)
-  Description: Connects to flight APIs, local transit, and hotel systems
-  Skills:
-    - Flight Status: Check flight status and delays
-    - Transit Routes: Get directions to the convention center
-```
-
-> **Production note**: In a real deployment, replace the static URL list with a service registry like Consul, etcd, or Kubernetes DNS. Agents register on startup and deregister on shutdown. The Orchestrator watches the registry for changes.
-
----
-
-## Step 3: Query Decomposer
-
-Open `src/main/java/dev/devconf/orchestrator/QueryDecomposer.java`.
-
-This LangChain4j AI Service uses the LLM to split a complex user query into targeted sub-tasks:
-
-```java
-@RegisterAiService
-public interface QueryDecomposer {
-
-    @SystemMessage("""
-        You are a query decomposition engine for the DevSphere
-        conference assistant.
-
-        Available agents and their capabilities:
-        {{agentsSummary}}
-
-        For each sub-task, specify:
-        - agentName: the EXACT name of the target agent
-        - query: a focused question for that agent
-
-        Return ONLY a valid JSON array:
-        [{"agentName": "...", "query": "..."}]
-        """)
-    String decompose(@UserMessage String query,
-                     @V("agentsSummary") String agentsSummary);
-}
-```
-
-The critical design choice: **the system message includes the list of available agent skills** so the LLM knows what agents exist and what each one can do. This makes routing dynamic — add a new agent to the mesh and the Orchestrator automatically learns to route to it.
-
-For Maya's query, the decomposer produces:
-
-```json
-[
-  {"agentName": "Schedule & Content Advisor",
-   "query": "What sessions about agentic AI and Java agents are available today after 9:45 AM?"},
-  {"agentName": "Travel & Logistics Agent",
-   "query": "What is the fastest way from the airport to the convention center right now?"},
-  {"agentName": "Expense & Compliance Agent",
-   "query": "Prepare to log a taxi receipt for travel from the airport to the venue."}
-]
-```
-
-The result is parsed into `SubTask` records:
-
-```java
-public record SubTask(String agentName, String query) {}
-```
-
----
-
-## Step 4: Response Aggregator
-
-Open `src/main/java/dev/devconf/orchestrator/ResponseAggregator.java`.
-
-After all sub-tasks return, this AI Service synthesizes the responses:
-
-```java
-@RegisterAiService
-public interface ResponseAggregator {
-
-    @SystemMessage("""
-        You synthesize responses from multiple specialist systems into
-        a single coherent, helpful answer for a conference attendee.
-
-        Organize by topic, use clear sections, maintain a warm tone.
-        Do NOT mention internal agent names.
-        """)
-    String aggregate(@UserMessage String combinedResponses);
-}
-```
-
-The aggregator receives a formatted string with each agent's response and produces a unified answer Maya sees in her DevSphere app.
-
----
-
-## Step 5: The Orchestration Loop
-
-Open `src/main/java/dev/devconf/orchestrator/OrchestratorAgentExecutorProducer.java`.
-
-This is where everything comes together. The `AgentExecutor` implements this flow:
-
-```
-Maya's message
-    │
-    ▼
-QueryDecomposer.decompose(query, agentsSummary)
-    │
-    ▼
-[SubTask("Schedule & Content Advisor", "sessions about agentic AI..."),
- SubTask("Travel & Logistics Agent", "fastest route from airport..."),
- SubTask("Expense & Compliance Agent", "log taxi receipt...")]
-    │
-    ▼
-For each SubTask:
-    → Build A2A message
-    → Send to agent via HTTP (SendMessage)
-    → Collect response text
-    │
-    ▼
-ResponseAggregator.aggregate(allResponses)
-    │
-    ▼
-Return final answer as A2A Task artifact
-```
-
-Key sections of the code:
-
-**1. Decompose the query:**
-```java
-String skillsSummary = discoveryService.buildSkillsSummary();
-String decomposedJson = queryDecomposer.decompose(userText, skillsSummary);
-List<SubTask> subTasks = parseSubTasks(decomposedJson);
-```
-
-**2. Dispatch to agents:**
-```java
-for (SubTask subTask : subTasks) {
-    var agentInfo = discoveryService.getAgentByName(subTask.agentName());
-    if (agentInfo.isPresent()) {
-        String response = dispatchToAgent(agentInfo.get().url(), subTask.query());
-        agentResponses.add("=== " + subTask.agentName() + " ===\n" + response);
-    } else {
-        agentResponses.add("=== " + subTask.agentName()
-                + " ===\n[Agent not found in registry]");
-    }
-}
-```
-
-**3. Aggregate and respond:**
-```java
-String combined = "Original question: " + userText + "\n\n"
-        + String.join("\n\n", agentResponses);
-String finalAnswer = responseAggregator.aggregate(combined);
-emitter.addArtifact(List.of(new TextPart(finalAnswer)));
-emitter.complete();
-```
-
-The `dispatchToAgent` method sends a standard A2A JSON-RPC `SendMessage` request to each specialist agent and extracts the text artifact from the response. It handles both `/a2a` (Java agents) and root `/` (Python agent) endpoints.
+The Orchestrator's public request is REST. It uses A2A JSON-RPC for its calls to the Concierge tenant agents.
 
 ---
 
 ## Step 6: Wire and Test
 
-### Start all agents
+### Start the Concierge and Orchestrator
 
-Make sure you have these agents running from previous exercises:
+Run these two services in separate terminals. Set `OPENAI_API_KEY` in both terminals. The Concierge serves all four specialist agents as tenants; the standalone services from Exercises 1–4 are not needed here.
 
-| Terminal | Command | Agent | Port |
-|----------|---------|-------|------|
-| Tab 1 | `cd exercises/exercise-1-schedule-advisor && ...` | Schedule & Content Advisor | 8080 |
-| Tab 2 | `cd exercises/exercise-2-venue-agent && mvn spring-boot:run` | Venue & On-Site Ops | 8081 |
-| Tab 3 | `cd exercises/exercise-3-travel-agent && python travel_agent.py` | Travel & Logistics | 9000 |
-| Tab 4 | `cd exercises/exercise-4-expense-agent && ...` | Expense & Compliance | 8082 |
-| Tab 5 | `cd exercises/exercise-5-orchestrator && mvn quarkus:dev` | **Orchestrator** | **8090** |
+| Terminal | Command | Service | Port |
+|----------|---------|---------|------|
+| Tab 1 | `cd exercises/exercise-5-orchestrator && mvn -pl concierge quarkus:dev` | Concierge (Schedule, Travel, Venue, and Expense tenants) | 8080 |
+| Tab 2 | `cd exercises/exercise-5-orchestrator && mvn -pl orchestrator quarkus:dev` | **Orchestrator** | **8090** |
 
-### Verify the Orchestrator's AgentCard
+### Verify the Concierge tenant AgentCards
 
 ```bash
-curl -s http://localhost:8090/.well-known/agent-card.json | jq .
+curl -s http://localhost:8080/.well-known/schedule/agent-card.json | jq .
+curl -s http://localhost:8080/.well-known/travel/agent-card.json | jq .
+curl -s http://localhost:8080/.well-known/venue/agent-card.json | jq .
+curl -s http://localhost:8080/.well-known/expense/agent-card.json | jq .
 ```
-
-You should see the Orchestrator's AgentCard with the skill `general-conference-assistant`.
 
 ### Send a simple query
 
+The Orchestrator exposes a REST endpoint at `POST /api/query`:
+
 ```bash
-curl -s -X POST http://localhost:8090/ \
+curl -s -X POST http://localhost:8090/api/query \
   -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "What agentic AI sessions are available on October 7?"}]
-      }
-    },
-    "id": "test-simple"
-  }' | jq .
+  -d '{"query":"What agentic AI sessions are available on October 7?"}' | jq .
 ```
 
-This should route entirely to the Schedule & Content Advisor.
+This should route to the Schedule & Content Advisor tenant.
 
 ### Send Maya's full query
 
 ```bash
-curl -s --max-time 180 -X POST http://localhost:8090/ \
+curl -s --max-time 180 -X POST http://localhost:8090/api/query \
   -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "My flight was delayed so I missed the morning shuttle. I am interested in agentic AI and Java agents — what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?"}]
-      }
-    },
-    "id": "maya-flight-delay"
-  }' | jq .
+  -d '{"query":"My flight was delayed so I missed the morning shuttle. I am interested in agentic AI and Java agents — what talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?"}' | jq .
 ```
 
 Watch the Orchestrator's terminal output — you should see it:
-1. Decompose the query into three or four sub-tasks
-2. Dispatch to the Schedule Advisor, Travel Agent, and Expense Agent
+1. Select relevant sub-agents from the configured set
+2. Dispatch to the selected Concierge tenants via A2A
 3. Aggregate the responses into a single coherent answer
 
-The response should include session recommendations filtered for Maya's interests, travel directions, and a confirmation that her expense will be logged — information that no single agent could provide alone.
+The response should include session recommendations filtered for Maya's interests, travel directions, and an expense response.
 
 ---
 
@@ -381,34 +255,31 @@ The response should include session recommendations filtered for Maya's interest
 You now have a **fully orchestrated agent mesh**:
 
 ```
-Maya → Orchestrator (:8090) → Schedule (:8080) + Venue (:8081) + Travel (:9000) + Expense (:8082)
+Maya → Orchestrator REST (:8090) → Concierge A2A runtime (:8080) → Schedule + Travel + Venue + Expense tenants
 ```
 
 The Orchestrator:
-- Discovers agents dynamically via AgentCard fetching
-- Uses the LLM to decompose complex queries into targeted sub-tasks
-- Dispatches sub-tasks to the right agent via A2A
+- Uses configured A2A client AgentCards for the four Concierge tenants
+- Uses the LangChain4j supervisor to select agents for each query
+- Dispatches sub-tasks to the selected agents via A2A
 - Aggregates responses into a single coherent answer
 
-This is the **power of A2A as a coordination protocol**: the Orchestrator doesn't know how any agent is implemented — it only knows what each agent can do (from the AgentCard) and how to talk to it (via A2A JSON-RPC).
+This is the **power of A2A as a coordination protocol**: the Orchestrator doesn't know how any agent is implemented — it uses each configured AgentCard to learn what the agent can do and how to talk to it via A2A JSON-RPC.
 
 ### What's running now
 
 | Agent | Technology | Port |
 |-------|-----------|------|
-| Schedule & Content Advisor | Jakarta EE / Java A2A SDK | 8080 |
-| Venue & On-Site Ops | Spring Boot + LangChain4j | 8081 |
-| Travel & Logistics | Python A2A SDK | 9000 |
-| Expense & Compliance | Jakarta EE / Java A2A SDK | 8082 |
-| **Orchestrator & Concierge** | **Quarkus** | **8090** |
+| Schedule, Travel, Venue, and Expense tenants | Quarkus Concierge runtime | 8080 |
+| **Orchestrator** | **Quarkus REST API** | **8090** |
 
 ---
 
-> **Discussion: Why Quarkus Native for the Orchestrator?**
+> **Discussion: Could the Orchestrator Use Quarkus Native?**
 >
 > The Orchestrator is the edge router — every user request hits it first. A native build of Quarkus can provide:
 > - **Sub-second cold starts** — critical for auto-scaling in serverless or Kubernetes
 > - **Minimal memory footprint** — the Orchestrator coordinates but doesn't do heavy computation
 > - **Fast request routing** — native compilation eliminates JIT warmup
 >
-> The specialist agents can run on heavier runtimes (WildFly, Spring Boot) because they start once and stay running. The Orchestrator may scale up/down based on load.
+> The specialist agents are hosted as tenants in the Concierge Quarkus runtime on port 8080. The Orchestrator may scale up/down based on load.

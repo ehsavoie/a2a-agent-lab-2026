@@ -245,7 +245,7 @@ In a production system, the Travel Agent would extract receipt details (OCR / st
 
 ### Connect the Orchestrator
 
-The Expense Agent client is already configured in `exercises/exercise-5-orchestrator/orchestrator/src/main/java/dev/devconf/orchestrator/ExpenseA2AAgent.java` with the URL `http://localhost:8082/.well-known/agent-card.json`. No `concierge.agent-urls` property is used. Start or restart the Orchestrator after confirming the Expense Agent is listening on port 8082.
+The Exercise 5 Expense client targets the Expense tenant AgentCard at `http://localhost:8080/.well-known/expense/agent-card.json`, served by the Concierge module. For Exercise 5, start Concierge with `cd exercises/exercise-5-orchestrator && mvn -pl concierge quarkus:dev`, then start the Orchestrator. The standalone Expense service on port 8082 is used for this exercise's own checks, not by Exercise 5.
 
 Then test the full flow:
 
@@ -255,7 +255,7 @@ curl -s -X POST http://localhost:8090/api/query \
   -d '{"query": "I took a $45 taxi from Airport Express Cabs to the convention center on 2026-10-07. Can you log this as an expense?"}' | jq .
 ```
 
-The Orchestrator should decompose this and route to the Expense Agent.
+The Orchestrator should route this request to the Expense tenant.
 
 ---
 
@@ -325,7 +325,7 @@ In two hours, you built a **production-grade A2A agent ecosystem**:
 2. **Exercise 2** — The Venue & On-Site Operations Agent (Spring Boot + LangChain4j), proving A2A is runtime-agnostic
 3. **Exercise 3** — The Travel & Logistics Agent (Python), proving A2A is language-independent
 4. **Exercise 4** — The Expense & Compliance Agent (Java A2A SDK) for cross-agent data handoff
-5. **Exercise 5** — The Orchestrator & Concierge (Quarkus Native), dynamically discovering, decomposing, dispatching, and aggregating across the mesh
+5. **Exercise 5** — The Quarkus Orchestrator routes requests to Schedule, Travel, Venue, and Expense tenants hosted in one Concierge runtime
 
 ### Going Further
 

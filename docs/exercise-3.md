@@ -347,7 +347,7 @@ All agents — regardless of language — advertise their capabilities through A
 | Venue & On-Site Operations Agent | Java | Spring Boot | 8081 | Running from Exercise 2 |
 | **Travel & Logistics Agent** | **Python** | **a2a-sdk** | **9000** | **New in this exercise** |
 
-Keep all three agents running — the Orchestrator in Exercise 5 will coordinate them all.
+Exercise 5 uses the Schedule, Travel, Venue, and Expense tenants hosted by its Concierge runtime; the standalone agent servers from earlier exercises are not part of that setup.
 
 ---
 

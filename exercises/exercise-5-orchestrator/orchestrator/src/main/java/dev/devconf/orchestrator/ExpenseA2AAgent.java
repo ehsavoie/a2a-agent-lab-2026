@@ -9,7 +9,7 @@ import dev.langchain4j.service.V;
 public interface ExpenseA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8082/.well-known/agent-card.json",
+            a2aServerUrl = "http://localhost:8080/.well-known/expense/agent-card.json",
             name = "Expense & Compliance Agent",
             description = "Logs receipts, validates expenses against corporate compliance limits, and generates expense summaries. Use when the attendee mentions a taxi, meal, hotel, or any spending to log or check.",
             outputKey = "expense-response"
