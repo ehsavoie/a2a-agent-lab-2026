@@ -14,11 +14,11 @@ It is 8:15 AM on Day 1. Maya lands at the airport, but her flight was delayed by
 
 Here's how the mesh resolves her request in real-time:
 
-1. **Edge Routing & Decomposition** — The Quarkus Orchestrator parses Maya's intent, inspects the active AgentCard registry, and splits the prompt into sub-tasks
-2. **Travel & Transit** — The Python Travel Agent compares transit options and determines a rideshare is 20 min faster than the delayed airport express train
-3. **Session Matching** — The Quarkus Schedule Advisor filters out morning sessions (Maya arrives at 9:45 AM) and finds a 10:15 AM session on "Scaling Vector Indexing in Enterprise Meshes"
-4. **Venue Check** — The Spring Boot Venue Agent checks Hall B's real-time IoT sensors, confirms 60% capacity, and reserves a fast-track entry pass
-5. **Expense Log** — The WildFly Expense Agent processes Maya's taxi receipt into an audit-ready reimbursement entry
+1. **Edge Routing & Decomposition** — The Quarkus Orchestrator receives Maya's prompt and uses its configured A2A clients to select specialist agents
+2. **Travel & Transit** — The Concierge Travel tenant compares transit options and returns travel information
+3. **Session Matching** — The Concierge Schedule tenant filters sessions for Maya's interests and arrival time
+4. **Venue Check** — The Concierge Venue tenant checks venue information when Maya's request needs it
+5. **Expense Log** — The Concierge Expense tenant asks for the receipt details needed to prepare an audit-ready reimbursement entry
 
 Each exercise adds a new agent to the mesh. By the end, you'll have the complete DevSphere system.
 
@@ -28,38 +28,33 @@ Each exercise adds a new agent to the mesh. By the end, you'll have the complete
                               User (Maya)
                                   |
                        ┌──────────▼──────────┐
-                       │  Orchestrator &      │
-                       │  Concierge           │
-                       │  (Quarkus) :8090     │
+                       │ Orchestrator        │
+                       │ REST :8090          │
                        └──────────┬───────────┘
-                                  │
-              ┌───────────────────┼───────────────────┐
-              │                   │                   │
-    ┌─────────▼────────┐ ┌───────▼───────┐ ┌─────────▼────────┐
-    │ Schedule &        │ │ Venue &       │ │ Travel &         │
-    │ Content Advisor   │ │ On-Site Ops   │ │ Logistics Agent  │
-    │ (Quarkus) :8080   │ │ (Spring Boot) │ │ (Python) :9000   │
-    └──────────────────┘ │ :8081          │ └──────────────────┘
-                         └───────────────┘
-              ┌──────────────────┐
-              │ Expense &        │
-              │ Compliance Agent │
-              │ (WildFly         │
-              │  Enterprise)     │
-              │ :8082            │
-              └──────────────────┘
+                                  │ A2A JSON-RPC
+                       ┌──────────▼──────────┐
+                       │ Concierge           │
+                       │ Quarkus :8080       │
+                       ├─────────────────────┤
+                       │ Schedule tenant     │
+                       │ Travel tenant       │
+                       │ Venue tenant        │
+                       │ Expense tenant      │
+                       └─────────────────────┘
 
-All agents: AgentCard + JSON-RPC + A2A SDK
+Specialist agents: AgentCard + A2A transport bindings + A2A SDK
 All traces: OpenTelemetry → Grafana/Tempo (:3000)
 ```
 
 | Port | Agent | Runtime | A2A SDK |
 |------|-------|---------|---------|
-| 8080 | Schedule & Content Advisor | Quarkus | `a2a-java-sdk-reference-jsonrpc` |
-| 8081 | Venue & On-Site Operations | Spring Boot | `a2a-java-sdk-reference-jsonrpc` |
+| 8080 | Schedule Advisor (Exercise 1) or Concierge tenants (Exercise 5) | Quarkus | `a2a-java-sdk-reference-jsonrpc` |
+| 8081 | Venue & On-Site Operations | Spring Boot | `a2a-spring-boot-starter-server-rest` |
 | 9000 | Travel & Logistics | Python | `a2a-sdk` (Python) |
-| 8090 | Orchestrator & Concierge | Quarkus | `a2a-java-sdk-reference-jsonrpc` + `a2a-java-sdk-client` |
-| 8082 | Expense & Compliance | WildFly 41 (Enterprise) | `a2a-jakarta-jsonrpc` + JPA + Kafka |
+| 8090 | Orchestrator REST API | Quarkus | `a2a-java-sdk-client` |
+| 8082 | Expense & Compliance | WildFly 41 (Jakarta EE) | `a2a-jakarta-jsonrpc` + `a2a-jakarta-rest` |
+
+For Exercise 5, run the Concierge on port 8080 with all four tenants and the Orchestrator on port 8090. The standalone agent services from Exercises 1–4 are not part of that setup.
 
 ## How It All Works
 
@@ -92,29 +87,22 @@ sequenceDiagram
     T->>C: {"result": {"status": "completed", "artifacts": [...]}}
 ```
 
-### Sequence 2: Agent Discovery (Orchestrator Startup)
+### Sequence 2: Concierge Multi-Tenant Runtime
 
-Before the Orchestrator can route requests, it discovers all specialist agents:
+Exercise 5 runs the four specialist agents as tenants in one Concierge runtime. The Orchestrator's A2A clients are configured with the corresponding tenant AgentCards:
 
 ```mermaid
 sequenceDiagram
     participant O as Orchestrator<br/>:8090
-    participant S as Schedule Advisor<br/>:8080
-    participant V as Venue Agent<br/>:8081
-    participant T as Travel Agent<br/>:9000
-    participant X as Expense Agent<br/>:8082
+    participant C as Concierge tenants<br/>Quarkus :8080
 
-    Note over O: @PostConstruct — AgentDiscoveryService
-    O->>S: GET /.well-known/agent-card.json
-    S-->>O: AgentCard {name, skills, interfaces}
-    O->>V: GET /.well-known/agent-card.json
-    V-->>O: AgentCard {name, skills, interfaces}
-    O->>T: GET /.well-known/agent-card.json
-    T-->>O: AgentCard {name, skills, interfaces}
-    O->>X: GET /.well-known/agent-card.json
-    X-->>O: AgentCard {name, skills, interfaces}
-
-    Note over O: Registry built:<br/>4 agents, 12 skills total
+    Note over C: Schedule, Travel, Venue, Expense
+    O->>C: A2A request via Schedule AgentCard
+    C-->>O: Schedule agent response
+    O->>C: A2A request via Travel AgentCard
+    C-->>O: Travel agent response
+    O->>C: A2A request via Expense AgentCard
+    C-->>O: Expense agent response
 ```
 
 ### Sequence 3: Maya's Full Scenario (Orchestrated Multi-Agent)
@@ -125,60 +113,49 @@ This is the complete flow when Maya sends her complex query:
 sequenceDiagram
     participant M as Maya
     participant O as Orchestrator<br/>:8090
-    participant LLM1 as QueryDecomposer<br/>(LLM)
-    participant S as Schedule Advisor<br/>:8080
-    participant T as Travel Agent<br/>:9000
-    participant X as Expense Agent<br/>:8082
-    participant LLM2 as ResponseAggregator<br/>(LLM)
+    participant S as Schedule tenant<br/>Concierge :8080
+    participant T as Travel tenant<br/>Concierge :8080
+    participant X as Expense tenant<br/>Concierge :8080
 
-    M->>O: "My flight was delayed... what talks today,<br/>how to get to venue, log my taxi receipt?"
+    M->>O: REST POST /api/query<br/>"My flight was delayed... what talks today, how to get to venue, log my taxi receipt?"
 
-    Note over O: Step 1: Decompose the query
-    O->>LLM1: decompose(userQuery, agentSkillsSummary)
-    LLM1-->>O: [<br/>  {agent: "Schedule Advisor", query: "AI sessions after 9:45 AM"},<br/>  {agent: "Travel Agent", query: "fastest route to venue"},<br/>  {agent: "Expense Agent", query: "log taxi receipt"}<br/>]
+    Note over O: Step 1: Supervisor selects configured agents
 
     Note over O: Step 2: Dispatch to specialists
-    O->>S: POST / SendMessage<br/>"AI and vector DB sessions after 9:45 AM"
-    O->>T: POST / SendMessage<br/>"fastest route from airport to venue"
-    O->>X: POST / SendMessage<br/>"log taxi receipt $35"
+    O->>S: A2A JSON-RPC<br/>"AI sessions later today"
+    O->>T: A2A JSON-RPC<br/>"fastest route from airport to venue"
+    O->>X: A2A JSON-RPC<br/>"process taxi receipt"
 
-    S-->>O: "10:15 AM - Scaling Vector Indexing...<br/>2:00 PM - Distributed AI Patterns..."
-    T-->>O: "Rideshare: 25 min, $35<br/>Airport Express: delayed +40 min"
-    X-->>O: "Expense logged: EXP-A1B2C3D4<br/>$35.00 Transportation — Compliant"
+    S-->>O: Relevant session recommendations for Day 1
+    T-->>O: "Rideshare: 35 min, €45<br/>Train: disrupted, 55 min, €12"
+    X-->>O: Requests the receipt details needed to log the expense
 
-    Note over O: Step 3: Aggregate into a coherent response
-    O->>LLM2: aggregate(originalQuery, allAgentResponses)
-    LLM2-->>O: Unified natural-language answer
+    Note over O: Step 3: Supervisor summarizes agent responses
 
-    O->>M: "Here's your plan, Maya:<br/>🚕 Take a rideshare (25 min, $35)...<br/>📅 Catch the 10:15 AM Vector Indexing talk...<br/>💰 Taxi receipt logged as EXP-A1B2C3D4..."
+    O->>M: REST response with the supervisor's summary
 ```
 
-### Sequence 4: Enterprise Agent (Exercise 4 — JPA + Kafka)
+### Sequence 4: Expense Agent (Exercise 4 — Expense Logging)
 
-The Expense Agent uses enterprise features for production-grade persistence and multi-node support:
+The Expense Agent uses LangChain4j tools to validate and log expenses:
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant N1 as WildFly Node 1<br/>:8082
-    participant DB as PostgreSQL<br/>(JPA TaskStore)
-    participant K as Kafka<br/>(Replicated Events)
-    participant N2 as WildFly Node 2<br/>:8083
+    participant C as A2A Client
+    participant E as Expense Agent<br/>WildFly :8082
+    participant L as LangChain4j + OpenAI
+    participant T as ExpenseTool
 
-    C->>N1: POST / SendMessage
-    N1->>DB: INSERT Task (status: submitted)
-    N1->>N1: AgentExecutor.execute()
-    N1->>DB: UPDATE Task (status: working)
-    N1->>K: Publish task-updated event
-
-    K-->>N2: Receive task-updated event
-    N2->>DB: Read updated Task (cache sync)
-
-    N1->>DB: UPDATE Task (status: completed, artifacts)
-    N1->>K: Publish task-completed event
-    N1->>C: {"result": {"status": "completed", ...}}
-
-    Note over N1,N2: Both nodes share the same DB<br/>and stay in sync via Kafka events
+    C->>E: POST / SendMessage
+    E->>E: AgentExecutor.execute()
+    E->>E: Submit task (status: submitted)
+    E->>E: Start work (status: working)
+    E->>L: expenseService.chat(userText)
+    L->>T: logExpense() checks amount and policy
+    T-->>L: Expense confirmation
+    L-->>E: Agent response
+    E->>E: Add artifact and complete task
+    E->>C: Completed Task with expense artifact
 ```
 
 ## Prerequisites
@@ -215,27 +192,27 @@ open http://localhost:3000                     # Grafana UI (admin/admin)
 | 1 | [Your First A2A Agent](exercises/exercise-1-schedule-advisor/) | 30 min | Schedule & Content Advisor | Quarkus + `@RegisterAiService` |
 | 2 | [Cross-Runtime Agents](exercises/exercise-2-venue-agent/) | 20 min | Venue & On-Site Operations | Spring Boot + LangChain4j |
 | 3 | [Cross-Language Interop](exercises/exercise-3-travel-agent-python/) | 15 min | Travel & Logistics Agent | Python A2A SDK |
-| 4 | [Enterprise Day-2](exercises/exercise-4-expense-agent/) | 20 min | Expense & Compliance Agent + OpenTelemetry | WildFly 41 Enterprise (JPA + Kafka) |
-| 5 | [The Orchestrator](exercises/exercise-5-orchestrator/) | 25 min | Orchestrator & Concierge | Quarkus + Multi-Agent |
+| 4 | [Expense & Compliance Agent](exercises/exercise-4-expense-agent/) | 20 min | Expense & Compliance Agent | WildFly 41 (Jakarta EE) |
+| 5 | [The Orchestrator](exercises/exercise-5-orchestrator/) | 25 min | Orchestrator and multi-tenant Concierge | Quarkus + A2A |
 
 Each exercise adds a new agent to the DevSphere mesh. If you fall behind, check the `solutions/` directory for complete working code at each checkpoint.
 
 ## The Agents
 
 ### The Orchestrator & Concierge (Quarkus)
-The primary edge router and user-facing gateway. Leveraging Quarkus for sub-second cold starts and minimal memory overhead, it receives user prompts, inspects AgentCard schemas across the mesh, and orchestrates multi-agent tasks. Uses two `@RegisterAiService` beans — one to decompose queries into sub-tasks, another to aggregate multi-agent responses.
+The Orchestrator is a Quarkus REST gateway at `:8090`. Its LangChain4j supervisor calls four configured A2A clients. Those clients target the Schedule, Travel, Venue, and Expense tenants in the Quarkus Concierge runtime at `:8080`.
 
 ### The Schedule & Content Advisor (Quarkus)
-Deep-scans the summit's session catalog, speaker bios, and domain tracks. Matches attendee skill levels and interests to specific talks. Uses Quarkus LangChain4j's `@RegisterAiService` with `@Tool`-annotated CDI beans for native LLM tool calling.
+Deep-scans the summit's session catalog, speaker names and session details, and domain tracks. Matches attendee skill levels and interests to specific talks. Uses Quarkus LangChain4j's `@RegisterAiService` with `@Tool`-annotated CDI beans for native LLM tool calling.
 
 ### The Travel & Logistics Agent (Python A2A SDK)
-Connects to flight APIs, local transit, and hotel systems. Handles travel bookings, flight disruption monitoring, and commute routes to the venue. Built with the Python A2A SDK reference implementation.
+Uses sample flight, transit, and hotel data. Handles travel queries, flight disruption information, and commute routes to the venue. Built with the Python A2A SDK reference implementation.
 
 ### The Venue & On-Site Operations Agent (Spring Boot + LangChain4j)
 Robust enterprise microservice that manages real-time IoT room capacity sensors, indoor interactive mapping, and catering queue tracking.
 
-### The Expense & Compliance Agent (WildFly Enterprise)
-Standardizes receipts and session attendance into corporate audit-ready expense logs. Deployed on WildFly 41 with enterprise-grade features: JPA-backed task persistence (PostgreSQL), push notification config store, and a Kafka-replicated queue manager for multi-node deployment. Supports multiple A2A transport protocols (JSON-RPC, REST, gRPC) via Maven profiles.
+### The Expense & Compliance Agent (WildFly 41 + Jakarta EE)
+Standardizes receipts into corporate audit-ready expense logs. Deployed on WildFly 41 and uses LangChain4j with OpenAI to process expense requests. Supports JSON-RPC and REST A2A transports.
 
 ## Building
 
@@ -255,7 +232,7 @@ mvn compile
 ## Key Technologies
 
 - **[A2A Protocol](https://google.github.io/A2A/)** — Open standard for agent-to-agent communication
-- **[A2A Java SDK](https://github.com/a2aproject/a2a-java-sdk)** — Java implementation of the A2A protocol
+- **[A2A Java SDK](https://github.com/a2aproject/a2a-java)** — Java implementation of the A2A protocol
 - **[LangChain4j](https://docs.langchain4j.dev/)** — Java framework for LLM-powered applications
 - **[A2A Jakarta EE SDK](https://github.com/wildfly-extras/a2a-jakarta)** — A2A integration for Jakarta EE / WildFly
 - **[Quarkus](https://quarkus.io/)** — Supersonic Subatomic Java framework

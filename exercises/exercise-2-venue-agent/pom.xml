@@ -22,6 +22,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- spring-a2a 0.1.2 requires A2A Java SDK 1.1.0.Final. -->
+            <dependency>
+                <groupId>org.a2aproject.sdk</groupId>
+                <artifactId>a2a-java-sdk-bom</artifactId>
+                <version>1.1.0.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>

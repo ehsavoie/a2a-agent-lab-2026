@@ -67,7 +67,7 @@ public class ExpenseAgentCardProducer {
                         .description("Process receipt data from other agents into audit-ready expense entries.")
                         .tags(List.of("receipts", "processing", "audit"))
                         .examples(List.of(
-                            "Process this receipt: vendor=Yellow Cab, amount=$45.00, date=2026-10-07"))
+                            "Process this receipt: vendor=Yellow Cab, amount=$45.00, currency=USD, date=2026-10-07, category=Transportation"))
                         .build(),
                     AgentSkill.builder()
                         .id("compliance-report")

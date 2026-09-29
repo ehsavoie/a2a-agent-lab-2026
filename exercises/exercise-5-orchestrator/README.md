@@ -1,41 +1,34 @@
-# Exercise 5: The Orchestrator & Concierge (Quarkus Native)
+# Exercise 5: The Orchestrator & Concierge (Quarkus)
 
-The primary edge router and user-facing gateway. Receives user prompts, inspects AgentCard schemas across the mesh, and orchestrates multi-agent tasks using LangChain4j for query decomposition and response aggregation.
+Exercise 5 uses two Quarkus services: the Orchestrator on port **8090** and the multi-tenant Concierge runtime on port **8080**. Concierge hosts the Schedule, Travel, Venue, and Expense agents. The Exercise 1–4 standalone services are not needed for this exercise.
 
 ## Quick Start
 
 ```bash
-# Prerequisites: agents on ports 8080, 8081, 9000, 8082 must be running
-mvn quarkus:dev
+cd exercises/exercise-5-orchestrator && mvn -pl concierge quarkus:dev
 ```
 
-The Orchestrator starts on **port 8090**.
+Start the Orchestrator in another terminal:
+
+```bash
+cd exercises/exercise-5-orchestrator && mvn -pl orchestrator quarkus:dev
+```
+
+Both services need `OPENAI_API_KEY` set in their terminal. The Orchestrator accepts requests on **port 8090**.
 
 ## Test
 
 ```bash
-curl -s http://localhost:8090/.well-known/agent-card.json | jq .
-
-curl -s -X POST http://localhost:8090/ \
+curl -s -X POST http://localhost:8090/api/query \
   -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
   -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "My flight was delayed so I missed the morning shuttle. I am interested in agentic AI and Java agents. What talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?"}]
-      }
-    },
-    "id": "maya-1"
+    "query": "My flight was delayed so I missed the morning shuttle. I am interested in agentic AI and Java agents. What talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?"
   }' | jq .
 ```
 
 ## Companion Project
 
-The companion Concierge project is in [exercise-5-concierge](../exercise-5-concierge/README.md).
+The companion Concierge module is in [concierge](concierge/README.md).
 
 ## Full Instructions
 

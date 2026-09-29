@@ -1,7 +1,7 @@
 """
 DevSphere 2026 Travel & Logistics Agent — A2A Python Agent
 
-Connects to flight APIs, local transit, and hotel systems.
+Uses sample flight, transit, and hotel data.
 Handles travel logistics, transit comparison, and receipt extraction
 for expense reporting.
 """
@@ -385,29 +385,31 @@ def extract_receipt(query: str) -> str:
     vendor = "Unknown vendor"
     amount = "0.00"
     currency = "EUR"
-    category = "transportation"
+    if "$" in query:
+        currency = "$"
+    category = "Transportation"
     date = datetime.now().strftime("%Y-%m-%d")
 
     if any(w in query_lower for w in ["taxi", "cab"]):
         vendor = "Antwerp Taxi Service"
         amount = "65.00"
-        category = "ground_transportation"
+        category = "Transportation"
     elif any(w in query_lower for w in ["uber", "lyft", "bolt", "rideshare", "ride"]):
         vendor = "Bolt Belgium"
         amount = "45.00"
-        category = "ground_transportation"
+        category = "Transportation"
     elif any(w in query_lower for w in ["train", "tram", "rail", "nmbs", "sncb"]):
         vendor = "NMBS/SNCB Belgian Railways"
         amount = "12.00"
-        category = "public_transit"
+        category = "Transportation"
     elif any(w in query_lower for w in ["hotel", "room"]):
         vendor = "Holiday Inn Express Antwerp"
         amount = "99.00"
-        category = "lodging"
+        category = "Accommodation"
     elif any(w in query_lower for w in ["food", "restaurant", "meal", "dinner", "lunch"]):
         vendor = "Balls & Glory Antwerp"
         amount = "18.50"
-        category = "meals"
+        category = "Meals"
 
     for word in query_lower.split():
         word_clean = word.strip("$€£,.")
@@ -539,7 +541,7 @@ def build_agent_card() -> AgentCard:
             AgentSkill(
                 id="transit-routes",
                 name="Transit Routes",
-                description="Get transit options from airport to venue with real-time disruption info.",
+                description="Get transit options from airport to venue with sample disruption info.",
                 tags=["transit", "airport", "rideshare", "train", "taxi"],
                 examples=[
                     "How do I get from Brussels Airport to Kinepolis Antwerp?",

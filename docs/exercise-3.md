@@ -137,7 +137,7 @@ def extract_receipt(query: str) -> str:
     }
 ```
 
-This structured payload is exactly what the Expense & Compliance Agent (Exercise 5) will consume for audit-ready processing — demonstrating **cross-agent, cross-language data handoff**.
+This structured payload is exactly what the Expense & Compliance Agent (Exercise 4) will consume for audit-ready processing — demonstrating **cross-agent, cross-language data handoff**.
 
 ### AgentExecutor (Python equivalent of the Java AgentExecutor)
 
@@ -247,7 +247,7 @@ You should see a structured receipt payload with vendor, amount (EUR), date, and
 
 ## Step 4: Java → Python
 
-Now let's call the Python agent from Java. Make sure your Schedule & Content Advisor from Exercise 1 is still running on port 8080. It requires `OPENAI_API_KEY`; the Python Travel Agent does not. See the [Schedule & Content Advisor quick start](../exercises/exercise-1-schedule-advisor/README.md#quick-start) for its setup.
+Now let's call the Python agent from Java. The Python Travel Agent does not require `OPENAI_API_KEY`.
 
 The checked-in Java client uses the Java SDK's `Client` and REST transport. Its setup in [`TravelAgentClient.java`](../exercises/exercise-3-travel-agent-python/java-client/src/main/java/dev/devconf/travel/TravelAgentClient.java) looks like this:
 
@@ -347,7 +347,7 @@ All agents — regardless of language — advertise their capabilities through A
 | Venue & On-Site Operations Agent | Java | Spring Boot | 8081 | Running from Exercise 2 |
 | **Travel & Logistics Agent** | **Python** | **a2a-sdk** | **9000** | **New in this exercise** |
 
-Keep all three agents running — the Orchestrator in Exercise 4 will coordinate them all.
+Exercise 5 uses the Schedule, Travel, Venue, and Expense tenants hosted by its Concierge runtime; the standalone agent servers from earlier exercises are not part of that setup.
 
 ---
 

@@ -8,7 +8,7 @@
 
 A Python A2A agent using the `a2a-sdk` that provides:
 - Flight status with delay information
-- Transit route comparison (rideshare, train, taxi, shuttle) with live disruption data
+- Transit route comparison (rideshare, train, taxi, shuttle) with sample disruption data
 - Hotel search with availability and pricing
 - Receipt extraction for expense reporting (cross-agent handoff to Exercise 5)
 - Restaurant recommendations and local tips

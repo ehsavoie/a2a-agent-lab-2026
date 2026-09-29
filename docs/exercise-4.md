@@ -1,18 +1,15 @@
-# Exercise 4: The Expense & Compliance Agent + Enterprise Observability
+# Exercise 4: The Expense & Compliance Agent
 
 **Time:** 20 minutes
 
-> _"Maya's taxi from the airport cost $45. She snaps a photo of the receipt in the DevSphere app. The Travel Agent extracts the fare details and passes the structured payload to the Expense & Compliance Agent — which validates the amount against corporate policy, logs an audit-ready reimbursement entry, and confirms it all in seconds. Meanwhile, the ops team watches the entire trace flow through Grafana."_
+> _"Maya's taxi from the airport cost $45. She snaps a photo of the receipt in the DevSphere app. The Travel Agent extracts the fare details and passes the structured payload to the Expense & Compliance Agent — which validates the amount against corporate policy, logs an audit-ready reimbursement entry, and confirms it all in seconds."_
 
 ## Overview
 
 In this exercise you will:
 
-1. Build the **Expense & Compliance Agent** — a second Jakarta EE (Java A2A SDK) agent that standardizes receipts into audit-ready expense logs
+1. Build the **Expense & Compliance Agent** — a WildFly 41 (Jakarta EE / Java A2A SDK) agent that standardizes receipts into audit-ready expense logs
 2. Wire up **cross-agent data handoff** — the Travel Agent extracts receipt details, the Orchestrator routes them to the Expense Agent
-3. Add **OpenTelemetry (OTel) tracing** to all agents — Java and Python
-4. Visualize **distributed traces** in Grafana across the full Orchestrator → Agent call chain
-
 ---
 
 ## Part 1: Build the Expense & Compliance Agent
@@ -33,7 +30,7 @@ This is another **WildFly 41 + Java A2A SDK** agent — the same pattern you lea
 
 ### Step 1: The ExpenseTool
 
-Open `src/main/java/dev/devconf/expense/ExpenseTool.java`. This tool gives the LLM access to expense management operations:
+Open `expense-agent/src/main/java/dev/devconf/expense/ExpenseTool.java`. This tool gives the LLM access to expense management operations:
 
 ```java
 public class ExpenseTool {
@@ -48,7 +45,7 @@ public class ExpenseTool {
     private final List<Expense> expenseLog = new ArrayList<>();
 
     @Tool("Log and validate an expense entry against corporate compliance rules.")
-    public String logExpense(String vendor, String amount, String date,
+    public String logExpense(String vendor, String amount, String currency, String date,
                              String category, String description) {
         // Validate category, parse amount, check against limits
         // Add to in-memory log, return confirmation with expense ID
@@ -85,11 +82,11 @@ public interface ExpenseService {
 
     @SystemMessage("""
             You are the DevConf 2026 Expense & Compliance Agent.
-            You standardize receipts and session attendance into
+            You standardize receipts into
             corporate audit-ready expense logs.
             Validate expenses against compliance rules:
             - Meals: max $75/day, Transportation: max $200/trip
-            All expenses require: vendor, amount, date, category.
+            All expenses require: vendor, amount, currency, date, category.
             """)
     String chat(@UserMessage String userMessage);
 }
@@ -158,14 +155,14 @@ The `ExpenseAgentExecutorProducer` follows the identical pattern from Exercise 1
 ```bash
 cd exercises/exercise-4-expense-agent
 
-# Build the JSON-RPC WAR and provision WildFly
-mvn package -Pjsonrpc
+# Build the A2A WAR and provision WildFly
+mvn package
 
-# If target/wildfly already exists, refresh its deployed WAR
-cp target/expense-agent-1.0.0-SNAPSHOT.war target/wildfly/standalone/deployments/ROOT.war
+# If expense-agent/target/wildfly already exists, refresh its deployed WAR
+cp expense-agent/target/expense-agent-1.0.0-SNAPSHOT.war expense-agent/target/wildfly/standalone/deployments/ROOT.war
 
 # Start WildFly with port offset (HTTP on 8082)
-./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2
+./expense-agent/target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2
 ```
 
 ### Step 5: Test the Expense Agent
@@ -211,7 +208,7 @@ curl -s -X POST http://localhost:8082/ \
       "message": {
         "messageId": "msg-1",
         "role": "ROLE_USER",
-        "parts": [{"text": "Process this receipt:\nvendor: Airport Express Cabs\namount: $45.00\ndate: 2026-10-07\ncategory: Transportation\ndescription: Taxi from airport to convention center"}]
+        "parts": [{"text": "Process this receipt:\nvendor: Airport Express Cabs\namount: $45.00\ncurrency: USD\ndate: 2026-10-07\ncategory: Transportation\ndescription: Taxi from airport to convention center"}]
       }
     },
     "id": "test-receipt-1"
@@ -248,189 +245,17 @@ In a production system, the Travel Agent would extract receipt details (OCR / st
 
 ### Connect the Orchestrator
 
-The Expense Agent client is already configured in `exercises/exercise-5-orchestrator/src/main/java/dev/devconf/orchestrator/ExpenseA2AAgent.java` with the URL `http://localhost:8082`. No `concierge.agent-urls` property is used. Start or restart the Orchestrator after confirming the Expense Agent is listening on port 8082.
+The Exercise 5 Expense client targets the Expense tenant AgentCard at `http://localhost:8080/.well-known/expense/agent-card.json`, served by the Concierge module. For Exercise 5, start Concierge with `cd exercises/exercise-5-orchestrator && mvn -pl concierge quarkus:dev`, then start the Orchestrator. The standalone Expense service on port 8082 is used for this exercise's own checks, not by Exercise 5.
 
 Then test the full flow:
 
 ```bash
-curl -s -X POST http://localhost:8090/ \
+curl -s -X POST http://localhost:8090/api/query \
   -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "I took a $45 taxi from Airport Express Cabs to the convention center today. Can you log this as an expense?"}]
-      }
-    },
-    "id": "test-handoff"
-  }' | jq .
+  -d '{"query": "I took a $45 taxi from Airport Express Cabs to the convention center on 2026-10-07. Can you log this as an expense?"}' | jq .
 ```
 
-The Orchestrator should decompose this and route to the Expense Agent.
-
----
-
-## Part 3: Enterprise Observability — OpenTelemetry + Grafana
-
-Your agent mesh works. Now you need to **see inside it**.
-
-### Add OpenTelemetry to the Quarkus Orchestrator
-
-Add the `quarkus-opentelemetry` dependency to `exercises/exercise-5-orchestrator/pom.xml`:
-
-```xml
-<dependency>
-    <groupId>io.quarkus</groupId>
-    <artifactId>quarkus-opentelemetry</artifactId>
-</dependency>
-```
-
-> You can find this snippet in `exercises/exercise-4-observability/quarkus-otel-pom-additions.xml`.
-
-Add OTel configuration to `application.properties`. For the Orchestrator, use the explicit service name below because it does not define `a2a.agent.name`:
-
-```properties
-quarkus.otel.enabled=true
-quarkus.otel.exporter.otlp.traces.endpoint=http://localhost:4317
-quarkus.otel.service.name=DevSphere Orchestrator
-quarkus.otel.instrument.rest=true
-```
-
-To trace the Schedule Advisor too, add the same dependency and Quarkus settings to `exercises/exercise-1-schedule-advisor`; there, `quarkus.otel.service.name=${a2a.agent.name}` resolves to its configured name.
-
-### Add OpenTelemetry to the Spring Boot Venue Agent
-
-Add these dependencies to `exercises/exercise-2-venue-agent/pom.xml`:
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
-<dependency>
-    <groupId>io.micrometer</groupId>
-    <artifactId>micrometer-tracing-bridge-otel</artifactId>
-</dependency>
-<dependency>
-    <groupId>io.opentelemetry</groupId>
-    <artifactId>opentelemetry-exporter-otlp</artifactId>
-</dependency>
-```
-
-Add to `application.properties`:
-
-```properties
-management.tracing.enabled=true
-management.tracing.sampling.probability=1.0
-management.otlp.tracing.endpoint=http://localhost:4317
-spring.application.name=Venue & On-Site Operations Agent
-```
-
-### Add OpenTelemetry to the Python Travel Agent
-
-```bash
-cd exercises/exercise-3-travel-agent-python
-pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-grpc
-```
-
-Add the initialization code from `exercises/exercise-4-observability/python_otel_setup.py` to `travel_agent.py` before the `main()` call:
-
-```python
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-
-def setup_otel():
-    resource = Resource.create({"service.name": "Travel & Logistics Agent (Python)"})
-    provider = TracerProvider(resource=resource)
-    exporter = OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
-    provider.add_span_processor(BatchSpanProcessor(exporter))
-    trace.set_tracer_provider(provider)
-    return trace.get_tracer("travel-logistics-agent")
-
-tracer = setup_otel()
-```
-
-Then wrap the `execute` method with a custom span:
-
-```python
-async def execute(self, context, event_queue):
-    with tracer.start_as_current_span("travel-agent.execute") as span:
-        # ... existing logic ...
-        span.set_attribute("a2a.user.query", user_message)
-```
-
-### Custom Spans for LLM Calls
-
-See `exercises/exercise-4-observability/TracedAgentExecutor.java` for an example to adapt and wire into an agent's executor producer to add fine-grained spans around LLM calls. The checked-in example is written for `SessionService`; it is not a drop-in replacement for the Expense Agent's executor:
-
-```java
-Span llmSpan = tracer.spanBuilder("langchain4j.chat").startSpan();
-try (Scope llmScope = llmSpan.makeCurrent()) {
-    response = service.chat(userText);
-    llmSpan.setAttribute("a2a.response.length", response.length());
-} finally {
-    llmSpan.end();
-}
-```
-
-Restart all agents after adding OTel configuration. The Expense Agent does not emit the custom spans shown below until its executor is adapted and wired with an OpenTelemetry `Tracer`.
-
----
-
-## Part 4: Visualize in Grafana
-
-Open the Grafana UI: **http://localhost:3000** (login: admin/admin), then navigate to **Explore → Tempo**.
-
-Send a complex query to the Orchestrator:
-
-```bash
-curl -s -X POST http://localhost:8090/ \
-  -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "My flight was delayed so I missed the morning shuttle. I am interested in agentic AI and Java agents. What talks should I catch today, how do I get to the venue quickly, and can you log my $45 taxi receipt from Airport Express Cabs?"}]
-      }
-    },
-    "id": "trace-test"
-  }'
-```
-
-In Grafana, select **"DevSphere Orchestrator"** and click **Find Traces**. With the agent instrumentation configured, you should see:
-
-```
-DevSphere Orchestrator
-├── POST / (incoming request)
-│   ├── orchestrator.execute
-│   │   ├── langchain4j.chat (QueryDecomposer)     ← LLM call ~2-5s
-│   │   ├── POST http://localhost:8080/          ← Schedule Advisor
-│   │   │   └── schedule-advisor.execute
-│   │   │       └── langchain4j.chat                ← LLM call ~2-5s
-│   │   ├── POST http://localhost:9000/             ← Travel Agent
-│   │   │   └── travel-agent.execute                ← Python span
-│   │   ├── POST http://localhost:8082/          ← Expense Agent
-│   │   │   └── expense-agent.execute
-│   │   │       └── langchain4j.chat                ← LLM call ~2-5s
-│   │   └── langchain4j.chat (ResponseAggregator)   ← LLM call ~2-5s
-```
-
-This gives you:
-- **Total latency**: How long the full request took
-- **Per-agent latency**: How long each specialist agent took
-- **LLM call duration**: How much time was spent in the OpenAI Responses API
-- **Network overhead**: The gap between spans shows serialization/network time
+The Orchestrator should route this request to the Expense tenant.
 
 ---
 
@@ -450,7 +275,7 @@ A2A Tasks include a `contextId` field that groups related messages into a conver
 String contextId = context.getTask().contextId();
 ```
 
-See `exercises/exercise-4-observability/StatefulTaskStore.java` for a conceptual implementation using `ConcurrentHashMap`. In production, replace with Redis or PostgreSQL.
+In production, replace an in-memory task store with Redis or PostgreSQL.
 
 ### Load Balancing Tradeoffs
 
@@ -470,46 +295,29 @@ You now have:
 
 - [x] **Expense & Compliance Agent** running on port 8082 with three skills
 - [x] **Cross-agent data handoff** — receipt data flows from Travel Agent to Expense Agent
-- [x] **OpenTelemetry tracing** across all agents (Java + Python)
-- [x] **Grafana visualization** showing the full Orchestrator → Agent call chain
 
 ---
 
 ## The Complete DevSphere System
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                    DevSphere Concierge System                    │
-│                                                                  │
-│  ┌──────────────┐  ┌─────────────┐  ┌───────────────────────┐  │
-│  │ Orchestrator │  │  Schedule   │  │  Travel & Logistics   │  │
-│  │ & Concierge  │  │  & Content  │  │  Agent (Python)       │  │
-│  │ :8090 (Qkus) │──│  Advisor    │  │  :9000                │  │
-│  │              │  │  :8080(A2A) │  │                       │  │
-│  │              │  ├─────────────┤  ├───────────────────────┤  │
-│  │              │  │   Venue &   │  │  Expense &            │  │
-│  │              │──│  On-Site Ops│  │  Compliance Agent     │  │
-│  │              │  │  :8081(Boot)│  │  :8082 (A2A)         │  │
-│  └──────────────┘  └─────────────┘  └───────────────────────┘  │
-│       │                    │                    │                │
-│       └────────────────────┼────────────────────┘                │
-│                            │                                     │
-│                    ┌───────▼───────┐                             │
-│                    │ Grafana/LGTM  │  ← All traces visible here  │
-│                    │    :3000      │                             │
-│                    └───────────────┘                             │
-└──────────────────────────────────────────────────────────────────┘
+┌──────────────────────────┐      A2A JSON-RPC      ┌──────────────────────────┐
+│ Orchestrator              │ ─────────────────────► │ Concierge runtime         │
+│ Quarkus REST :8090        │                         │ Quarkus :8080              │
+│ POST /api/query           │                         │ Schedule · Travel tenants │
+└──────────────────────────┘                         │ Venue · Expense tenants  │
+                                                     └──────────────────────────┘
 ```
 
 ## What You Built Today
 
 In two hours, you built a **production-grade A2A agent ecosystem**:
 
-1. **Exercise 1** — Your first A2A agent: the Schedule & Content Advisor (Jakarta EE / Java A2A SDK), teaching AgentCard, AgentExecutor, and LLM tool calling
+1. **Exercise 1** — Your first A2A agent: the Schedule & Content Advisor (Quarkus + A2A Java SDK), teaching AgentCard, AgentExecutor, and LLM tool calling
 2. **Exercise 2** — The Venue & On-Site Operations Agent (Spring Boot + LangChain4j), proving A2A is runtime-agnostic
 3. **Exercise 3** — The Travel & Logistics Agent (Python), proving A2A is language-independent
-4. **Exercise 4** — The Expense & Compliance Agent (Java A2A SDK) for cross-agent data handoff, plus OpenTelemetry observability
-5. **Exercise 5** — The Orchestrator & Concierge (Quarkus Native), dynamically discovering, decomposing, dispatching, and aggregating across the mesh
+4. **Exercise 4** — The Expense & Compliance Agent (Java A2A SDK) for cross-agent data handoff
+5. **Exercise 5** — The Quarkus Orchestrator routes requests to Schedule, Travel, Venue, and Expense tenants hosted in one Concierge runtime
 
 ### Going Further
 
@@ -522,9 +330,9 @@ In two hours, you built a **production-grade A2A agent ecosystem**:
 ### Resources
 
 - [A2A Protocol Specification](https://google.github.io/A2A/)
-- [A2A Java SDK](https://github.com/a2aproject/a2a-java-sdk)
+- [A2A Java SDK](https://github.com/a2aproject/a2a-java)
 - [A2A Jakarta EE SDK (Java A2A SDK)](https://github.com/wildfly-extras/a2a-jakarta)
-- [A2A Python SDK](https://github.com/a2aproject/a2a-python-sdk)
+- [A2A Python SDK](https://github.com/a2aproject/a2a-python)
 - [A2A Samples](https://github.com/a2aproject/a2a-samples)
 - [LangChain4j Documentation](https://docs.langchain4j.dev/)
 
@@ -535,4 +343,3 @@ In two hours, you built a **production-grade A2A agent ecosystem**:
 > - **Authentication or billing error**: Check `OPENAI_API_KEY` and confirm API billing is enabled. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 > - **Empty responses**: The first LLM call can be slow. Increase the OpenAI HTTP read timeout in `ExpenseServiceProducer` if needed.
 > - **Port 8082 conflict**: Make sure you're starting WildFly with `-Djboss.socket.binding.port-offset=2`.
-> - **No traces in Grafana**: Verify the LGTM stack is running on port 3000 (Grafana) and OTLP collector is on port 4317. Check that all agents have OTel configured correctly.

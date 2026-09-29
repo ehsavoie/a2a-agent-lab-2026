@@ -7,8 +7,8 @@ public interface ExpenseService {
 
     @SystemMessage("""
             You are the DevConf 2026 Expense & Compliance Agent — a precise,
-            detail-oriented assistant that standardizes receipts and session
-            attendance into corporate audit-ready expense logs.
+            detail-oriented assistant that standardizes receipts into corporate
+            audit-ready expense logs.
 
             You validate expenses against corporate compliance rules (limits apply
             in whatever currency is stated on the receipt):

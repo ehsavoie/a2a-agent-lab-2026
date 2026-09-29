@@ -1,79 +1,33 @@
-# Exercise 4: Expense & Compliance Agent (WildFly Enterprise)
+# Exercise 4: Expense & Compliance Agent (WildFly)
 
-The **Expense & Compliance Agent** standardizes receipts and session attendance into corporate audit-ready expense logs. It validates expenses against corporate compliance rules and can process structured receipt data received from other agents (e.g. the Travel & Logistics Agent).
+The **Expense & Compliance Agent** standardizes receipts into corporate audit-ready expense logs. It validates expenses against corporate compliance rules and can process structured receipt data received from other agents (e.g. the Travel & Logistics Agent).
 
 ## Technology
 
-- **Runtime:** WildFly 41 (Jakarta EE) with enterprise features
-- **A2A SDK:** `a2a-jakarta-jsonrpc` / `a2a-jakarta-rest` / `a2a-jakarta-grpc` (via Maven profiles)
+- **Runtime:** WildFly 41 (Jakarta EE)
+- **A2A SDK:** `a2a-jakarta-jsonrpc` / `a2a-jakarta-rest`
 - **LLM:** LangChain4j + OpenAI GPT-6 Luna via the Responses API at medium reasoning effort
-- **Persistence:** JPA-backed TaskStore + PushNotificationConfigStore (PostgreSQL)
-- **Replication:** Kafka replicated queue manager for multi-node deployment
 - **Port:** 8082 (WildFly with port offset 2)
 
-## Enterprise Features
+## Transports
 
-This exercise uses the professional enterprise setup from the A2A Jakarta EE SDK:
-
-| Feature | Dependency | What It Does |
-|---------|-----------|--------------|
-| JPA TaskStore | `a2a-java-extras-task-store-database-jpa` | Persists A2A tasks in PostgreSQL (replaces in-memory) |
-| JPA PushNotificationConfigStore | `a2a-java-extras-push-notification-config-store-database-jpa` | Persists push notification configs in PostgreSQL |
-| Replicated Queue Manager | `a2a-java-queue-manager-replicated-core` | Enables multi-node task queue via Kafka |
-| Kafka Replication | `a2a-java-queue-manager-replication-mp-reactive` | SmallRye Reactive Messaging (Kafka) for event broadcast |
-
-## Transport Profiles
-
-The transport protocol is selected via Maven profiles. Each profile provisions a WildFly server with the required Galleon layers:
-
-```bash
-# JSON-RPC transport (default for A2A)
-mvn package -Pjsonrpc
-
-# REST transport (JSON-RPC + HTTP/JSON)
-mvn package -Prest
-
-# gRPC transport (JSON-RPC + gRPC)
-mvn package -Pgrpc
-```
-
-The `AgentCardProducer` auto-detects which transports are on the classpath and advertises them in the AgentCard.
+The agent includes JSON-RPC and REST transports. The `AgentCardProducer` advertises the transports available on the classpath.
 
 ## Build & Run
 
 Set an OpenAI API key with API billing enabled before starting the agent. ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
 
-The shared PostgreSQL, Kafka, and Grafana services are defined in the [development compose file](../exercise-5-orchestrator/podman-compose.yml). From the repository root, start them with:
-
-```bash
-cd exercises/exercise-5-orchestrator
-podman-compose up -d
-cd ../exercise-4-expense-agent
-```
-
-After Kafka has had a few seconds to start, create the replicated-events topic:
-
-```bash
-podman exec devconf-kafka /opt/kafka/bin/kafka-topics.sh --create --if-not-exists \
-  --topic replicated-events --bootstrap-server localhost:9092 --partitions 1
-```
-
-Before starting WildFly, set the PostgreSQL credentials used by that compose file. Kafka listens on `localhost:9092` for the replicated queue manager.
-
 ```bash
 export OPENAI_API_KEY=your-api-key-here
-export POSTGRESQL_DATABASE=devconf
-export POSTGRESQL_USER=devconf
-export POSTGRESQL_PASSWORD=devconf
 
-# Build with JSON-RPC transport
-mvn package -Pjsonrpc
+# Build the agent and provision WildFly
+mvn package
 
-# Refresh the deployed WAR when target/wildfly already exists
-cp target/expense-agent-1.0.0-SNAPSHOT.war target/wildfly/standalone/deployments/ROOT.war
+# Refresh the deployed WAR when the provisioned server already exists
+cp expense-agent/target/expense-agent-1.0.0-SNAPSHOT.war expense-agent/target/wildfly/standalone/deployments/ROOT.war
 
 # Start WildFly on port 8082 (base port 8080 + offset 2)
-./target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2
+./expense-agent/target/wildfly/bin/standalone.sh -Djboss.socket.binding.port-offset=2
 ```
 
 ## Skills
@@ -127,12 +81,7 @@ curl -s -X POST http://localhost:8082/ \
 | `ExpenseServiceProducer.java` | CDI producer that builds the AI Service with an OpenAI Responses API chat model |
 | `ExpenseAgentCardProducer.java` | Port-offset-aware AgentCard with multi-transport auto-detection |
 | `ExpenseAgentExecutorProducer.java` | CDI producer for the AgentExecutor |
-| `persistence.xml` | JPA persistence unit for JpaTask + JpaPushNotificationConfig |
-| `microprofile-config.properties` | Kafka/SmallRye Reactive Messaging configuration |
-
-## Companion Project
-
-The companion Observability project is in [exercise-4-observability](../exercise-4-observability/README.md).
+| `microprofile-config.properties` | A2A authorization and OpenAI model configuration |
 
 ## Full Instructions
 

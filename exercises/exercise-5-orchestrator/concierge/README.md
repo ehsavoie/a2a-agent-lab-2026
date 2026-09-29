@@ -1,4 +1,4 @@
-# Exercise 5: The Concierge — Orchestrating the Agent Mesh
+# Exercise 5: Concierge Multi-Tenant Agent Runtime
 
 **Time:** 25 minutes
 
@@ -6,94 +6,68 @@
 
 ## What You Build
 
-A **Concierge Agent** (Quarkus + LangChain4j) that dynamically discovers other agents, decomposes complex queries into sub-tasks, dispatches them to specialist agents via A2A, and aggregates the responses into a single coherent answer.
+The Concierge module is a Quarkus A2A server that hosts four tenant agents: Schedule, Travel, Venue, and Expense. The Orchestrator module calls the tenant agents through their AgentCards.
 
 ## Architecture
 
 ```
                   ┌─────────────────────────────┐
-  User query ───► │    Concierge Agent (:8090)   │
-                  │                             │
-                  │  1. Decompose (LLM)         │
-                  │     → SubTask[sessions]      │
-                  │     → SubTask[dining]        │
-                  │                             │
-                  │  2. Dispatch via A2A         │
-                  │     ┌────────┐ ┌──────────┐ │
-                  │     │Session │ │  Travel  │ │
-                  │     │ :8080  │ │  :9000   │ │
-                  │     └────────┘ └──────────┘ │
-                  │                             │
-                  │  3. Aggregate (LLM)         │
+  User query ───► │    Orchestrator (:8090)      │
+                  │    REST /api/query           │
                   └──────────────┬──────────────┘
-                                 │
-                  Final answer ◄─┘
+                                 │ A2A JSON-RPC
+                  ┌──────────────▼──────────────┐
+                  │ Concierge runtime (:8080)   │
+                  │ Schedule · Travel · Venue   │
+                  │ Expense tenants             │
+                  └─────────────────────────────┘
 ```
 
 ## Project Structure
 
 ```
-exercise-5-concierge/
+concierge/
 ├── pom.xml
-└── src/main/java/dev/devconf/concierge/
-    ├── AgentDiscoveryService.java        # Discovers agents via AgentCard HTTP fetch
-    ├── QueryDecomposer.java              # LLM-powered query decomposition into SubTasks
-    ├── ResponseAggregator.java           # LLM-powered response synthesis
-    ├── ConciergeAgentCardProducer.java   # CDI producer for the Concierge AgentCard
-    ├── ConciergeAgentExecutorProducer.java  # Orchestration loop: decompose → dispatch → aggregate
-    └── SubTask.java                      # record(agentName, query)
+└── src/main/java/dev/devconf/
+    ├── schedule/                          # Schedule tenant
+    ├── travel/                            # Travel tenant
+    ├── venue/                             # Venue tenant
+    ├── expense/                           # Expense tenant
+    └── A2ARequestLogger.java
 ```
 
 ## Prerequisites
 
-- Exercise 1 **Session Agent** running on port **8080**
-- Exercise 3 **Travel Tips Agent** running on port **9000**
+- Java 21
 - `OPENAI_API_KEY` environment variable set for `gpt-6-luna` through the Responses API at medium reasoning effort. An OpenAI API key with API billing enabled is required; ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier is unsupported.
+
+Set `OPENAI_API_KEY` in this terminal before starting Concierge.
 
 ## How to Run
 
 ```bash
-export OPENAI_API_KEY=your-api-key-here
-cd exercise-5-concierge
-mvn quarkus:dev
+cd exercises/exercise-5-orchestrator && mvn -pl concierge quarkus:dev
 ```
 
-The Concierge starts on **http://localhost:8090**.
+The Concierge starts on **http://localhost:8080**.
 
 ## How to Verify
 
 **1. Check the AgentCard:**
 
 ```bash
-curl http://localhost:8090/.well-known/agent-card.json | python3 -m json.tool
+curl http://localhost:8080/.well-known/schedule/agent-card.json | python3 -m json.tool
+curl http://localhost:8080/.well-known/travel/agent-card.json | python3 -m json.tool
+curl http://localhost:8080/.well-known/venue/agent-card.json | python3 -m json.tool
+curl http://localhost:8080/.well-known/expense/agent-card.json | python3 -m json.tool
 ```
 
-**2. Send a complex, multi-domain query:**
-
-```bash
-curl -s --max-time 120 -X POST http://localhost:8090 \
-  -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "SendMessage",
-    "params": {
-      "message": {
-        "messageId": "msg-1",
-        "role": "ROLE_USER",
-        "parts": [{"text": "I am a Java developer arriving Thursday. What sessions should I attend and where should I have dinner afterward?"}]
-      }
-    },
-    "id": "1"
-  }' | python3 -m json.tool
-```
-
-The response should combine session recommendations **and** restaurant suggestions — pulled from two different agents.
+The Orchestrator's documented `/api/query` interaction exercises calls to the Concierge tenants.
 
 ## Companion Project
 
-The companion Orchestrator project is in [exercise-5-orchestrator](../exercise-5-orchestrator/README.md).
+The companion Orchestrator project is in [the sibling orchestrator module](../README.md).
 
 ## Full Instructions
 
-See [../../docs/exercise-5.md](../../docs/exercise-5.md) for the complete step-by-step guide.
+See [../../../docs/exercise-5.md](../../../docs/exercise-5.md) for the complete step-by-step guide.
