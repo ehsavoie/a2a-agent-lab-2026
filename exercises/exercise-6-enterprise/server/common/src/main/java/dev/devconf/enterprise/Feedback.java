@@ -20,7 +20,7 @@ public class Feedback {
     @Column(nullable = false)
     private String speaker;
 
-    @Column(length = 512)
+    @Column(name = "session_title", length = 512)
     private String sessionTitle;
 
     @Column(nullable = false)
@@ -29,7 +29,7 @@ public class Feedback {
     @Column(length = 1024)
     private String comment;
 
-    @Column(nullable = false)
+    @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt;
 
     protected Feedback() {}
