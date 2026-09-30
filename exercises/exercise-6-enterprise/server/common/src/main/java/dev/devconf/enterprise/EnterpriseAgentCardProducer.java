@@ -56,7 +56,7 @@ public class EnterpriseAgentCardProducer {
                         .id("hello_world")
                         .name("Hello World")
                         .description("Greets the attendee by name. The task is created on one node "
-                                + "and completed on the other, proving cross-node Kafka replication.")
+                                + "and completed there while observed on the other, proving cross-node Kafka replication.")
                         .tags(Collections.singletonList("hello world"))
                         .examples(List.of("Hello, Maya!", "Say hello to Maya"))
                         .build()))

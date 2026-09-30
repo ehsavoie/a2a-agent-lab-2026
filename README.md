@@ -194,6 +194,7 @@ open http://localhost:3000                     # Grafana UI (admin/admin)
 | 3 | [Cross-Language Interop](exercises/exercise-3-travel-agent-python/) | 15 min | Travel & Logistics Agent | Python A2A SDK |
 | 4 | [Expense & Compliance Agent](exercises/exercise-4-expense-agent/) | 20 min | Expense & Compliance Agent | WildFly 41 (Jakarta EE) |
 | 5 | [The Orchestrator](exercises/exercise-5-orchestrator/) | 25 min | Orchestrator and multi-tenant Concierge | Quarkus + A2A |
+| 6 | [Enterprise A2A (Bonus)](exercises/exercise-6-enterprise/) | Bonus | Shared task store and cross-node Kafka replication | Two WildFly 41 instances |
 
 Each exercise adds a new agent to the DevSphere mesh. If you fall behind, check the `solutions/` directory for complete working code at each checkpoint.
 
