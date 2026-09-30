@@ -662,6 +662,11 @@
         <h4>Exercise 5: Orchestrator</h4>
         <p>Quarkus REST app with <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> — the LLM orchestrates A2A sub-agents autonomously.</p>
     </div>
+    <div class="card">
+        <div class="card-icon">&#127981;</div>
+        <h4>Exercise 6: Enterprise (Bonus)</h4>
+        <p>Multi-node WildFly with JPA-backed task store and Kafka-replicated queue manager: prove cross-node task replication live.</p>
+    </div>
 </div>
 
 <div class="callout info">
@@ -689,6 +694,10 @@
     <div class="timeline-item red">
         <strong>Exercise 5 &mdash; 25 min</strong>
         <p>Orchestrator &amp; Concierge: Quarkus REST app with <code>@SupervisorAgent</code>, <code>@A2AClientAgent</code>, and web UI</p>
+    </div>
+    <div class="timeline-item teal">
+        <strong>Exercise 6 &mdash; Bonus</strong>
+        <p>Enterprise A2A: JPA-backed TaskStore + Kafka-replicated QueueManager, two WildFly nodes sharing PostgreSQL and Kafka</p>
     </div>
 </div>
 </section>
@@ -2313,11 +2322,17 @@ mvn package -Pjsonrpc</code></pre>
 
 <h4>Start Node A (port 8080, offset 0)</h4>
 <pre><code>cd exercises/exercise-6-enterprise/node-a
+POSTGRESQL_USER=devconf \
+POSTGRESQL_PASSWORD=devconf \
+POSTGRESQL_DATABASE=devconf \
 ./target/wildfly/bin/standalone.sh \
   -Dmp.messaging.incoming.replicated-events-in.group.id=node-a</code></pre>
 
 <h4>Start Node B (port 9080, offset 1000) — new terminal</h4>
 <pre><code>cd exercises/exercise-6-enterprise/node-b
+POSTGRESQL_USER=devconf \
+POSTGRESQL_PASSWORD=devconf \
+POSTGRESQL_DATABASE=devconf \
 ./target/wildfly/bin/standalone.sh \
   -Djboss.socket.binding.port-offset=1000 \
   -Dmp.messaging.incoming.replicated-events-in.group.id=node-b</code></pre>
