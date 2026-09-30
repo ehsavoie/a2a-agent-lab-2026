@@ -42,30 +42,26 @@ public class TravelAgentClient {
 
         // Step 1: Fetch the Python agent's AgentCard
         System.out.println("\n1. Fetching Python Travel Agent's AgentCard...");
-        AgentCard card = A2A.getAgentCard(PYTHON_AGENT_URL);
-        System.out.println("   Agent: " + card.name());
-        System.out.println("   Description: " + card.description());
-        System.out.println("   Skills:");
-        for (AgentSkill skill : card.skills()) {
-            System.out.println("     - " + skill.name() + ": " + skill.description());
-        }
+        // TODO: Call A2A.getAgentCard(PYTHON_AGENT_URL) to fetch the card.
+        //       Then print card.name(), card.description(), and iterate card.skills()
+        //       to print each skill's name and description.
+        AgentCard card = null;
 
         // Step 2: Build the A2A client from the AgentCard
-        Client client = Client.builder(card)
-                .withTransport(RestTransport.class, new RestTransportConfigBuilder())
-                .build();
+        // TODO: Use Client.builder(card)
+        //           .withTransport(RestTransport.class, new RestTransportConfigBuilder())
+        //           .build()
+        Client client = null;
 
-        // Step 3: Send transit query (Maya's scenario)
+        // Step 3: Send queries using sendAndPrint()
         System.out.println("\n2. Sending transit query: 'How do I get from Brussels Airport to Kinepolis Antwerp?'");
-        sendAndPrint(client, "How do I get from Brussels Airport to Kinepolis Antwerp?");
+        // TODO: Call sendAndPrint(client, "How do I get from Brussels Airport to Kinepolis Antwerp?")
 
-        // Step 4: Send flight status query
         System.out.println("\n3. Sending flight query: 'What is the status of flight UA 998?'");
-        sendAndPrint(client, "What is the status of flight UA 998?");
+        // TODO: Call sendAndPrint(client, "What is the status of flight UA 998?")
 
-        // Step 5: Send receipt extraction
         System.out.println("\n4. Sending receipt extraction: 'Log my taxi receipt for €65'");
-        sendAndPrint(client, "Log my taxi receipt for €65");
+        // TODO: Call sendAndPrint(client, "Log my taxi receipt for €65")
 
         client.close();
 

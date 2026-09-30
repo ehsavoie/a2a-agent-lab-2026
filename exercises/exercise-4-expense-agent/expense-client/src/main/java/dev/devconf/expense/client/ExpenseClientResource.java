@@ -71,41 +71,34 @@ public class ExpenseClientResource {
 
     private Response askAgent(String query) {
         try {
-            AgentCard agentCard = A2ACardResolver.builder()
-                    .baseUrl(AGENT_BASE_URL)
-                    .build()
-                    .getAgentCard();
+            // Step 1: Fetch the AgentCard
+            // TODO: Use A2ACardResolver.builder()
+            //           .baseUrl(AGENT_BASE_URL)
+            //           .build()
+            //           .getAgentCard()
+            AgentCard agentCard = null;
 
-            try (Client client = Client.builder(agentCard)
-                    .withTransport(RestTransport.class, new RestTransportConfigBuilder())
-                    .build()) {
+            // Step 2: Build the A2A client (Client is AutoCloseable — use try-with-resources)
+            // TODO: Use Client.builder(agentCard)
+            //           .withTransport(RestTransport.class, new RestTransportConfigBuilder())
+            //           .build()
+            try (Client client = null) {
 
-                Message message = Message.builder()
-                        .role(Message.Role.ROLE_USER)
-                        .parts(List.of(new TextPart(query)))
-                        .build();
-
-                CompletableFuture<String> result = new CompletableFuture<>();
-
-                client.sendMessage(message,
-                        Collections.singletonList((ClientEvent event, AgentCard card) -> {
-                            if (event instanceof TaskUpdateEvent update) {
-                                if (update.getUpdateEvent() instanceof TaskStatusUpdateEvent statusUpdate) {
-                                    if (statusUpdate.status().state() == TaskState.TASK_STATE_FAILED) {
-                                        result.completeExceptionally(
-                                                new RuntimeException("Agent task failed"));
-                                    }
-                                }
-                                if (update.getTask().status().state() == TaskState.TASK_STATE_COMPLETED) {
-                                    result.complete(extractText(update.getTask().artifacts()));
-                                }
-                            }
-                        }),
-                        error -> result.completeExceptionally(new RuntimeException(error.getMessage())),
-                        null);
-
-                String text = result.get(30, TimeUnit.SECONDS);
-                return Response.ok(new ExpenseResponse(text)).build();
+                // Step 3: Build the message, send it, and collect the response
+                // TODO:
+                //   a) Build the message:
+                //        Message.builder().role(Message.Role.ROLE_USER).parts(List.of(new TextPart(query))).build()
+                //   b) Create: CompletableFuture<String> result = new CompletableFuture<>()
+                //   c) Call client.sendMessage(message, listeners, errorHandler, null) where the listener:
+                //        - Checks event instanceof TaskUpdateEvent update
+                //        - If update.getUpdateEvent() instanceof TaskStatusUpdateEvent statusUpdate
+                //            and statusUpdate.status().state() == TaskState.TASK_STATE_FAILED
+                //            → result.completeExceptionally(...)
+                //        - If update.getTask().status().state() == TaskState.TASK_STATE_COMPLETED
+                //            → result.complete(extractText(update.getTask().artifacts()))
+                //        - The error handler: error -> result.completeExceptionally(...)
+                //   d) Return Response.ok(new ExpenseResponse(result.get(30, TimeUnit.SECONDS))).build()
+                return Response.serverError().build();
             }
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

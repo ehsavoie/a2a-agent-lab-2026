@@ -195,6 +195,30 @@ curl -s -X POST http://localhost:8082/ \
   }' | jq .result.task.artifacts[0].parts[0].text
 ```
 
+**Log an over-limit expense (should be flagged):**
+
+The Accommodation limit is $350/night. This $420 hotel stay will be logged but flagged as non-compliant:
+
+```bash
+curl -s -X POST http://localhost:8082/ \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "SendMessage",
+    "params": {
+      "message": {
+        "messageId": "msg-2",
+        "role": "ROLE_USER",
+        "parts": [{"text": "Log my hotel bill: $420 at Grand Plaza Hotel on 2026-10-07 for accommodation, one night stay for the conference"}]
+      }
+    },
+    "id": "test-overlimit-1"
+  }' | jq .result.task.artifacts[0].parts[0].text
+```
+
+The response should show `Compliant: NO` with an `OVER LIMIT` flag indicating $420.00 exceeds the $350.00 cap for Accommodation.
+
 **Process a receipt (cross-agent format):**
 
 ```bash
@@ -315,8 +339,8 @@ In two hours, you built a **production-grade A2A agent ecosystem**:
 
 1. **Exercise 1** — Your first A2A agent: the Schedule & Content Advisor (Quarkus + A2A Java SDK), teaching AgentCard, AgentExecutor, and LLM tool calling
 2. **Exercise 2** — The Venue & On-Site Operations Agent (Spring Boot + LangChain4j), proving A2A is runtime-agnostic
-3. **Exercise 3** — The Travel & Logistics Agent (Python), proving A2A is language-independent
-4. **Exercise 4** — The Expense & Compliance Agent (Java A2A SDK) for cross-agent data handoff
+3. **Exercise 3** — The Travel & Logistics Agent (Java or Python), proving A2A is language-independent
+4. **Exercise 4** — The Expense & Compliance Agent (A2A Jakarta SDK) for cross-agent data handoff
 5. **Exercise 5** — The Quarkus Orchestrator routes requests to Schedule, Travel, Venue, and Expense tenants hosted in one Concierge runtime
 
 ### Going Further

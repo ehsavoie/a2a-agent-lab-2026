@@ -16,11 +16,11 @@
     <description>Aggregator that builds all solution code (same as exercises since this is a step-by-step lab)</description>
 
     <modules>
-        <module>exercise-1</module>
-        <module>exercise-2</module>
-        <module>exercise-3/java-client</module>
-        <module>exercise-4</module>
-        <module>exercise-5</module>
-        <module>exercise-6</module>
+        <module>solution-1</module>
+        <module>solution-2</module>
+        <module>solution-3/java-client</module>
+        <module>solution-4</module>
+        <module>solution-5</module>
+        <module>solution-6</module>
     </modules>
 </project>

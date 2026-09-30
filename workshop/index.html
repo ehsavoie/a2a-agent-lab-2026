@@ -971,41 +971,48 @@ public interface ScheduleService {
     <p>The AgentCard is how your agent introduces itself to the A2A world. It is served at <code>/.well-known/agent-card.json</code> and tells other agents what you can do.</p>
 </div>
 
-<details class="solution">
-    <summary>Show ScheduleAgentCardProducer.java</summary>
-    <div class="solution-body">
-<pre><code>@ApplicationScoped
-public class ScheduleAgentCardProducer {
+<p>Open <code>ScheduleAgentCardProducer.java</code> and implement the <code>agentCard()</code> method. Here is what you need to do:</p>
+<ol>
+    <li>Use <code>AgentCard.builder()</code> and chain the following setters:
+        <ul>
+            <li><code>.name()</code>, <code>.description()</code>, <code>.version()</code> &mdash; read from the injected <code>@ConfigProperty</code> fields already declared in the class</li>
+            <li><code>.supportedInterfaces()</code> &mdash; pass a single <code>AgentInterface</code> constructed with <code>TransportProtocol.JSONRPC.asString()</code> and the injected <code>agentUrl</code></li>
+            <li><code>.capabilities()</code> &mdash; use <code>AgentCapabilities.builder()</code> with <code>streaming(false)</code> and <code>pushNotifications(false)</code></li>
+            <li><code>.skills()</code> &mdash; use the three <code>AgentSkill</code> definitions below</li>
+            <li><code>.defaultInputModes(List.of("text"))</code> and <code>.defaultOutputModes(List.of("text"))</code></li>
+        </ul>
+    </li>
+    <li>Return the result of <code>.build()</code></li>
+</ol>
 
-    @Produces
-    @PublicAgentCard
-    public AgentCard agentCard() {
-        return AgentCard.builder()
-                .name("Schedule &amp; Content Advisor")
-                .description("Deep-scans the DevConf session catalog...")
-                .version("1.0.0")
-                .skills(List.of(
-                    AgentSkill.builder()
-                        .id("session-search")
-                        .name("Session Search")
-                        .description("Search sessions by topic, speaker, or track.")
-                        .build(),
-                    AgentSkill.builder()
-                        .id("session-recommend")
-                        .name("Session Recommendations")
-                        .description("Personalized recommendations based on interests.")
-                        .build(),
-                    AgentSkill.builder()
-                        .id("speaker-info")
-                        .name("Speaker Information")
-                        .description("Get speaker bios and session history.")
-                        .build()
-                ))
-                .build();
-    }
-}</code></pre>
-    </div>
-</details>
+<p>Use the following skills exactly as given:</p>
+<pre><code>AgentSkill.builder()
+    .id("session-search")
+    .name("Session Search")
+    .description("Search for conference sessions by topic, technology, speaker, or track.")
+    .tags(List.of("sessions", "search", "schedule"))
+    .examples(List.of(
+        "What sessions about agentic AI are on October 7?",
+        "Find talks about Java agents"))
+    .build(),
+AgentSkill.builder()
+    .id("session-recommend")
+    .name("Session Recommendations")
+    .description("Get personalized session recommendations based on interests and availability.")
+    .tags(List.of("recommendations", "personalization"))
+    .examples(List.of(
+        "I arrive at 9:45 AM on October 7 and like agentic AI. What should I attend?",
+        "Recommend sessions for a Java developer interested in microservices"))
+    .build(),
+AgentSkill.builder()
+    .id("speaker-info")
+    .name("Speaker Information")
+    .description("Get information about conference speakers and their sessions.")
+    .tags(List.of("speakers", "sessions"))
+    .examples(List.of(
+        "Tell me about the speakers covering AI topics",
+        "Who is speaking about Quarkus?"))
+    .build()</code></pre>
 
 <div class="callout info">
     <div class="callout-title">&#128161; CDI pattern</div>
@@ -1023,42 +1030,19 @@ public class ScheduleAgentCardProducer {
     <p>The <code>AgentExecutor</code> receives incoming A2A messages and produces responses through the emitter pattern.</p>
 </div>
 
-<details class="solution">
-    <summary>Show ScheduleAgentExecutorProducer.java</summary>
-    <div class="solution-body">
-<pre><code>@ApplicationScoped
-public class ScheduleAgentExecutorProducer {
-
-    @Inject
-    ScheduleService scheduleService;
-
-    @Produces
-    public AgentExecutor agentExecutor() {
-        return new AgentExecutor() {
-            @Override
-            public void execute(RequestContext context, AgentEmitter emitter) {
-                String userText = extractText(context.getMessage());
-
-                emitter.startWork(emitter.messageBuilder()
-                    .parts(List.of(new TextPart("Scanning the schedule...")))
-                    .build());
-
-                try {
-                    String response = scheduleService.chat(userText);
-                    emitter.addArtifact(List.of(new TextPart(response)));
-                    emitter.complete();
-                } catch (Exception e) {
-                    emitter.updateStatus(TaskState.TASK_STATE_FAILED,
-                        emitter.messageBuilder()
-                            .parts(List.of(new TextPart("Error: " + e.getMessage())))
-                            .build());
-                }
-            }
-        };
-    }
-}</code></pre>
-    </div>
-</details>
+<p>Open <code>ScheduleAgentExecutorProducer.java</code> and implement the <code>agentExecutor()</code> method. Return an anonymous class that implements <code>AgentExecutor</code> with two methods:</p>
+<ol>
+    <li><strong><code>execute(RequestContext context, AgentEmitter emitter)</code></strong>
+        <ol>
+            <li>Extract the plain text from the incoming message: iterate <code>context.getMessage().parts()</code>, collect the text from each <code>TextPart</code> into a single string</li>
+            <li>Call <code>emitter.startWork()</code> to signal the task has started</li>
+            <li>Call <code>scheduleService.chat(userText)</code> to get the LLM response</li>
+            <li>On success: call <code>emitter.addArtifact(Collections.singletonList(new TextPart(response)), null, "response", null)</code>, then <code>emitter.complete()</code></li>
+            <li>On exception: call <code>emitter.addArtifact(...)</code> with the error message, then <code>emitter.fail()</code></li>
+        </ol>
+    </li>
+    <li><strong><code>cancel(RequestContext context, AgentEmitter emitter)</code></strong> &mdash; throw <code>new TaskNotCancelableError()</code></li>
+</ol>
 
 <p>The flow maps directly to the Task lifecycle:</p>
 <pre><code>Client sends SendMessage
@@ -1213,64 +1197,57 @@ curl -s -X POST http://localhost:8080/ \
     </div>
 </div>
 
-<details class="solution">
-    <summary>Show VenueAgentConfig.java (Spring Boot wiring)</summary>
-    <div class="solution-body">
-<pre><code>@Configuration
-public class VenueAgentConfig {
+<p>Open <code>VenueAgentConfig.java</code>. The <code>chatModel()</code> and <code>venueService()</code> beans are already provided &mdash; implement the two remaining <code>@Bean</code> methods.</p>
 
-    @Bean
-    public VenueService venueService(ChatModel model,
-                                      VenueTool venueTool) {
-        return AiServices.builder(VenueService.class)
-                .chatModel(model)
-                .tools(venueTool)
-                .build();
-    }
+<p><strong>agentCard()</strong> &mdash; use <code>AgentCard.builder()</code> with:</p>
+<ol>
+    <li><code>.name()</code>, <code>.description()</code>, <code>.version()</code> &mdash; from the <code>@Value</code> injected fields</li>
+    <li><code>.supportedInterfaces()</code> &mdash; a single <code>AgentInterface</code> with <code>TransportProtocol.HTTP_JSON.asString()</code> and <code>agentUrl</code> (note: REST transport, unlike Exercise 1 which used JSON-RPC)</li>
+    <li><code>.capabilities()</code> &mdash; <code>AgentCapabilities.builder()</code> with <code>streaming(false)</code> and <code>pushNotifications(false)</code></li>
+    <li><code>.skills()</code> &mdash; use the four skills below</li>
+    <li><code>.defaultInputModes(List.of("text"))</code> and <code>.defaultOutputModes(List.of("text"))</code></li>
+</ol>
 
-    @Bean
-    public AgentCard agentCard() {
-        return AgentCard.builder()
-                .name("Venue &amp; On-Site Operations Agent")
-                .version("1.0.0")
-                .supportedInterfaces(List.of(
-                    new AgentInterface(
-                        TransportProtocol.HTTP_JSON.asString(),
-                        "http://localhost:8081")))
-                .capabilities(AgentCapabilities.builder()
-                        .streaming(false)
-                        .pushNotifications(false).build())
-                .skills(List.of(
-                    AgentSkill.builder().id("room-capacity")
-                        .name("Room Capacity").build(),
-                    AgentSkill.builder().id("indoor-map")
-                        .name("Indoor Map").build(),
-                    AgentSkill.builder().id("catering-queue")
-                        .name("Catering Queue").build(),
-                    AgentSkill.builder().id("entry-pass")
-                        .name("Entry Pass").build()
-                ))
-                .build();
-    }
+<p>Use the following skills exactly as given:</p>
+<pre><code>AgentSkill.builder()
+    .id("room-capacity")
+    .name("Room Capacity Check")
+    .description("Check real-time room capacity and occupancy from IoT sensors.")
+    .tags(List.of("venue", "iot", "capacity"))
+    .examples(List.of("Is Hall B full?", "How many seats are left in Room 201?"))
+    .build(),
+AgentSkill.builder()
+    .id("indoor-map")
+    .name("Indoor Navigation")
+    .description("Get walking directions between rooms and areas in the venue.")
+    .tags(List.of("venue", "navigation", "directions"))
+    .examples(List.of("How do I get from the entrance to Hall B?"))
+    .build(),
+AgentSkill.builder()
+    .id("catering-queue")
+    .name("Catering Queue Status")
+    .description("Check current queue lengths and wait times at catering stations.")
+    .tags(List.of("venue", "catering", "food"))
+    .examples(List.of("Where is the shortest food queue?"))
+    .build(),
+AgentSkill.builder()
+    .id("entry-pass")
+    .name("Fast-Track Entry Pass")
+    .description("Reserve a fast-track entry pass for priority seating at a session room.")
+    .tags(List.of("venue", "pass", "reservation"))
+    .examples(List.of("Reserve a fast-track pass for Hall B"))
+    .build()</code></pre>
 
-    @Bean
-    public AgentExecutor agentExecutor(VenueService venueService) {
-        return new AgentExecutor() {
-            @Override
-            public void execute(RequestContext ctx, AgentEmitter emitter) {
-                String userText = extractText(ctx.getMessage());
-                emitter.startWork();
-                String response = venueService.chat(userText);
-                emitter.addArtifact(
-                    List.of(new TextPart(response)),
-                    null, "response", null);
-                emitter.complete();
-            }
-        };
-    }
-}</code></pre>
-    </div>
-</details>
+<p><strong>agentExecutor(VenueService venueService)</strong> &mdash; return an anonymous <code>AgentExecutor</code> with:</p>
+<ol>
+    <li><strong><code>execute()</code></strong>: extract user text, call <code>emitter.startWork()</code>, call <code>venueService.chat(userText)</code>, call <code>emitter.addArtifact(Collections.singletonList(new TextPart(response)), null, "response", null)</code>, then <code>emitter.complete()</code> on success or <code>emitter.fail()</code> on exception</li>
+    <li><strong><code>cancel()</code></strong>: throw <code>new TaskNotCancelableError()</code></li>
+</ol>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Spring vs Quarkus wiring</div>
+    <p>In Spring Boot, <code>@Bean</code> methods in a <code>@Configuration</code> class replace Quarkus <code>@Produces</code> methods. The <code>AgentCard</code> bean is discovered automatically by spring-a2a (no <code>@PublicAgentCard</code> qualifier needed). The <code>AgentExecutor</code> bean is wired the same way in both frameworks.</p>
+</div>
 </section>
 
 <!-- Step 2: VenueTool -->
@@ -1338,6 +1315,10 @@ public class VenueTool {
     <pre><code>cd exercises/exercise-2-venue-agent
 mvn spring-boot:run</code></pre>
 
+    <h4>Fetch the AgentCard</h4>
+    <pre><code>curl -s http://localhost:8081/.well-known/agent-card.json \
+  -H "A2A-Version: 1.0" | jq '{name, skills: [.skills[].id]}'</code></pre>
+
     <h4>Check room capacity by physical name (REST transport)</h4>
     <pre><code>curl -s -X POST http://localhost:8081/message:send \
   -H "Content-Type: application/json" \
@@ -1368,14 +1349,6 @@ mvn spring-boot:run</code></pre>
 curl -s http://localhost:8081/tasks/&lt;taskId&gt; \
   -H "A2A-Version: 1.0" | jq .</code></pre>
 
-    <h4>Cross-runtime verification</h4>
-    <pre><code># Exercise 1 (Quarkus) — JSON-RPC transport
-curl -s http://localhost:8080/.well-known/agent-card.json \
-  -H "A2A-Version: 1.0" | jq '{name, skills: [.skills[].id]}'
-
-# Exercise 2 (Spring Boot + spring-a2a) — REST transport
-curl -s http://localhost:8081/.well-known/agent-card.json \
-  -H "A2A-Version: 1.0" | jq '{name, skills: [.skills[].id]}'</code></pre>
 </div>
 
 <h3>Checkpoint</h3>
@@ -1501,6 +1474,10 @@ def extract_receipt(query):
   }' | python -m json.tool</code></pre>
 
     <h4>Python &rarr; Java (interop test)</h4>
+    <div class="callout warning">
+        <div class="callout-title">&#9888; Prerequisite</div>
+        <p>The Exercise 1 Schedule Advisor (Quarkus) must be running on port 8080 before running the interop test. Start it with <code>mvn quarkus:dev</code> in <code>exercises/exercise-1-schedule-advisor</code>.</p>
+    </div>
     <pre><code>python test_interop.py</code></pre>
 </div>
 </section>
@@ -1540,50 +1517,25 @@ def extract_receipt(query):
 
 <h4>The client code</h4>
 
-<p>Three steps: fetch the AgentCard, build a <code>Client</code>, send messages. Compare this to the Python <code>test_interop.py</code> &mdash; the pattern is the same, the language is different.</p>
+<p>Open <code>java-client/src/main/java/dev/devconf/travel/TravelAgentClient.java</code>. The <code>sendAndPrint()</code> helper method is already provided &mdash; implement the three steps in <code>main()</code>:</p>
 
-<details class="solution">
-    <summary>Show TravelAgentClient.java</summary>
-    <div class="solution-body">
-<pre><code>// 1. Fetch the Python agent's AgentCard
-AgentCard card = A2A.getAgentCard("http://localhost:9000");
-System.out.println("Agent: " + card.name());
-for (AgentSkill skill : card.skills()) {
-    System.out.println("  - " + skill.name() + ": " + skill.description());
-}
+<ol>
+    <li><strong>Step 1 &mdash; Fetch the AgentCard</strong><br>
+        Call <code>A2A.getAgentCard(PYTHON_AGENT_URL)</code> and store the result in <code>card</code>.
+        Then print <code>card.name()</code>, <code>card.description()</code>, and iterate <code>card.skills()</code> to print each skill&rsquo;s name and description.</li>
 
-// 2. Build the A2A client from the AgentCard
-Client client = Client.builder(card)
-    .withTransport(RestTransport.class,
-        new RestTransportConfigBuilder())
-    .build();
+    <li><strong>Step 2 &mdash; Build the client</strong><br>
+        Use <code>Client.builder(card)</code>, chain <code>.withTransport(RestTransport.class, new RestTransportConfigBuilder())</code>, and call <code>.build()</code> to get the <code>client</code> instance.</li>
 
-// 3. Send a message and handle the response
-Message message = A2A.toUserMessage(
-    "How do I get from the airport to the venue quickly?");
-CountDownLatch latch = new CountDownLatch(1);
-
-client.sendMessage(message,
-    List.of((ClientEvent event, AgentCard ac) -&gt; {
-        if (event instanceof TaskEvent taskEvent) {
-            var task = taskEvent.getTask();
-            for (Artifact artifact : task.artifacts()) {
-                for (Part&lt;?&gt; part : artifact.parts()) {
-                    if (part instanceof TextPart tp) {
-                        System.out.println(tp.text());
-                    }
-                }
-            }
-        }
-        latch.countDown();
-    }),
-    error -&gt; System.err.println("Error: " + error.getMessage())
-);
-
-latch.await(30, TimeUnit.SECONDS);
-client.close();</code></pre>
-    </div>
-</details>
+    <li><strong>Step 3 &mdash; Send queries</strong><br>
+        Call <code>sendAndPrint()</code> three times with the client and the following strings:
+        <ul>
+            <li><code>"How do I get from Brussels Airport to Kinepolis Antwerp?"</code></li>
+            <li><code>"What is the status of flight UA 998?"</code></li>
+            <li><code>"Log my taxi receipt for &euro;65"</code></li>
+        </ul>
+    </li>
+</ol>
 
 <div class="callout info">
     <div class="callout-title">&#128161; Key insight</div>
@@ -1736,6 +1688,74 @@ public class ExpenseServiceProducer {
     </div>
 </details>
 
+<h4>Implement the AgentCard Producer</h4>
+<p>Open <code>ExpenseAgentCardProducer.java</code> and implement the <code>agentCard()</code> method. The <code>isRest()</code> and <code>isGrpcEnabled()</code> helpers and the port constants are already provided.</p>
+<ol>
+    <li>Read the port offset from config and compute the base URL:
+        <pre><code>int portOffset = ConfigProvider.getConfig()
+    .getOptionalValue("jboss.socket.binding.port-offset", Integer.class).orElse(0);
+String jsonRpcUrl = "http://localhost:" + (BASE_HTTP_PORT + portOffset);</code></pre>
+    </li>
+    <li>Build the <code>interfaces</code> list conditionally:
+        <ul>
+            <li>Always add <code>AgentInterface(TransportProtocol.JSONRPC.asString(), jsonRpcUrl)</code></li>
+            <li>If <code>isRest()</code>: add <code>AgentInterface(TransportProtocol.HTTP_JSON.asString(), jsonRpcUrl)</code></li>
+            <li>If <code>isGrpcEnabled()</code>: add <code>AgentInterface(TransportProtocol.GRPC.asString(), "localhost:" + (BASE_GRPC_PORT + portOffset))</code></li>
+        </ul>
+    </li>
+    <li>Call <code>AgentCard.builder()</code> with name, description, version, <code>supportedInterfaces(interfaces)</code>, <code>capabilities</code> (<code>streaming(true)</code>), skills, and <code>defaultInputModes/OutputModes</code></li>
+</ol>
+
+<p>Use the following skills exactly as given:</p>
+<pre><code>AgentSkill.builder()
+    .id("expense-logging")
+    .name("Expense Logging")
+    .description("Log and validate expense entries against corporate compliance rules.")
+    .tags(List.of("expenses", "logging", "compliance"))
+    .examples(List.of(
+        "Log a $45 taxi from Airport Cabs on 2026-10-07",
+        "I spent $22 on lunch at the convention center"))
+    .build(),
+AgentSkill.builder()
+    .id("receipt-processing")
+    .name("Receipt Processing")
+    .description("Process receipt data from other agents into audit-ready expense entries.")
+    .tags(List.of("receipts", "processing", "audit"))
+    .examples(List.of(
+        "Process this receipt: vendor=Yellow Cab, amount=$45.00, currency=USD, date=2026-10-07, category=Transportation"))
+    .build(),
+AgentSkill.builder()
+    .id("compliance-report")
+    .name("Compliance Report")
+    .description("Generate compliance status reports and flag policy violations.")
+    .tags(List.of("compliance", "reporting", "audit"))
+    .examples(List.of(
+        "Show my expense summary",
+        "Are all my expenses compliant?"))
+    .build()</code></pre>
+
+<h4>Implement the AgentExecutor Producer</h4>
+<p>Open <code>ExpenseAgentExecutorProducer.java</code> and implement the <code>agentExecutor()</code> method. The <code>extractText()</code> helper and the <code>expenseServiceProducer</code> injection are already provided.</p>
+<p>Return an anonymous <code>AgentExecutor</code> with two methods:</p>
+<ol>
+    <li><strong><code>execute(RequestContext, AgentEmitter)</code></strong>
+        <ol>
+            <li>Extract user text with <code>extractText(context.getMessage())</code></li>
+            <li>If this is a new task (<code>context.getTask() == null</code>), call <code>emitter.submit()</code> first</li>
+            <li>Call <code>emitter.startWork()</code></li>
+            <li>Call <code>expenseServiceProducer.getExpenseService().chat(userText)</code></li>
+            <li>On success: <code>emitter.addArtifact(Collections.singletonList(new TextPart(response)), null, "response", null)</code>, then <code>emitter.complete()</code></li>
+            <li>On exception: <code>emitter.addArtifact(...)</code> with the error message, then <code>emitter.fail()</code></li>
+        </ol>
+    </li>
+    <li><strong><code>cancel(RequestContext, AgentEmitter)</code></strong> &mdash; throw <code>new TaskNotCancelableError()</code></li>
+</ol>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; emitter.submit()</div>
+    <p>The extra <code>emitter.submit()</code> call on new tasks is specific to the expense agent&rsquo;s multi-step processing flow. It transitions the task to <code>SUBMITTED</code> before starting work, which lets the client know the task was accepted before the LLM processing begins.</p>
+</div>
+
 <h4>Build &amp; Run the Expense Agent on port 8082</h4>
 <pre><code>export OPENAI_API_KEY=your-api-key-here
 
@@ -1775,6 +1795,33 @@ mvn package
       "metadata": {}
     }
   }' | jq '.task.artifacts[0].parts[0].text'</code></pre>
+
+<h4>Implement the A2A Client</h4>
+<p>Open <code>expense-client/src/main/java/dev/devconf/expense/client/ExpenseClientResource.java</code>. The three JAX-RS endpoints (<code>submitExpense</code>, <code>getSummary</code>, <code>getCompliance</code>) and the <code>extractText()</code> helper are already provided &mdash; implement the <code>askAgent(String query)</code> private method in three steps:</p>
+
+<ol>
+    <li><strong>Step 1 &mdash; Fetch the AgentCard</strong><br>
+        Use <code>A2ACardResolver.builder().baseUrl(AGENT_BASE_URL).build().getAgentCard()</code> to retrieve the card from the running agent.</li>
+
+    <li><strong>Step 2 &mdash; Build the A2A client</strong><br>
+        Open a try-with-resources block (<code>Client</code> is <code>AutoCloseable</code>) and build the client with:<br>
+        <code>Client.builder(agentCard).withTransport(RestTransport.class, new RestTransportConfigBuilder()).build()</code></li>
+
+    <li><strong>Step 3 &mdash; Build the message, send it, and collect the response</strong>
+        <ol type="a">
+            <li>Build the message: <code>Message.builder().role(Message.Role.ROLE_USER).parts(List.of(new TextPart(query))).build()</code></li>
+            <li>Create a <code>CompletableFuture&lt;String&gt; result = new CompletableFuture&lt;&gt;()</code></li>
+            <li>Call <code>client.sendMessage(message, listeners, errorHandler, null)</code> where the listener checks <code>event instanceof TaskUpdateEvent update</code>:
+                <ul>
+                    <li>If <code>update.getUpdateEvent() instanceof TaskStatusUpdateEvent statusUpdate</code> and state is <code>TASK_STATE_FAILED</code> &rarr; <code>result.completeExceptionally(...)</code></li>
+                    <li>If <code>update.getTask().status().state() == TaskState.TASK_STATE_COMPLETED</code> &rarr; <code>result.complete(extractText(update.getTask().artifacts()))</code></li>
+                    <li>Error handler: <code>error -&gt; result.completeExceptionally(...)</code></li>
+                </ul>
+            </li>
+            <li>Return <code>Response.ok(new ExpenseResponse(result.get(30, TimeUnit.SECONDS))).build()</code></li>
+        </ol>
+    </li>
+</ol>
 
 <h4>Build &amp; Run the Expense Client on port 8083</h4>
 <p>The Expense Client is a JAX-RS web application on WildFly that calls the Expense Agent via the A2A Java SDK. It serves a browser UI at the root and exposes three REST endpoints:</p>
@@ -1819,7 +1866,7 @@ mvn package
     <p>The key integration point in Maya&rsquo;s scenario: the Travel Agent&rsquo;s <code>receipt-extraction</code> skill outputs structured data that the Expense Agent&rsquo;s <code>receipt-processing</code> skill consumes.</p>
 </div>
 
-<pre><code>Travel Agent (Python)                    Expense Agent (WildFly)
+<pre><code>Travel Agent                            Expense Agent
 extract_receipt(query)         &rarr;        processReceipt(receiptData)
   {"vendor": "Bolt Belgium",               Validate: &euro;45 &lt; &euro;200 limit &#10003;
    "amount": "45.00",                      Category: ground_transportation &#10003;
@@ -1829,7 +1876,7 @@ extract_receipt(query)         &rarr;        processReceipt(receiptData)
 
 <div class="callout info">
     <div class="callout-title">&#128161; Cross-language handoff</div>
-    <p>Python extracts the structured data, and the user (or a client) sends it directly to the Expense Agent for validation and logging. Two runtimes, one data format &mdash; all via A2A.</p>
+    <p>the Travel Agent extracts the structured data, and the user (or a client) sends it directly to the Expense Agent for validation and logging. Two runtimes, one data format &mdash; all via A2A.</p>
 </div>
 </section>
 
@@ -1850,30 +1897,6 @@ extract_receipt(query)         &rarr;        processReceipt(receiptData)
     <li>Receipts validated against compliance limits in the correct currency</li>
 </ul>
 
-<div class="arch-diagram">
-<pre>
-+-----------------------------------------------------------+
-|                    DevSphere System                        |
-|                                                           |
-|         +--------- Orchestrator ---------+                |
-|         |          :8090 (Quarkus)       |                |
-|         |   @SupervisorAgent             |                |
-|         |   @A2AClientAgent x 4          |                |
-|         +----------+---------+-----------+                |
-|                    |         |                            |
-|         +----------v---------v-----------+                |
-|         |  Concierge  :8080 (Quarkus)    |                |
-|         |  Schedule + Venue + Travel     |                |
-|         |  + Expense agents (multi-tenant)|                |
-|         +----------------------------------+               |
-|                                                           |
-|               +---------------+                           |
-|               | Grafana/LGTM  |  &larr; All traces here       |
-|               |    :3000      |                           |
-|               +---------------+                           |
-+-----------------------------------------------------------+
-</pre>
-</div>
 </section>
 
 

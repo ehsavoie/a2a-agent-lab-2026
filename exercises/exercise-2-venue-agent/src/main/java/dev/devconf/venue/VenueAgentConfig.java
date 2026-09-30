@@ -64,83 +64,29 @@ public class VenueAgentConfig {
 
     @Bean
     public AgentCard agentCard() {
-        return AgentCard.builder()
-                .name(agentName)
-                .description(agentDescription)
-                .version(agentVersion)
-                .supportedInterfaces(List.of(
-                        new AgentInterface(
-                                TransportProtocol.HTTP_JSON.asString(), agentUrl)
-                ))
-                .capabilities(AgentCapabilities.builder()
-                        .streaming(false)
-                        .pushNotifications(false)
-                        .build())
-                .skills(List.of(
-                        AgentSkill.builder()
-                                .id("room-capacity")
-                                .name("Room Capacity Check")
-                                .description("Check real-time room capacity and occupancy from IoT sensors.")
-                                .tags(List.of("venue", "iot", "capacity"))
-                                .examples(List.of("Is Hall B full?", "How many seats are left in Room 201?"))
-                                .build(),
-                        AgentSkill.builder()
-                                .id("indoor-map")
-                                .name("Indoor Navigation")
-                                .description("Get walking directions between rooms and areas in the venue.")
-                                .tags(List.of("venue", "navigation", "directions"))
-                                .examples(List.of("How do I get from the entrance to Hall B?"))
-                                .build(),
-                        AgentSkill.builder()
-                                .id("catering-queue")
-                                .name("Catering Queue Status")
-                                .description("Check current queue lengths and wait times at catering stations.")
-                                .tags(List.of("venue", "catering", "food"))
-                                .examples(List.of("Where is the shortest food queue?"))
-                                .build(),
-                        AgentSkill.builder()
-                                .id("entry-pass")
-                                .name("Fast-Track Entry Pass")
-                                .description("Reserve a fast-track entry pass for priority seating at a session room.")
-                                .tags(List.of("venue", "pass", "reservation"))
-                                .examples(List.of("Reserve a fast-track pass for Hall B"))
-                                .build()
-                ))
-                .defaultInputModes(List.of("text"))
-                .defaultOutputModes(List.of("text"))
-                .build();
+        // TODO: Use AgentCard.builder() to build and return the AgentCard.
+        // Set name, description, version from the @Value injected fields.
+        // Set supportedInterfaces with a single AgentInterface using TransportProtocol.HTTP_JSON.asString() and agentUrl.
+        // Set capabilities (streaming: false, pushNotifications: false).
+        // Set skills (see workshop instructions).
+        // Set defaultInputModes and defaultOutputModes to List.of("text").
+        return null;
     }
 
     @Bean
     public AgentExecutor agentExecutor(VenueService venueService) {
-        return new AgentExecutor() {
-
-            @Override
-            public void execute(RequestContext context, AgentEmitter emitter) throws A2AError {
-                String userText = extractText(context.getMessage());
-
-                emitter.startWork();
-
-                try {
-                    String response = venueService.chat(userText);
-
-                    emitter.addArtifact(
-                            Collections.singletonList(new TextPart(response)),
-                            null, "response", null);
-                    emitter.complete();
-                } catch (Exception e) {
-                    emitter.addArtifact(
-                            Collections.singletonList(new TextPart("Error: " + e.getMessage())),
-                            null, "error", null);
-                    emitter.fail();
-                }
-            }
-
-            @Override
-            public void cancel(RequestContext context, AgentEmitter emitter) throws A2AError {
-                throw new TaskNotCancelableError();
-            }
-        };
+        // TODO: Return an anonymous AgentExecutor implementation.
+        //
+        // In execute(RequestContext, AgentEmitter):
+        //   1. Extract user text from context.getMessage() using extractText()
+        //   2. Call emitter.startWork()
+        //   3. Call venueService.chat(userText) to get the LLM response
+        //   4. On success: emitter.addArtifact(Collections.singletonList(new TextPart(response)), null, "response", null), then emitter.complete()
+        //   5. On exception: emitter.addArtifact(...) with error message, then emitter.fail()
+        //
+        // In cancel(RequestContext, AgentEmitter):
+        //   Throw new TaskNotCancelableError()
+        return null;
     }
 
     private String extractText(Message message) {

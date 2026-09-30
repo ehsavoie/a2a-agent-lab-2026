@@ -23,44 +23,17 @@ public class ScheduleAgentExecutorProducer {
 
     @Produces
     public AgentExecutor agentExecutor() {
-        return new AgentExecutor() {
-
-            @Override
-            public void execute(RequestContext context, AgentEmitter emitter) throws A2AError {
-                String userText = extractText(context.getMessage());
-
-                emitter.startWork();
-
-                try {
-                    String response = scheduleService.chat(userText);
-
-                    emitter.addArtifact(
-                            Collections.singletonList(new TextPart(response)),
-                            null, "response", null);
-                    emitter.complete();
-                } catch (Exception e) {
-                    emitter.addArtifact(
-                            Collections.singletonList(new TextPart("Error: " + e.getMessage())),
-                            null, "error", null);
-                    emitter.fail();
-                }
-            }
-
-            @Override
-            public void cancel(RequestContext context, AgentEmitter emitter) throws A2AError {
-                throw new TaskNotCancelableError();
-            }
-        };
-    }
-
-    private String extractText(Message message) {
-        if (message == null || message.parts() == null) return "";
-        StringBuilder sb = new StringBuilder();
-        for (Part<?> part : message.parts()) {
-            if (part instanceof TextPart textPart) {
-                sb.append(textPart.text());
-            }
-        }
-        return sb.toString().trim();
+        // TODO: Return an anonymous AgentExecutor implementation.
+        //
+        // In execute(RequestContext, AgentEmitter):
+        //   1. Extract the user text from context.getMessage() (iterate parts, collect TextPart values)
+        //   2. Call emitter.startWork() to signal the task is running
+        //   3. Call scheduleService.chat(userText) to get the LLM response
+        //   4. Call emitter.addArtifact(...) with a TextPart wrapping the response
+        //   5. Call emitter.complete() on success, or emitter.fail() on exception
+        //
+        // In cancel(RequestContext, AgentEmitter):
+        //   Throw new TaskNotCancelableError()
+        return null;
     }
 }

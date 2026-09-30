@@ -23,65 +23,21 @@ public class ExpenseAgentCardProducer {
     @Produces
     @PublicAgentCard
     public AgentCard agentCard() {
-        int portOffset = ConfigProvider.getConfig()
-                .getOptionalValue("jboss.socket.binding.port-offset", Integer.class)
-                .orElse(0);
-
-        String jsonRpcUrl = "http://localhost:" + (BASE_HTTP_PORT + portOffset);
-        List<AgentInterface> interfaces = new ArrayList<>();
-        interfaces.add(
-                new AgentInterface(
-                        TransportProtocol.JSONRPC.asString(), jsonRpcUrl));
-        if (isRest()) {
-            interfaces.add(
-                    new AgentInterface(
-                            TransportProtocol.HTTP_JSON.asString(), jsonRpcUrl));
-        }
-        if (isGrpcEnabled()) {
-            interfaces.add(
-                    new AgentInterface(
-                            TransportProtocol.GRPC.asString(), "localhost:" + (BASE_GRPC_PORT + portOffset)));
-        }
-
-        return AgentCard.builder()
-                .name("Expense & Compliance Agent")
-                .description("Standardizes receipts into corporate audit-ready expense logs with compliance validation")
-                .version("1.0.0")
-                .supportedInterfaces(interfaces)
-                .capabilities(AgentCapabilities.builder()
-                        .streaming(true)
-                        .build())
-                .skills(List.of(
-                    AgentSkill.builder()
-                        .id("expense-logging")
-                        .name("Expense Logging")
-                        .description("Log and validate expense entries against corporate compliance rules.")
-                        .tags(List.of("expenses", "logging", "compliance"))
-                        .examples(List.of(
-                            "Log a $45 taxi from Airport Cabs on 2026-10-07",
-                            "I spent $22 on lunch at the convention center"))
-                        .build(),
-                    AgentSkill.builder()
-                        .id("receipt-processing")
-                        .name("Receipt Processing")
-                        .description("Process receipt data from other agents into audit-ready expense entries.")
-                        .tags(List.of("receipts", "processing", "audit"))
-                        .examples(List.of(
-                            "Process this receipt: vendor=Yellow Cab, amount=$45.00, currency=USD, date=2026-10-07, category=Transportation"))
-                        .build(),
-                    AgentSkill.builder()
-                        .id("compliance-report")
-                        .name("Compliance Report")
-                        .description("Generate compliance status reports and flag policy violations.")
-                        .tags(List.of("compliance", "reporting", "audit"))
-                        .examples(List.of(
-                            "Show my expense summary",
-                            "Are all my expenses compliant?"))
-                        .build()
-                ))
-                .defaultInputModes(List.of("text"))
-                .defaultOutputModes(List.of("text"))
-                .build();
+        // TODO: Build and return an AgentCard using AgentCard.builder().
+        //
+        // 1. Read the port offset:
+        //      int portOffset = ConfigProvider.getConfig()
+        //          .getOptionalValue("jboss.socket.binding.port-offset", Integer.class).orElse(0);
+        //      String jsonRpcUrl = "http://localhost:" + (BASE_HTTP_PORT + portOffset);
+        //
+        // 2. Build the interfaces list (List<AgentInterface>):
+        //      - Always add AgentInterface(TransportProtocol.JSONRPC.asString(), jsonRpcUrl)
+        //      - If isRest(): add AgentInterface(TransportProtocol.HTTP_JSON.asString(), jsonRpcUrl)
+        //      - If isGrpcEnabled(): add AgentInterface(TransportProtocol.GRPC.asString(), "localhost:" + (BASE_GRPC_PORT + portOffset))
+        //
+        // 3. Call AgentCard.builder() with name, description, version, supportedInterfaces(interfaces),
+        //    capabilities (streaming: true), skills (see workshop), defaultInputModes/OutputModes, then .build()
+        return null;
     }
 
     private boolean isGrpcEnabled() {

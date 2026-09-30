@@ -24,39 +24,19 @@ public class ExpenseAgentExecutorProducer {
     @Produces
     @ApplicationScoped
     public AgentExecutor agentExecutor() {
-        return new AgentExecutor() {
-
-            @Override
-            public void execute(RequestContext context, AgentEmitter emitter) throws A2AError {
-                String userText = extractText(context.getMessage());
-
-                boolean isNewTask = context.getTask() == null;
-                if (isNewTask) {
-                    emitter.submit();
-                }
-
-                emitter.startWork();
-
-                try {
-                    String response = expenseServiceProducer.getExpenseService().chat(userText);
-
-                    emitter.addArtifact(
-                            Collections.singletonList(new TextPart(response)),
-                            null, "response", null);
-                    emitter.complete();
-                } catch (Exception e) {
-                    emitter.addArtifact(
-                            Collections.singletonList(new TextPart("Error: " + e.getMessage())),
-                            null, "error", null);
-                    emitter.fail();
-                }
-            }
-
-            @Override
-            public void cancel(RequestContext context, AgentEmitter emitter) throws A2AError {
-                throw new TaskNotCancelableError();
-            }
-        };
+        // TODO: Return an anonymous AgentExecutor implementation.
+        //
+        // In execute(RequestContext, AgentEmitter):
+        //   1. Extract user text using extractText(context.getMessage())
+        //   2. If context.getTask() == null (new task), call emitter.submit() first
+        //   3. Call emitter.startWork()
+        //   4. Call expenseServiceProducer.getExpenseService().chat(userText)
+        //   5. On success: emitter.addArtifact(Collections.singletonList(new TextPart(response)), null, "response", null), then emitter.complete()
+        //   6. On exception: emitter.addArtifact(...) with error message, then emitter.fail()
+        //
+        // In cancel(RequestContext, AgentEmitter):
+        //   Throw new TaskNotCancelableError()
+        return null;
     }
 
     private String extractText(Message message) {
