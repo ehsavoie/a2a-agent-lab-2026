@@ -69,6 +69,67 @@
         </dependencies>
     </dependencyManagement>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.4.0</version>
+                    <configuration>
+                        <failOnMissingWebXml>false</failOnMissingWebXml>
+                    </configuration>
+                </plugin>
+                <!--
+                    Default WildFly provisioning for node-a and node-b: PostgreSQL + Kafka.
+                    The gRPC profile in each node overrides <configuration> to add the gRPC
+                    feature-pack and stability-level; all other settings are inherited here.
+                -->
+                <plugin>
+                    <groupId>org.wildfly.plugins</groupId>
+                    <artifactId>wildfly-maven-plugin</artifactId>
+                    <version>${version.wildfly-maven-plugin}</version>
+                    <configuration>
+                        <feature-packs>
+                            <feature-pack>
+                                <groupId>org.wildfly</groupId>
+                                <artifactId>wildfly-galleon-pack</artifactId>
+                                <version>${version.wildfly}</version>
+                            </feature-pack>
+                            <feature-pack>
+                                <groupId>org.wildfly</groupId>
+                                <artifactId>wildfly-datasources-galleon-pack</artifactId>
+                                <version>${version.wildfly.datasources}</version>
+                            </feature-pack>
+                        </feature-packs>
+                        <discover-provisioning-info>
+                            <add-ons>
+                                <add-on>wildfly-cli</add-on>
+                                <add-on>postgresql:default</add-on>
+                                <add-on>kafka</add-on>
+                            </add-ons>
+                        </discover-provisioning-info>
+                        <jboss-home>${jboss.home}</jboss-home>
+                        <name>ROOT.war</name>
+                        <provisioning-dir>${jboss.home}</provisioning-dir>
+                        <galleon-options>
+                            <jboss-fork-embedded>true</jboss-fork-embedded>
+                        </galleon-options>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>provisioning</id>
+                            <goals>
+                                <goal>package</goal>
+                            </goals>
+                            <phase>${wildfly.maven.plugin.phase}</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
     <modules>
         <module>node-a</module>
         <module>node-b</module>
