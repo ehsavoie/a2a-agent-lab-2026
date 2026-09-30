@@ -2171,32 +2171,27 @@ mvn quarkus:dev</code></pre>
 
 <div class="arch-diagram">
 <pre>
-  EnterpriseClient
-        |
-        | 1. init message (creates task)
-        v
-  +-----------+        +-------------------+
-  |  Node A   |        |   PostgreSQL :5432 |
-  |   :8080   |-------&gt;| JPA TaskStore      |
-  +-----------+        | JPA PNConfigStore  |
-        |              +-------------------+
-        | 2. publish event
-        v
-  +-----------+
-  |   Kafka   |  replicated-events topic
-  |   :9092   |
-  +-----------+
-        |
-        | 3. broadcast to all nodes
-        v
-  +-----------+
-  |  Node B   |
-  |   :9080   |
-  +-----------+
-        |
-        | 4. WORKING &rarr; COMPLETED streamed to client
-        v
-  EnterpriseClient (subscribed to Node B)
+              +------------------------------+
+              |     SHARED INFRASTRUCTURE    |
+              |                              |
+              |  PostgreSQL :5432            |
+              |  - JPA TaskStore             |
+              |  - JPA PNConfigStore         |
+              |                              |
+              |  Kafka :9092                 |
+              |  - replicated-events topic   |
+              +------------------------------+
+                    ^               ^
+                    |               |
+  +-----------+     |               |     +-----------+
+  |  Node A   |-----+               +-----|  Node B   |
+  |   :8080   |                          |   :9080   |
+  +-----------+                          +-----------+
+       ^                                       |
+       | 1. create task                        | 4. WORKING &rarr; COMPLETED
+       |                                       v
+  EnterpriseClient                      EnterpriseClient
+  (sends to Node A)                     (subscribed to Node B)
 </pre>
 </div>
 

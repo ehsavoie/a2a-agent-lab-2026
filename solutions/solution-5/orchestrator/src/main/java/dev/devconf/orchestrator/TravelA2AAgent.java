@@ -1,25 +1,19 @@
 package dev.devconf.orchestrator;
 
-import org.a2aproject.sdk.client.ClientBuilder;
-import org.a2aproject.sdk.client.transport.rest.RestTransport;
-import org.a2aproject.sdk.client.transport.rest.RestTransportConfigBuilder;
-
+import dev.langchain4j.agentic.a2a.A2AContextId;
+import dev.langchain4j.agentic.a2a.A2ATaskId;
 import dev.langchain4j.agentic.declarative.A2AClientAgent;
+import dev.langchain4j.agentic.scope.ResultWithAgenticScope;
 import dev.langchain4j.service.V;
-import dev.langchain4j.agentic.declarative.A2AClientCustomizer;
 
 public interface TravelA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:9000",
+            a2aServerUrl = "http://localhost:8080/",
+            tenant = "travel",
             name = "Travel & Logistics Agent",
             description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
-            outputKey = "response"
+            outputKey = "travel-response"
     )
-    String ask(@V("query") String query);
-
-    @A2AClientCustomizer
-    static void customizer(ClientBuilder cb) {
-        cb.withTransport(RestTransport.class, new RestTransportConfigBuilder());
-    }
+    ResultWithAgenticScope<String> ask(@V("query") String query, @A2AContextId @V("contextId") String contextId, @A2ATaskId @V("taskId") String taskId);
 }

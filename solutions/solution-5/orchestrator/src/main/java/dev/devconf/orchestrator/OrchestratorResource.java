@@ -1,5 +1,8 @@
 package dev.devconf.orchestrator;
 
+import dev.langchain4j.agentic.scope.AgenticScope;
+import java.util.logging.Logger;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -10,6 +13,8 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/api")
 public class OrchestratorResource {
 
+    private static final Logger LOG = Logger.getLogger(OrchestratorResource.class.getName());
+
     @Inject
     OrchestratorSupervisor supervisor;
 
@@ -18,7 +23,11 @@ public class OrchestratorResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public QueryResponse query(QueryRequest request) {
-        String response = supervisor.orchestrate(request.query());
+        LOG.info("Received query: " + request.query());
+        LOG.info("Supervisor class: " + supervisor.getClass().getName());
+        AgenticScope scope = supervisor.orchestrate(request.query()).agenticScope();
+        String response = scope.readState("response").toString() ;
+        LOG.info("Supervisor response: " + response);
         return new QueryResponse(response);
     }
 

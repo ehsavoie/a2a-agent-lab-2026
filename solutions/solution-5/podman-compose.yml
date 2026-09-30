@@ -4,7 +4,7 @@ version: "3.8"
 # Provides PostgreSQL (for Expense Agent JPA stores) and Grafana LGTM (for OTel traces).
 #
 # Usage:
-#   cd solutions/exercise-5
+#   cd exercises/exercise-5-orchestrator
 #   podman-compose up -d
 
 services:
@@ -20,15 +20,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  lgtm:
-    image: docker.io/grafana/otel-lgtm:latest
-    container_name: devconf-lgtm
+  kafka:
+    image: docker.io/apache/kafka:4.1.0
+    container_name: devconf-kafka
     ports:
-      - "3000:3000"     # Grafana UI
-      - "4317:4317"     # OTLP gRPC
-      - "4318:4318"     # OTLP HTTP
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - "9092:9092"
 
 volumes:
   pgdata:
