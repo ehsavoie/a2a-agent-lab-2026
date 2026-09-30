@@ -132,11 +132,11 @@ curl -fsS http://localhost:9080/.well-known/agent-card.json -H 'A2A-Version: 1.0
 From the exercise directory, choose the client profile matching the server build:
 
 ```bash
-mvn compile exec:java -Prun-jsonrpc -pl client
+mvn compile exec:java -Pjsonrpc -pl client
 # REST:
-# mvn compile exec:java -Prun-rest -pl client
+# mvn compile exec:java -Prest -pl client
 # gRPC:
-# mvn compile exec:java -Prun-grpc -pl client
+# mvn compile exec:java -Pgrpc -pl client
 ```
 
 The command compiles the client before running it. It greets Maya by default;
