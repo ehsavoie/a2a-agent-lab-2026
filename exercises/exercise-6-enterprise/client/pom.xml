@@ -17,7 +17,12 @@
     <description>Client demonstrating cross-node task replication between two WildFly enterprise agent nodes</description>
 
     <properties>
-        <attendee.name>Maya</attendee.name>
+        <!--
+            The message sent to the agent. Always pass this explicitly:
+              -Dmessage="Feedback for Mario Fusco, rating: 5, great talk!"
+              -Dmessage="Summary for Mario Fusco"
+        -->
+        <message>Feedback for Mario Fusco, session: Building Production-Ready Agentic Systems with LangChain4j and Quarkus, rating: 5, absolutely loved the live coding demo!</message>
     </properties>
 
     <dependencies>
@@ -70,12 +75,8 @@
     </build>
 
     <profiles>
-        <!--
-            Run the cross-node demo with JSON-RPC transport:
-              mvn compile exec:java -Prun-jsonrpc -pl client
-        -->
         <profile>
-            <id>run-jsonrpc</id>
+            <id>jsonrpc</id>
             <build>
                 <plugins>
                     <plugin>
@@ -84,7 +85,7 @@
                         <configuration>
                             <arguments>
                                 <argument>JSONRPC</argument>
-                                <argument>${attendee.name}</argument>
+                                <argument>${message}</argument>
                             </arguments>
                         </configuration>
                     </plugin>
@@ -92,12 +93,8 @@
             </build>
         </profile>
 
-        <!--
-            Run the cross-node demo with gRPC transport (requires -Pgrpc server build):
-              mvn compile exec:java -Prun-grpc -pl client
-        -->
         <profile>
-            <id>run-grpc</id>
+            <id>grpc</id>
             <build>
                 <plugins>
                     <plugin>
@@ -106,7 +103,7 @@
                         <configuration>
                             <arguments>
                                 <argument>GRPC</argument>
-                                <argument>${attendee.name}</argument>
+                                <argument>${message}</argument>
                             </arguments>
                         </configuration>
                     </plugin>
@@ -114,12 +111,8 @@
             </build>
         </profile>
 
-        <!--
-            Run the cross-node demo with REST transport (requires -Prest server build):
-              mvn compile exec:java -Prun-rest -pl client
-        -->
         <profile>
-            <id>run-rest</id>
+            <id>rest</id>
             <build>
                 <plugins>
                     <plugin>
@@ -128,7 +121,7 @@
                         <configuration>
                             <arguments>
                                 <argument>HTTP+JSON</argument>
-                                <argument>${attendee.name}</argument>
+                                <argument>${message}</argument>
                             </arguments>
                         </configuration>
                     </plugin>

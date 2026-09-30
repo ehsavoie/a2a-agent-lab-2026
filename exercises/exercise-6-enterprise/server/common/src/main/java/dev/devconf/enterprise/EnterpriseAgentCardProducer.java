@@ -24,7 +24,7 @@ public class EnterpriseAgentCardProducer {
     @Produces
     @PublicAgentCard
     public AgentCard createAgentCard() {
-        // Both nodes run the same WAR. The advertised URL is computed from the WildFly
+        // Both nodes deploy the same WAR. The advertised URL is computed from the WildFly
         // socket-binding-port-offset so the AgentCard is always correct on whichever
         // node serves this request (node A: offset 0, node B: offset 1000).
         int portOffset = ConfigProvider.getConfig()
@@ -33,7 +33,6 @@ public class EnterpriseAgentCardProducer {
 
         String jsonRpcUrl = "http://localhost:" + (BASE_HTTP_PORT + portOffset);
         List<AgentInterface> interfaces = new ArrayList<>();
-        // JSONRPC is always present — it is needed to serve the AgentCard.
         interfaces.add(new AgentInterface(TransportProtocol.JSONRPC.asString(), jsonRpcUrl));
         if (isRest()) {
             interfaces.add(new AgentInterface(TransportProtocol.HTTP_JSON.asString(), jsonRpcUrl));
@@ -45,21 +44,33 @@ public class EnterpriseAgentCardProducer {
         }
 
         return AgentCard.builder()
-                .name("Enterprise A2A Agent (DevSphere)")
-                .description("Multi-node enterprise agent demonstrating JPA-backed task store and "
-                        + "Kafka-replicated queue manager across two WildFly nodes")
+                .name("Conference Feedback Agent (DevSphere)")
+                .description("Collects attendee feedback for conference sessions and provides "
+                        + "per-talk or global summaries to speakers. Backed by a shared PostgreSQL "
+                        + "database and Kafka-replicated queue across two WildFly nodes.")
                 .version("1.0.0")
                 .capabilities(AgentCapabilities.builder().streaming(true).build())
                 .defaultInputModes(Collections.singletonList("text"))
                 .defaultOutputModes(Collections.singletonList("text"))
-                .skills(Collections.singletonList(AgentSkill.builder()
-                        .id("hello_world")
-                        .name("Hello World")
-                        .description("Greets the attendee by name. The task is created on one node "
-                                + "and completed there while observed on the other, proving cross-node Kafka replication.")
-                        .tags(Collections.singletonList("hello world"))
-                        .examples(List.of("Hello, Maya!", "Say hello to Maya"))
-                        .build()))
+                .skills(List.of(
+                        AgentSkill.builder()
+                                .id("submit-feedback")
+                                .name("Submit Session Feedback")
+                                .description("Record an attendee's rating and comment for a speaker's session.")
+                                .tags(List.of("feedback", "rating", "conference"))
+                                .examples(List.of(
+                                        "Feedback for Mario Fusco, session: Building Production-Ready Agentic Systems with LangChain4j and Quarkus, rating: 5, absolutely loved the live coding demo!",
+                                        "Feedback for Guillaume Laforge, session: Choose your own adventure in agentic design patterns, rating: 5, best format of the conference!"))
+                                .build(),
+                        AgentSkill.builder()
+                                .id("feedback-summary")
+                                .name("Feedback Summary")
+                                .description("Return aggregated feedback for a speaker, optionally filtered to a specific session.")
+                                .tags(List.of("feedback", "summary", "speaker"))
+                                .examples(List.of(
+                                        "Summary for Mario Fusco",
+                                        "What feedback did Mario Fusco receive for his LangChain4j talk?"))
+                                .build()))
                 .supportedInterfaces(interfaces)
                 .build();
     }

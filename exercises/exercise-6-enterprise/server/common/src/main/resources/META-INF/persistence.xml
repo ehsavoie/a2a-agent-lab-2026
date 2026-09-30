@@ -5,6 +5,7 @@
 
         <class>org.a2aproject.sdk.extras.taskstore.database.jpa.JpaTask</class>
         <class>org.a2aproject.sdk.extras.pushnotificationconfigstore.database.jpa.JpaPushNotificationConfig</class>
+        <class>dev.devconf.enterprise.Feedback</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>

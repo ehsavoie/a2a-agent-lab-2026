@@ -123,14 +123,14 @@ public class EnterpriseClient implements AutoCloseable {
         return taskId.get(10, TimeUnit.SECONDS);
     }
 
-    public void sendContinuationMessage(String taskId, String name) throws Exception {
+    public void sendContinuationMessage(String taskId, String message) throws Exception {
         Message continuation = Message.builder()
                 .role(Message.Role.ROLE_USER)
                 .messageId(UUID.randomUUID().toString())
                 .taskId(taskId)
-                .parts(List.of(new TextPart(name)))
+                .parts(List.of(new TextPart(message)))
                 .build();
-        trace("Sending continuation for task " + taskId + " text=" + name);
+        trace("Sending continuation for task " + taskId + " text=" + message);
         client.sendMessage(continuation, Collections.emptyList(), null, null);
         trace("Continuation request returned for task " + taskId);
     }
@@ -270,7 +270,7 @@ public class EnterpriseClient implements AutoCloseable {
      *  4. Observes WORKING → COMPLETED on Node B, arriving purely via Kafka replication
      *  5. Uses fresh clients to retrieve and verify the completed task from both nodes
      */
-    public static String runCrossNodeDemo(String protocol, String name) throws Exception {
+    public static String runCrossNodeDemo(String protocol, String message) throws Exception {
         long startedAt = System.nanoTime();
         String taskId;
         try (EnterpriseClient nodeA = new EnterpriseClient(protocol, NODE_A_PORT_OFFSET, false, true, startedAt)) {
@@ -286,7 +286,7 @@ public class EnterpriseClient implements AutoCloseable {
 
             nodeB.trace("Waiting for COMPLETED for task " + taskId);
             try (EnterpriseClient nodeA = new EnterpriseClient(protocol, NODE_A_PORT_OFFSET, false, true, startedAt)) {
-                nodeA.sendContinuationMessage(taskId, name);
+                nodeA.sendContinuationMessage(taskId, message);
             }
 
             completedTask = completion.get(15, TimeUnit.SECONDS);
@@ -304,9 +304,10 @@ public class EnterpriseClient implements AutoCloseable {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            throw new IllegalStateException("Usage: EnterpriseClient <protocol> <name>\n"
+            throw new IllegalStateException("Usage: EnterpriseClient <protocol> <prompt>\n"
                     + "  protocol: JSONRPC | HTTP+JSON | GRPC\n"
-                    + "  name:     attendee name to greet");
+                    + "  prompt:   e.g. \"Feedback for Mario Fusco, rating: 5, great talk!\"\n"
+                    + "            or   \"Summary for Mario Fusco\"");
         }
         String response = runCrossNodeDemo(args[0], args[1]);
         System.out.println("Agent responds:\n" + response);

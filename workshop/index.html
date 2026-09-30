@@ -2187,7 +2187,7 @@ mvn quarkus:dev</code></pre>
         <span class="step-number" style="background: var(--accent-teal);">1</span>
         <span class="step-title">Start the infrastructure</span>
     </div>
-    <p>The enterprise exercise needs two backing services. A <code>podman-compose.yml</code> in the exercise root starts all of them.</p>
+    <p>The enterprise exercise needs two backing services. A <code>podman-compose.yml</code> in the exercise root starts all of them and seeds the feedback database on first startup.</p>
 </div>
 
 <pre><code>cd exercises/exercise-6-enterprise
@@ -2199,10 +2199,30 @@ podman-compose up -d
         <tr><th>Service</th><th>Port</th><th>Purpose</th></tr>
     </thead>
     <tbody>
-        <tr><td><strong>PostgreSQL 17</strong></td><td>5432</td><td>Shared JPA task store and push-notification config store</td></tr>
+        <tr><td><strong>PostgreSQL 17</strong></td><td>5432</td><td>Shared JPA store: A2A tasks, push-notification configs, and <code>session_feedback</code> (seeded from <code>initdb/01-feedback.sql</code>)</td></tr>
         <tr><td><strong>Kafka 4.1</strong></td><td>9092</td><td>Broadcast task-state events across nodes (<code>replicated-events</code> topic)</td></tr>
     </tbody>
 </table>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; Stopping Podman containers</div>
+    <p><code>podman-compose</code> places containers in a Podman <strong>pod</strong> and does not always stop them before removing, unlike Docker Compose. Running <code>podman-compose down</code> directly on running containers produces a &ldquo;container state improper&rdquo; error. Always stop first:</p>
+    <pre><code>podman-compose stop   # stop containers, leave them
+podman-compose down   # remove stopped containers + network</code></pre>
+    <p>If a previous <code>down</code> was interrupted and the pod is in an inconsistent state, force-remove it:</p>
+    <pre><code>podman pod rm -f $(podman pod ls -q)</code></pre>
+</div>
+
+<div class="callout warning">
+    <div class="callout-title">&#9888; Seed feedback not loaded &mdash; summary returns &ldquo;No feedback found&rdquo;</div>
+    <p>The <code>initdb/01-feedback.sql</code> seed script only runs when the PostgreSQL volume is first created. If the <code>pgdata</code> volume already existed before starting the exercise, the seed data was never loaded.</p>
+    <p>Either recreate the volume (wipes existing data):</p>
+    <pre><code>podman-compose stop &amp;&amp; podman-compose down -v
+podman-compose up -d</code></pre>
+    <p>Or load the seed data directly without touching the volume:</p>
+    <pre><code>psql -h localhost -U devconf -d devconf \
+  -f exercises/exercise-6-enterprise/initdb/01-feedback.sql</code></pre>
+</div>
 
 <div class="callout info">
     <div class="callout-title">&#128161; Kafka consumer groups</div>
@@ -2246,14 +2266,21 @@ public class EnterpriseAgentCardProducer {
                 TransportProtocol.GRPC.asString(), "localhost:" + (BASE_GRPC_PORT + portOffset)));
 
         return AgentCard.builder()
-                .name("Enterprise A2A Agent (DevSphere)")
-                .description("Multi-node enterprise agent: JPA-backed task store + Kafka-replicated queue manager")
+                .name("Conference Feedback Agent (DevSphere)")
+                .description("Collects attendee feedback for sessions; provides per-talk or global "
+                        + "summaries to speakers. Backed by shared PostgreSQL + Kafka across two WildFly nodes.")
                 .version("1.0.0")
-                .skills(Collections.singletonList(AgentSkill.builder()
-                        .id("hello_world")
-                        .name("Hello World")
-                        .description("Greets the attendee. Task executed on Node A, observed on Node B.")
-                        .build()))
+                .skills(List.of(
+                        AgentSkill.builder()
+                                .id("submit-feedback")
+                                .name("Submit Session Feedback")
+                                .description("Record a rating and comment for a speaker's session.")
+                                .build(),
+                        AgentSkill.builder()
+                                .id("feedback-summary")
+                                .name("Feedback Summary")
+                                .description("Return aggregated feedback for a speaker, optionally per session.")
+                                .build()))
                 ...
     }
 }</code></pre>
@@ -2279,16 +2306,15 @@ public void execute(RequestContext context, AgentEmitter emitter) throws A2AErro
         return;  // task is SUBMITTED, open for continuation
     }
 
-    emitter.startWork();         // publish WORKING event via Kafka &rarr; broadcast to all nodes
-    pause(2000);                 // simulates real work; restores interrupt status on interruption
+    emitter.startWork();         // publish WORKING event &rarr; broadcast to all nodes
 
-    String name = extractLastTextPart(context.getMessage());
-    emitter.addArtifact(Collections.singletonList(new TextPart("Hello " + name)), ..., "greeting", ...);
-    pause(1000);
-    emitter.addArtifact(Collections.singletonList(new TextPart("Preparing your workshop welcome, " + name)), ..., "progress", ...);
-    pause(1000);
-    emitter.addArtifact(Collections.singletonList(new TextPart("Welcome to the enterprise A2A demo, " + name + "!")), ..., "summary", ...);
-    emitter.complete();          // publish COMPLETED after all three artifact events
+    String text   = extractText(context.getMessage().parts());
+    String result = isSummaryRequest(text)
+            ? feedbackStore.buildSummary(extractSpeaker(text), extractSession(text))
+            : handleFeedbackSubmission(text);  // parses speaker, session, rating, comment &rarr; persists to PostgreSQL
+
+    emitter.addArtifact(Collections.singletonList(new TextPart(result)), null, "response", null);
+    emitter.complete();          // publish COMPLETED + artifact &rarr; Node B receives it via Kafka
 }</code></pre>
     </div>
 </details>
@@ -2362,74 +2388,81 @@ curl -s http://localhost:9080/.well-known/agent-card.json \
         <span class="step-number" style="background: var(--accent-teal);">&#10003;</span>
         <span class="step-title">Cross-node demo with the Java client</span>
     </div>
-    <p>The <code>client/</code> module contains <code>EnterpriseClient</code>, which orchestrates the full cross-node scenario in five steps.</p>
+    <p>The <code>client/</code> module contains <code>EnterpriseClient</code>, which orchestrates the full cross-node scenario: a task is created on Node A, a client subscribes to that <strong>same task ID</strong> on Node B, the feedback message is sent to Node A, and the result is observed on Node B.</p>
 </div>
 
 <pre><code>cd exercises/exercise-6-enterprise
 
-# JSON-RPC transport (default)
-mvn compile exec:java -Prun-jsonrpc -pl client
+# Submit feedback via JSON-RPC
+mvn compile exec:java -Pjsonrpc -pl client \
+  -Dmessage="Feedback for Mario Fusco, session: Building Production-Ready Agentic Systems with LangChain4j and Quarkus, rating: 5, absolutely loved the live coding demo!"
 
-# REST transport (requires -Prest server build)
-mvn compile exec:java -Prun-rest -pl client
+# Submit feedback via gRPC (requires -Pgrpc server build)
+mvn compile exec:java -Pgrpc -pl client \
+  -Dmessage="Feedback for Mario Fusco, session: A Year of Agentic AI Evolution, rating: 5, honest account of what works and what doesn't in production"
 
-# gRPC transport (requires -Pgrpc server build)
-mvn compile exec:java -Prun-grpc -pl client</code></pre>
+# Request a summary via REST (requires -Prest server build)
+mvn compile exec:java -Prest -pl client \
+  -Dmessage="Summary for Mario Fusco"</code></pre>
 
-<p>These commands compile the client before running it and greet Maya by default. Add <code>-Dattendee.name=YourName</code> to change the attendee.</p>
+<p>The profile (<code>-Pjsonrpc</code>, <code>-Pgrpc</code>, <code>-Prest</code>) matches the server build profile and selects the wire protocol. The <code>-Dmessage</code> argument is the prompt sent to the agent — submit feedback or request a summary independently of the transport.</p>
 
-<p>The client runs this sequence:</p>
+<p>The <code>run-jsonrpc</code> profile runs this sequence:</p>
 
 <pre><code>1. Node A (:8080)   &larr; sendMessage(messageId="init")
                          Task created, state: SUBMITTED
                          Task ID returned to client
 
 2. Node B (:9080)   &larr; subscribeToTask(taskId)
-                         Node B loads the task from the shared store
+                         Node B loads the task from the shared JPA TaskStore
+                         (it was created on Node A — shared PostgreSQL makes it visible)
 
-3. Node A (:8080)   &larr; sendMessage(taskId=..., text="Maya")
+3. Node A (:8080)   &larr; sendMessage(taskId=...,
+             "Feedback for Mario Fusco, session: Building Production-Ready
+              Agentic Systems with LangChain4j and Quarkus, rating: 5,
+              absolutely loved the live coding demo!")
                          Task transitions: SUBMITTED &rarr; WORKING
 
 4. Node B (:9080)   receives via Kafka:
                          WORKING event  &rarr; SSE stream
-                         After 2 seconds: greeting artifact
-                         After 1 more second: progress artifact
-                         After 1 more second: summary artifact
-                         COMPLETED event &rarr; client finishes waiting
+                         COMPLETED event + feedback confirmation artifact</code></pre>
 
-5. Node A &amp; Node B   &larr; getTask(taskId) using fresh clients
-                         Both return COMPLETED and all three matching artifacts</code></pre>
-
-<p>The client prints each status and artifact as it arrives, with elapsed times, node names, and task IDs. Snapshots and replicated updates can print the same status more than once. Expected output excerpt (times and IDs vary):</p>
+<p>Expected output (run-jsonrpc):</p>
 <pre><code>[+1.000s] Node A (:8080) Created task abc-123 state=TASK_STATE_SUBMITTED
 [+1.100s] Node B (:9080) Task abc-123 status=TASK_STATE_SUBMITTED
 [+2.200s] Node B (:9080) Task abc-123 status=TASK_STATE_WORKING
-[+4.200s] Node B (:9080) Task abc-123 artifact=greeting id=... text=Hello Maya
-[+5.200s] Node B (:9080) Task abc-123 artifact=progress id=... text=Preparing your workshop welcome, Maya
-[+6.200s] Node B (:9080) Task abc-123 artifact=summary id=... text=Welcome to the enterprise A2A demo, Maya!
-[+6.200s] Node B (:9080) Task abc-123 status=TASK_STATE_COMPLETED
-[+6.200s] Node B (:9080) Completed stream for task abc-123 with 3 artifacts
-[+6.300s] Node A (:8080) GetTask: abc-123 state=TASK_STATE_COMPLETED artifacts=3 (all artifact IDs, names, and contents match the stream)
-[+6.400s] Node B (:9080) GetTask: abc-123 state=TASK_STATE_COMPLETED artifacts=3 (all artifact IDs, names, and contents match the stream)
-Agent responds:
-Hello Maya
-Preparing your workshop welcome, Maya
-Welcome to the enterprise A2A demo, Maya!</code></pre>
+[+2.300s] Node B (:9080) Task abc-123 artifact=response text=Thank you! Feedback recorded for Mario Fusco — Building Production-Ready Agentic Systems with LangChain4j and Quarkus
+                                                              ★★★★★  "absolutely loved the live coding demo!"
+[+2.300s] Node B (:9080) Task abc-123 status=TASK_STATE_COMPLETED
+Agent responds: Thank you! Feedback recorded for Mario Fusco ...</code></pre>
+
+<p>After running both feedback profiles, run the summary (run-rest sends to Node B directly):</p>
+<pre><code>Agent responds: Feedback summary for Mario Fusco
+────────────────────────────────────────
+Responses: 10  |  Average rating: 4.7/5
+
+Session: A Year of Agentic AI Evolution ...  (4.7/5)
+  ★★★★★  "Honest account of what works and what doesn't in production."
+  ...
+
+Session: Building Production-Ready Agentic Systems ...  (4.8/5)
+  ★★★★★  "Finally a talk that shows real production patterns."
+  ...</code></pre>
 
 <div class="callout tip">
     <div class="callout-title">&#128161; What this proves</div>
-    <p>Node B loads the initial task from the shared JPA TaskStore. The initial snapshot can include <code>SUBMITTED</code>; subsequent <code>WORKING</code> and <code>COMPLETED</code> state changes and all three artifacts arrive via the Kafka <code>replicated-events</code> topic and are relayed to the subscribed client. The client waits for <code>COMPLETED</code>, then fresh clients retrieve the task from both nodes and verify the original ID, <code>COMPLETED</code> status, and all artifact IDs, names, and contents, demonstrating shared TaskStore access. Repeating these lookups after restarting both servers confirms persistence across restarts. This is what makes the system horizontally scalable: any node behind a load balancer can answer <code>GetTask</code> or serve an SSE stream for any task.</p>
+    <p>Node B had no local record of the task. It found it in the shared JPA TaskStore (PostgreSQL) and subscribed to its event stream. The <code>WORKING</code> and <code>COMPLETED</code> state changes arrived via Kafka replication. The feedback itself is stored in PostgreSQL, so a summary requested on Node B returns all submissions made via Node A. This is what makes the system horizontally scalable: any node behind a load balancer can answer <code>GetTask</code>, serve a subscription stream, or query business data for any task.</p>
 </div>
 
 <h3>Checkpoint</h3>
 
 <ul class="checklist">
-    <li>PostgreSQL and Kafka running via <code>podman-compose up -d</code></li>
-    <li>Node A on port 8080, Node B on port 9080 &mdash; both serving the same agent with their own advertised URLs</li>
-    <li>JPA-backed task store: tasks persist across restarts and are visible from both nodes</li>
+    <li>PostgreSQL and Kafka running via <code>podman-compose up -d</code> (seed feedback loaded from <code>initdb/01-feedback.sql</code>)</li>
+    <li>Node A on port 8080, Node B on port 9080 — both serving the Conference Feedback Agent AgentCard</li>
+    <li>JPA-backed task store: tasks and feedback data persist across restarts and are visible from both nodes</li>
     <li>Kafka-replicated queue manager: <code>WORKING &rarr; COMPLETED</code> events broadcast across nodes</li>
-    <li>Client prints every status and all three artifacts on Node B, waiting for <code>COMPLETED</code></li>
-    <li>Final <code>GetTask</code> calls on both nodes return the same completed task and all three matching artifacts</li>
+    <li>Feedback submitted via Node A is included in summaries returned by Node B (shared PostgreSQL)</li>
+    <li>Task created on Node A is subscribed and observed on Node B, proving cross-node task replication</li>
 </ul>
 
 <div class="callout success">
