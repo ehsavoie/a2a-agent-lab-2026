@@ -1306,7 +1306,7 @@ public class VenueTool {
     <pre><code>cd exercises/exercise-2-venue-agent
 mvn spring-boot:run</code></pre>
 
-    <h4>Check room capacity (REST transport)</h4>
+    <h4>Check room capacity by physical name (REST transport)</h4>
     <pre><code>curl -s -X POST http://localhost:8081/message:send \
   -H "Content-Type: application/json" \
   -H "A2A-Version: 1.0" \
@@ -1315,6 +1315,19 @@ mvn spring-boot:run</code></pre>
       "messageId": "msg-1",
       "role": "ROLE_USER",
       "parts": [{"text": "Is Hall B full? Can I get a fast-track entry pass for Maya?"}]
+    }
+  }' | jq .</code></pre>
+
+    <h4>Check room capacity by session room code</h4>
+    <p>The conference schedule uses <code>TBA X</code> room codes. The Venue Agent resolves them to physical rooms and includes both names in the response so there is no ambiguity.</p>
+    <pre><code>curl -s -X POST http://localhost:8081/message:send \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "message": {
+      "messageId": "msg-2",
+      "role": "ROLE_USER",
+      "parts": [{"text": "Is there still space in room TBA 7 and TBA 2?"}]
     }
   }' | jq .</code></pre>
 
@@ -2025,9 +2038,28 @@ mvn quarkus:dev</code></pre>
 mvn quarkus:dev</code></pre>
 
     <h4>Send Maya&rsquo;s full scenario (curl)</h4>
+    <p>This single query spans <strong>all four agents</strong>. Notice that Maya does <em>not</em> mention the taxi fare &mdash; the orchestrator asks the Travel Agent for transit options, gets the cost, and hands it to the Expense Agent automatically.</p>
     <pre><code>curl -s -X POST http://localhost:8090/api/query \
   -H "Content-Type: application/json" \
-  -d '{"query": "My flight was delayed so I missed the morning shuttle. I am interested in agentic AI and Java agents. What talks should I catch today, how do I get to the venue quickly, and can you log my taxi receipt?"}' | jq .</code></pre>
+  -d '{
+    "query": "My flight was delayed so I missed the morning shuttle. What is the fastest way to get from Brussels Airport to Kinepolis Antwerp right now, and how much will it cost? I am interested in agentic AI and Java agents — which talks are still on today and do the rooms still have space? Once you have the transport cost, please log it as an expense for me and check my compliance status."
+  }' | jq .response</code></pre>
+
+    <div class="callout info">
+        <div class="callout-title">&#128161; What the orchestrator does with this query</div>
+        <p>The <code>@SupervisorAgent</code> LLM fans the request out across all agents in one shot:</p>
+        <ul>
+            <li><strong>Travel Agent</strong> &mdash; compares the Bolt rideshare (35 min, EUR 45, recommended) vs. the disrupted NMBS train (55 min today). The taxi fare is discovered here, not supplied by Maya.</li>
+            <li><strong>Schedule Agent</strong> &mdash; searches for agentic AI and Java talks available on 2026-10-07.</li>
+            <li><strong>Venue Agent</strong> &mdash; checks real-time room capacity for each suggested session so Maya knows whether seats are still available before she makes the trip.</li>
+            <li><strong>Expense Agent</strong> &mdash; receives the EUR 45 taxi cost from the Travel Agent&rsquo;s answer and logs it (<span style="color: var(--accent-green);">COMPLIANT</span> &mdash; under the EUR 200 transport cap). Maya already has 5 pre-seeded expenses (2 flagged), so the compliance report immediately shows a realistic picture.</li>
+        </ul>
+    </div>
+
+    <h4>Check compliance separately</h4>
+    <pre><code>curl -s -X POST http://localhost:8090/api/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Can you show me the full expense compliance report for Maya?"}' | jq .response</code></pre>
 
     <h4>Or use the Web UI</h4>
     <p>Open <a href="http://localhost:8090" target="_blank">http://localhost:8090</a> in your browser for an interactive chat interface.</p>

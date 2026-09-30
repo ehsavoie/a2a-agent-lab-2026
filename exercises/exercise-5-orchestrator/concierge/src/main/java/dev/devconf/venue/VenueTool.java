@@ -35,6 +35,19 @@ public class VenueTool {
         rooms.put("room 401", new RoomInfo("Room 401", 120, 90));
         rooms.put("room 102", new RoomInfo("Room 102", 180, 55));
         rooms.put("lab room b", new RoomInfo("Lab Room B", 60, 33));
+        rooms.put("room 303", new RoomInfo("Room 303", 100, 70));
+        rooms.put("room 104", new RoomInfo("Room 104", 80, 50));
+
+        // Session schedule uses "TBA X" room codes — map them to physical rooms
+        rooms.put("tba 7", rooms.get("main hall a"));   // keynote hall
+        rooms.put("tba 2", rooms.get("hall b"));
+        rooms.put("tba 3", rooms.get("room 201"));
+        rooms.put("tba 4", rooms.get("room 301"));
+        rooms.put("tba 5", rooms.get("room 401"));
+        rooms.put("tba 6", rooms.get("room 102"));
+        rooms.put("tba 8", rooms.get("lab room b"));
+        rooms.put("tba 9", rooms.get("room 303"));
+        rooms.put("tba 10", rooms.get("room 104"));
 
         cateringStations = new LinkedHashMap<>();
         cateringStations.put("main lobby cafe", new CateringStation("Main Lobby Cafe", "Ground Floor, near Main Hall A entrance", 12, 8));
@@ -55,8 +68,8 @@ public class VenueTool {
         directions.put("room 201->room 301", "Take the stairs or elevator one floor up. Room 301 is in the same wing, directly above Room 201.");
     }
 
-    @Tool("Check real-time room capacity and occupancy from IoT sensors. Provide the room name.")
-    public String checkRoomCapacity(@P("The room name to check") String roomName) {
+    @Tool("Check real-time room capacity and occupancy from IoT sensors. Provide the room name or session room code (e.g. 'TBA 7').")
+    public String checkRoomCapacity(@P("The room name or session room code to check") String roomName) {
         String key = roomName.toLowerCase().trim();
         RoomInfo room = rooms.get(key);
         if (room == null) {
@@ -69,16 +82,20 @@ public class VenueTool {
         }
         if (room == null) {
             return "Room '" + roomName + "' not found. Available rooms: "
-                    + rooms.values().stream().map(RoomInfo::name).collect(Collectors.joining(", "));
+                    + rooms.values().stream().map(RoomInfo::name).distinct().collect(Collectors.joining(", "));
         }
         String status = room.occupancyPercent() >= 95 ? "FULL" :
                          room.occupancyPercent() >= 80 ? "Nearly Full" : "Available";
+        String displayName = room.name();
+        if (!key.equals(displayName.toLowerCase()) && key.startsWith("tba")) {
+            displayName = room.name() + " (session room code: " + roomName.toUpperCase() + ")";
+        }
         return String.format("**%s** (IoT Sensor Reading)\n"
                 + "- Total Capacity: %d seats\n"
                 + "- Current Occupancy: %d%% (%d/%d seats occupied)\n"
                 + "- Available Seats: %d\n"
                 + "- Status: %s",
-                room.name(), room.capacity(), room.occupancyPercent(),
+                displayName, room.capacity(), room.occupancyPercent(),
                 room.capacity() - room.available(), room.capacity(),
                 room.available(), status);
     }

@@ -3,7 +3,6 @@ package dev.devconf.travel;
 import dev.langchain4j.agent.tool.Tool;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @ApplicationScoped
@@ -220,16 +219,22 @@ public class TravelTool {
         String amount = "0.00";
         String currency = "EUR";
         if (description.contains("$")) {
-            currency = "$";
+            currency = "USD";
+        } else if (description.contains("£")) {
+            currency = "GBP";
         }
         String category = "Transportation";
-        String date = LocalDate.now().toString();
+        String date = "2026-10-07";
 
-        if (q.contains("taxi") || q.contains("cab")) {
+        if (q.contains("bolt")) {
+            vendor = "Bolt Belgium";
+            amount = "45.00";
+            category = "Transportation";
+        } else if (q.contains("taxi") || q.contains("cab")) {
             vendor = "Antwerp Taxi Service";
             amount = "65.00";
             category = "Transportation";
-        } else if (q.contains("uber") || q.contains("bolt") || q.contains("rideshare") || q.contains("ride")) {
+        } else if (q.contains("uber") || q.contains("rideshare") || q.contains("ride")) {
             vendor = "Bolt Belgium";
             amount = "45.00";
             category = "Transportation";
@@ -237,23 +242,25 @@ public class TravelTool {
             vendor = "NMBS/SNCB Belgian Railways";
             amount = "12.00";
             category = "Transportation";
-        } else if (q.contains("hotel") || q.contains("room")) {
-            vendor = "Holiday Inn Express Antwerp";
-            amount = "99.00";
+        } else if (q.contains("hotel") || q.contains("room") || q.contains("crowne") || q.contains("holiday inn")) {
+            vendor = "Crowne Plaza Antwerp";
+            amount = "185.00";
             category = "Accommodation";
-        } else if (q.contains("food") || q.contains("restaurant") || q.contains("meal") || q.contains("dinner") || q.contains("lunch")) {
-            vendor = "Balls & Glory Antwerp";
-            amount = "18.50";
+        } else if (q.contains("food") || q.contains("restaurant") || q.contains("meal") || q.contains("dinner") || q.contains("lunch") || q.contains("brasserie") || q.contains("bistro")) {
+            vendor = "Bistro du Centre";
+            amount = "82.00";
             category = "Meals";
         }
 
+        // If the caller explicitly mentions an amount, extract it
         for (String word : q.split("\\s+")) {
-            String clean = word.replaceAll("[€$£,.]$", "");
-            clean = clean.replaceAll("^[€$£]", "");
+            String clean = word.replaceAll("[€$£,]", "").replaceAll("\\.$", "");
             try {
                 double parsed = Double.parseDouble(clean);
-                amount = String.format("%.2f", parsed);
-                break;
+                if (parsed > 1) {
+                    amount = String.format("%.2f", parsed);
+                    break;
+                }
             } catch (NumberFormatException ignored) {
             }
         }
@@ -261,32 +268,19 @@ public class TravelTool {
         String confidence = "Unknown vendor".equals(vendor) ? "low" : "high";
 
         return String.format("""
-                📄 **Receipt extracted:**
+                Receipt extracted and ready for expense logging:
 
-                ```
-                Vendor:   %s
-                Amount:   %s %s
-                Date:     %s
-                Category: %s
-                Status:   pending_review
-                ```
+                vendor: %s
+                amount: %s
+                currency: %s
+                date: %s
+                category: %s
+                description: %s
+                status: pending_review
+                confidence: %s
 
-                This receipt data is ready to be forwarded to the Expense & Compliance Agent \
-                for audit-ready processing.
-
-                _Structured payload:_
-                ```json
-                {
-                  "vendor": "%s",
-                  "amount": "%s",
-                  "currency": "%s",
-                  "date": "%s",
-                  "category": "%s",
-                  "status": "pending_review",
-                  "confidence": "%s"
-                }
-                ```""", vendor, currency, amount, date, category,
-                vendor, amount, currency, date, category, confidence);
+                Forward this to the Expense & Compliance Agent to log and validate against corporate limits.""",
+                vendor, amount, currency, date, category, description.trim(), confidence);
     }
 
     @Tool("Get helpful local tips for Devoxx Belgium attendees about the venue, Belgian culture, transport, and dining.")
