@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevSphere Expense Portal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f4f5f7;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 { font-size: 1.25rem; font-weight: 600; }
+    header span { font-size: 0.8rem; color: #8892a4; background: #2d3047; padding: 2px 8px; border-radius: 4px; }
+
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      padding: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      padding-bottom: .75rem;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .card h2 .icon { font-size: 1.2rem; }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem 1rem;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+
+    label { display: block; font-size: .8rem; font-weight: 500; color: #555; margin-bottom: .3rem; }
+
+    input, select, textarea {
+      width: 100%;
+      padding: .5rem .75rem;
+      border: 1px solid #dde1e7;
+      border-radius: 6px;
+      font-size: .9rem;
+      background: #fafafa;
+      color: #1a1a2e;
+      transition: border-color .15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #4f6ef7;
+      background: #fff;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .55rem 1.25rem;
+      border: none;
+      border-radius: 6px;
+      font-size: .9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: #4f6ef7; color: #fff; }
+    .btn-primary:hover { opacity: .9; }
+    .btn-secondary { background: #eef0f7; color: #3a4a7a; }
+    .btn-secondary:hover { background: #e2e5f1; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .form-actions {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* Result panels */
+    .result-actions {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+
+    .result-box {
+      background: #f8f9fc;
+      border: 1px solid #e4e7ef;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      min-height: 80px;
+      font-size: .88rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: #2d3047;
+    }
+    .result-box.empty { color: #aaa; font-style: italic; }
+    .result-box.error { border-color: #f9c7c7; background: #fff5f5; color: #c0392b; }
+    .result-box.loading { color: #7a8bcc; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid #ccc;
+      border-top-color: #4f6ef7;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Amount + currency inline */
+    .amount-row { display: grid; grid-template-columns: 1fr 100px; gap: .5rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>DevSphere Expense Portal</h1>
+  <span>Powered by A2A</span>
+</header>
+
+<main>
+
+  <!-- Log expense form -->
+  <div class="card">
+    <h2><span class="icon">🧾</span> Log New Expense</h2>
+    <form id="expenseForm">
+      <div class="form-grid">
+        <div>
+          <label for="vendor">Vendor *</label>
+          <input id="vendor" type="text" placeholder="e.g. Bolt Belgium" required>
+        </div>
+        <div>
+          <label for="date">Date *</label>
+          <input id="date" type="date" required>
+        </div>
+        <div>
+          <label>Amount &amp; Currency *</label>
+          <div class="amount-row">
+            <input id="amount" type="number" step="0.01" min="0" placeholder="0.00" required>
+            <select id="currency">
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+              <option value="GBP">GBP</option>
+              <option value="CHF">CHF</option>
+              <option value="JPY">JPY</option>
+              <option value="CAD">CAD</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="category">Category *</label>
+          <select id="category">
+            <option value="Transportation">Transportation</option>
+            <option value="Meals">Meals</option>
+            <option value="Accommodation">Accommodation</option>
+            <option value="Registration">Registration</option>
+            <option value="Supplies">Supplies</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="description">Description</label>
+          <input id="description" type="text" placeholder="e.g. Taxi from airport to venue">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="submitBtn">Submit Expense</button>
+      </div>
+    </form>
+    <div id="submitResult" class="result-box empty" style="margin-top:1rem;">
+      Response will appear here.
+    </div>
+  </div>
+
+  <!-- Summary & Compliance -->
+  <div class="card">
+    <h2><span class="icon">📊</span> Reports</h2>
+    <div class="result-actions">
+      <button class="btn btn-secondary" id="summaryBtn">Expense Summary</button>
+      <button class="btn btn-secondary" id="complianceBtn">Compliance Status</button>
+    </div>
+    <div id="reportResult" class="result-box empty">Select a report above.</div>
+  </div>
+
+</main>
+
+<script>
+  // Pre-fill today's date
+  document.getElementById('date').value = new Date().toISOString().slice(0, 10);
+
+  function setResult(el, text, state) {
+    el.className = 'result-box ' + (state || '');
+    el.textContent = text;
+  }
+
+  function setLoading(el) {
+    el.className = 'result-box loading';
+    el.innerHTML = '<span class="spinner"></span> Contacting agent…';
+  }
+
+  async function callApi(path, options) {
+    const res = await fetch(path, options);
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Request failed');
+    return json.response;
+  }
+
+  // Log expense
+  document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const out = document.getElementById('submitResult');
+    btn.disabled = true;
+    setLoading(out);
+    try {
+      const body = {
+        vendor:      document.getElementById('vendor').value.trim(),
+        amount:      document.getElementById('amount').value,
+        currency:    document.getElementById('currency').value,
+        date:        document.getElementById('date').value,
+        category:    document.getElementById('category').value,
+        description: document.getElementById('description').value.trim()
+      };
+      const text = await callApi('/api/expense', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      setResult(out, text, '');
+    } catch (err) {
+      setResult(out, err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // Reports
+  async function fetchReport(path) {
+    const out = document.getElementById('reportResult');
+    document.getElementById('summaryBtn').disabled = true;
+    document.getElementById('complianceBtn').disabled = true;
+    setLoading(out);
+    try {
+      const text = await callApi(path, { method: 'GET' });
+      setResult(out, text, '');
+    } catch (err) {
+      setResult(out, err.message, 'error');
+    } finally {
+      document.getElementById('summaryBtn').disabled = false;
+      document.getElementById('complianceBtn').disabled = false;
+    }
+  }
+
+  document.getElementById('summaryBtn').addEventListener('click', () => fetchReport('/api/expense/summary'));
+  document.getElementById('complianceBtn').addEventListener('click', () => fetchReport('/api/expense/compliance'));
+</script>
+
+</body>
+</html>

@@ -11,9 +11,9 @@
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>travel-agent-java-client</artifactId>
-    <name>Java → Python A2A Interop Client</name>
-    <description>Java client that calls the Python Travel &amp; Logistics Agent via the A2A protocol</description>
+    <artifactId>solution-travel-agent-java-client</artifactId>
+    <name>Java → Python A2A Interop Client (Solution)</name>
+    <description>Solution: Java client that calls the Python Travel &amp; Logistics Agent via the A2A protocol</description>
 
     <dependencies>
         <!-- A2A Java SDK — client + REST transport -->

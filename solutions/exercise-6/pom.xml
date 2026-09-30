@@ -14,7 +14,7 @@
     <artifactId>enterprise-agent-parent-solution</artifactId>
     <packaging>pom</packaging>
     <name>DevSphere Enterprise Agent — Parent Solution (WildFly + Jakarta A2A SDK)</name>
-    <description>Solution: Multi-node enterprise exercise — JPA-backed task store + Kafka-replicated queue manager across two WildFly nodes</description>
+    <description>Solution: Multi-node enterprise — JPA-backed task store + Kafka-replicated queue manager across two WildFly nodes</description>
 
     <properties>
         <a2a-jakarta.version>1.0.0.Final</a2a-jakarta.version>
@@ -23,6 +23,10 @@
         <version.wildfly.grpc>0.2.1.Final</version.wildfly.grpc>
         <version.wildfly-maven-plugin>5.1.3.Final</version.wildfly-maven-plugin>
         <jboss.home>${project.build.directory}/wildfly</jboss.home>
+        <!--
+            Default build does not provision a WildFly server.
+            Each profile (jsonrpc, grpc, rest) sets this to 'package'.
+        -->
         <wildfly.maven.plugin.phase>none</wildfly.maven.plugin.phase>
     </properties>
 
@@ -60,8 +64,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>node-a</module>
-        <module>node-b</module>
+        <module>server</module>
         <module>client</module>
     </modules>
 </project>
