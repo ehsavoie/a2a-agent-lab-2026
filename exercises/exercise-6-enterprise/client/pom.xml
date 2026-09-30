@@ -16,6 +16,10 @@
     <name>DevSphere Enterprise Client</name>
     <description>Client demonstrating cross-node task replication between two WildFly enterprise agent nodes</description>
 
+    <properties>
+        <attendee.name>Maya</attendee.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.a2aproject.sdk</groupId>
@@ -68,7 +72,7 @@
     <profiles>
         <!--
             Run the cross-node demo with JSON-RPC transport:
-              mvn exec:java -Prun-jsonrpc -pl client
+              mvn compile exec:java -Prun-jsonrpc -pl client
         -->
         <profile>
             <id>run-jsonrpc</id>
@@ -80,7 +84,7 @@
                         <configuration>
                             <arguments>
                                 <argument>JSONRPC</argument>
-                                <argument>${user.name}</argument>
+                                <argument>${attendee.name}</argument>
                             </arguments>
                         </configuration>
                     </plugin>
@@ -90,7 +94,7 @@
 
         <!--
             Run the cross-node demo with gRPC transport (requires -Pgrpc server build):
-              mvn exec:java -Prun-grpc -pl client
+              mvn compile exec:java -Prun-grpc -pl client
         -->
         <profile>
             <id>run-grpc</id>
@@ -102,7 +106,7 @@
                         <configuration>
                             <arguments>
                                 <argument>GRPC</argument>
-                                <argument>${user.name}</argument>
+                                <argument>${attendee.name}</argument>
                             </arguments>
                         </configuration>
                     </plugin>
@@ -112,7 +116,7 @@
 
         <!--
             Run the cross-node demo with REST transport (requires -Prest server build):
-              mvn exec:java -Prun-rest -pl client
+              mvn compile exec:java -Prun-rest -pl client
         -->
         <profile>
             <id>run-rest</id>
@@ -124,7 +128,7 @@
                         <configuration>
                             <arguments>
                                 <argument>HTTP+JSON</argument>
-                                <argument>${user.name}</argument>
+                                <argument>${attendee.name}</argument>
                             </arguments>
                         </configuration>
                     </plugin>

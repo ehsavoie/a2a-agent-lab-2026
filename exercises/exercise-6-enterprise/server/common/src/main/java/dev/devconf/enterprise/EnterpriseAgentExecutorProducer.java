@@ -18,6 +18,7 @@ import org.a2aproject.sdk.spec.TextPart;
 public class EnterpriseAgentExecutorProducer {
 
     @Produces
+    @ApplicationScoped
     public AgentExecutor enterpriseAgentExecutor() {
         return new EnterpriseAgentExecutor();
     }
@@ -41,12 +42,7 @@ public class EnterpriseAgentExecutorProducer {
             }
 
             emitter.startWork();
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
-            }
+            pause(2000);
 
             List<Part<?>> parts = context.getMessage().parts();
             List<TextPart> textParts = parts.stream()
@@ -57,8 +53,25 @@ public class EnterpriseAgentExecutorProducer {
 
             emitter.addArtifact(
                     Collections.singletonList(new TextPart("Hello " + name)),
-                    null, "response", null);
+                    null, "greeting", null);
+            pause(1000);
+            emitter.addArtifact(
+                    Collections.singletonList(new TextPart("Preparing your workshop welcome, " + name)),
+                    null, "progress", null);
+            pause(1000);
+            emitter.addArtifact(
+                    Collections.singletonList(new TextPart("Welcome to the enterprise A2A demo, " + name + "!")),
+                    null, "summary", null);
             emitter.complete();
+        }
+
+        private void pause(long millis) {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            }
         }
 
         @Override

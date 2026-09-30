@@ -6,15 +6,15 @@
 
     <parent>
         <groupId>dev.devconf</groupId>
-        <artifactId>enterprise-agent-parent</artifactId>
+        <artifactId>enterprise-server-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>enterprise-agent-node-b</artifactId>
+    <artifactId>enterprise-agent-common</artifactId>
     <packaging>war</packaging>
-    <name>DevSphere Enterprise Agent — Node B (WildFly + Jakarta A2A SDK)</name>
-    <description>Node B of the enterprise exercise: runs on port 9080 (offset 1000), shares PostgreSQL and Kafka with Node A</description>
+    <name>DevSphere Enterprise Agent — Shared WAR</name>
+    <description>One agent WAR deployed on both enterprise WildFly nodes</description>
 
     <dependencies>
         <!-- Jakarta EE APIs — provided by WildFly -->
@@ -60,6 +60,7 @@
         <!-- manager, enabling multi-node/load-balanced deployment.       -->
         <!-- ============================================================ -->
         <dependency>
+            <!-- JPA-backed TaskStore (replaces InMemoryTaskStore once on the classpath) -->
             <groupId>org.a2aproject.sdk</groupId>
             <artifactId>a2a-java-extras-task-store-database-jpa</artifactId>
             <exclusions>
@@ -74,6 +75,7 @@
             </exclusions>
         </dependency>
         <dependency>
+            <!-- JPA-backed PushNotificationConfigStore -->
             <groupId>org.a2aproject.sdk</groupId>
             <artifactId>a2a-java-extras-push-notification-config-store-database-jpa</artifactId>
             <exclusions>
@@ -88,6 +90,7 @@
             </exclusions>
         </dependency>
         <dependency>
+            <!-- Replicated queue manager core -->
             <groupId>org.a2aproject.sdk</groupId>
             <artifactId>a2a-java-queue-manager-replicated-core</artifactId>
             <exclusions>
@@ -106,6 +109,7 @@
             </exclusions>
         </dependency>
         <dependency>
+            <!-- MicroProfile Reactive Messaging (Kafka) replication strategy -->
             <groupId>org.a2aproject.sdk</groupId>
             <artifactId>a2a-java-queue-manager-replication-mp-reactive</artifactId>
             <exclusions>
@@ -126,23 +130,11 @@
     </dependencies>
 
     <build>
+        <finalName>ROOT</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.wildfly.plugins</groupId>
-                <artifactId>wildfly-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>provisioning</id>
-                        <goals>
-                            <goal>package</goal>
-                        </goals>
-                        <phase>${wildfly.maven.plugin.phase}</phase>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
@@ -150,9 +142,6 @@
     <profiles>
         <profile>
             <id>jsonrpc</id>
-            <properties>
-                <wildfly.maven.plugin.phase>package</wildfly.maven.plugin.phase>
-            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.wildfly.a2a</groupId>
@@ -163,9 +152,6 @@
 
         <profile>
             <id>grpc</id>
-            <properties>
-                <wildfly.maven.plugin.phase>package</wildfly.maven.plugin.phase>
-            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.wildfly.a2a</groupId>
@@ -181,57 +167,16 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
+                <!-- gRPC needs JSONRPC to serve the AgentCard -->
                 <dependency>
                     <groupId>org.wildfly.a2a</groupId>
                     <artifactId>a2a-jakarta-jsonrpc</artifactId>
                 </dependency>
             </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.wildfly.plugins</groupId>
-                        <artifactId>wildfly-maven-plugin</artifactId>
-                        <configuration>
-                            <feature-packs>
-                                <feature-pack>
-                                    <groupId>org.wildfly</groupId>
-                                    <artifactId>wildfly-galleon-pack</artifactId>
-                                    <version>${version.wildfly}</version>
-                                </feature-pack>
-                                <feature-pack>
-                                    <groupId>org.wildfly.grpc</groupId>
-                                    <artifactId>wildfly-grpc-feature-pack</artifactId>
-                                    <version>${version.wildfly.grpc}</version>
-                                </feature-pack>
-                                <feature-pack>
-                                    <groupId>org.wildfly</groupId>
-                                    <artifactId>wildfly-datasources-galleon-pack</artifactId>
-                                    <version>${version.wildfly.datasources}</version>
-                                </feature-pack>
-                            </feature-packs>
-                            <discover-provisioning-info>
-                                <add-ons>
-                                    <add-on>wildfly-cli</add-on>
-                                    <add-on>grpc</add-on>
-                                    <add-on>postgresql:default</add-on>
-                                    <add-on>kafka</add-on>
-                                </add-ons>
-                            </discover-provisioning-info>
-                            <galleon-options>
-                                <jboss-fork-embedded>true</jboss-fork-embedded>
-                                <stability-level>preview</stability-level>
-                            </galleon-options>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
 
         <profile>
             <id>rest</id>
-            <properties>
-                <wildfly.maven.plugin.phase>package</wildfly.maven.plugin.phase>
-            </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.wildfly.a2a</groupId>

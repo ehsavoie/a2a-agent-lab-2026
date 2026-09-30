@@ -2121,7 +2121,7 @@ mvn quarkus:dev</code></pre>
 <section id="ex6-intro" class="section-anchor">
 <h2><span class="badge badge-teal">Exercise 6</span> Enterprise A2A &mdash; Multi-Node WildFly with JPA &amp; Kafka <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(Bonus)</span></h2>
 
-<p><em>&ldquo;The DevSphere system needs to survive a node failure and scale horizontally. In this bonus exercise you deploy the same agent WAR on two WildFly nodes sharing a PostgreSQL database and a Kafka broker, then prove that a task created on Node&nbsp;A can be completed and observed on Node&nbsp;B &mdash; without Node&nbsp;B ever touching the database for that task&rsquo;s events.&rdquo;</em></p>
+<p><em>&ldquo;The DevSphere system needs to survive a node failure and scale horizontally. In this bonus exercise you deploy the same agent WAR on two WildFly nodes sharing a PostgreSQL database and a Kafka broker, then prove that a task created and executed on Node&nbsp;A can be observed live on Node&nbsp;B through Kafka replication.&rdquo;</em></p>
 
 <div class="card-grid">
     <div class="card">
@@ -2137,7 +2137,7 @@ mvn quarkus:dev</code></pre>
     <div class="card">
         <div class="card-icon">&#128202;</div>
         <h4>JPA PushNotificationConfigStore</h4>
-        <p>Push-notification subscriptions are persisted in PostgreSQL so any node can serve a <code>GetTask</code> or SSE stream for any task.</p>
+        <p>Stores push-notification subscriptions in PostgreSQL. The cross-node demo uses task subscriptions and the shared JPA TaskStore.</p>
     </div>
     <div class="card">
         <div class="card-icon">&#128064;</div>
@@ -2166,10 +2166,10 @@ mvn quarkus:dev</code></pre>
         |
         | 3. broadcast to all nodes
         v
-  +-----------+        +-------------------+
-  |  Node B   |        |   Grafana :3000    |
-  |   :9080   |-------&gt;| OTel traces        |
-  +-----------+        +-------------------+
+  +-----------+
+  |  Node B   |
+  |   :9080   |
+  +-----------+
         |
         | 4. WORKING &rarr; COMPLETED streamed to client
         v
@@ -2177,7 +2177,7 @@ mvn quarkus:dev</code></pre>
 </pre>
 </div>
 
-<pre><code>cd exercises/exercise-6-enterprise</code></pre>
+<p>Exercise directory: <code>exercises/exercise-6-enterprise</code>. Start each command block below from the repository root, using a new terminal or returning to the root before the next block.</p>
 </section>
 
 <!-- Step 1: Infrastructure -->
@@ -2187,12 +2187,12 @@ mvn quarkus:dev</code></pre>
         <span class="step-number" style="background: var(--accent-teal);">1</span>
         <span class="step-title">Start the infrastructure</span>
     </div>
-    <p>The enterprise exercise needs three backing services. A <code>podman-compose.yml</code> in the exercise root starts all of them.</p>
+    <p>The enterprise exercise needs two backing services. A <code>podman-compose.yml</code> in the exercise root starts all of them.</p>
 </div>
 
 <pre><code>cd exercises/exercise-6-enterprise
 podman-compose up -d
-# or: docker compose up -d</code></pre>
+# or: docker compose -f podman-compose.yml up -d</code></pre>
 
 <table>
     <thead>
@@ -2201,13 +2201,12 @@ podman-compose up -d
     <tbody>
         <tr><td><strong>PostgreSQL 17</strong></td><td>5432</td><td>Shared JPA task store and push-notification config store</td></tr>
         <tr><td><strong>Kafka 4.1</strong></td><td>9092</td><td>Broadcast task-state events across nodes (<code>replicated-events</code> topic)</td></tr>
-        <tr><td><strong>Grafana LGTM</strong></td><td>3000 / 4317</td><td>Distributed traces via OpenTelemetry</td></tr>
     </tbody>
 </table>
 
 <div class="callout info">
     <div class="callout-title">&#128161; Kafka consumer groups</div>
-    <p>Each node <strong>must</strong> start with a unique <code>mp.messaging.incoming.replicated-events-in.group.id</code>. If both nodes share the same consumer group, Kafka splits the partition between them and each node only receives half the events &mdash; breaking cross-node replication. Pass the group id as a system property at startup (see Step 3).</p>
+    <p>Wait for PostgreSQL and Kafka to finish starting before starting the WildFly nodes. Each node <strong>must</strong> start with a unique <code>mp.messaging.incoming.replicated-events-in.group.id</code>. If both nodes share the same consumer group, Kafka distributes partitions between them and each node only receives events from its assigned partitions &mdash; breaking cross-node replication. Pass the group id as a system property at startup (see Step 3).</p>
 </div>
 </section>
 
@@ -2253,7 +2252,7 @@ public class EnterpriseAgentCardProducer {
                 .skills(Collections.singletonList(AgentSkill.builder()
                         .id("hello_world")
                         .name("Hello World")
-                        .description("Greets the attendee. Task created on one node, completed on the other.")
+                        .description("Greets the attendee. Task executed on Node A, observed on Node B.")
                         .build()))
                 ...
     }
@@ -2261,7 +2260,7 @@ public class EnterpriseAgentCardProducer {
     </div>
 </details>
 
-<p>The AgentExecutor uses an <strong>init handshake</strong> pattern to split task creation from task execution, allowing the client to subscribe on a different node before the work begins:</p>
+<p>The <code>AgentExecutor</code> producer method is annotated with <code>@Produces</code> and <code>@ApplicationScoped</code> so each node shares one executor instance. The AgentExecutor uses an <strong>init handshake</strong> pattern to split task creation from task execution, allowing the client to subscribe on a different node before the work begins:</p>
 
 <details class="solution">
     <summary>Show EnterpriseAgentExecutorProducer.java</summary>
@@ -2281,11 +2280,15 @@ public void execute(RequestContext context, AgentEmitter emitter) throws A2AErro
     }
 
     emitter.startWork();         // publish WORKING event via Kafka &rarr; broadcast to all nodes
-    Thread.sleep(2000);          // simulates real work
+    pause(2000);                 // simulates real work; restores interrupt status on interruption
 
     String name = extractLastTextPart(context.getMessage());
-    emitter.addArtifact(Collections.singletonList(new TextPart("Hello " + name)), ...);
-    emitter.complete();          // publish COMPLETED + artifact via Kafka &rarr; Node B receives it
+    emitter.addArtifact(Collections.singletonList(new TextPart("Hello " + name)), ..., "greeting", ...);
+    pause(1000);
+    emitter.addArtifact(Collections.singletonList(new TextPart("Preparing your workshop welcome, " + name)), ..., "progress", ...);
+    pause(1000);
+    emitter.addArtifact(Collections.singletonList(new TextPart("Welcome to the enterprise A2A demo, " + name + "!")), ..., "summary", ...);
+    emitter.complete();          // publish COMPLETED after all three artifact events
 }</code></pre>
     </div>
 </details>
@@ -2303,43 +2306,43 @@ public void execute(RequestContext context, AgentEmitter emitter) throws A2AErro
         <span class="step-number" style="background: var(--accent-teal);">3</span>
         <span class="step-title">Build &amp; run Node A and Node B</span>
     </div>
-    <p>Build both WAR files (the JSON-RPC profile provisions a complete WildFly server in <code>target/wildfly/</code>), then start each node with a different port offset and Kafka consumer group.</p>
+    <p>Build one shared WAR and provision two WildFly instances, then start each node with a different port offset, Kafka consumer group, and transaction node ID.</p>
 </div>
 
-<h4>Build Node A and Node B</h4>
-<pre><code># Build Node A
-cd exercises/exercise-6-enterprise/node-a
-mvn package -Pjsonrpc
-
-# Build Node B (same WAR, separate WildFly instance)
-cd ../node-b
-mvn package -Pjsonrpc</code></pre>
+<h4>Build the shared agent and both servers</h4>
+<pre><code># Build the common WAR and provision both nodes
+cd exercises/exercise-6-enterprise/server
+mvn clean package -Pjsonrpc</code></pre>
 
 <div class="callout info">
     <div class="callout-title">&#128161; Profile options</div>
-    <p>Use <code>-Pjsonrpc</code> for JSON-RPC transport (recommended for this exercise), <code>-Prest</code> for REST, or <code>-Pgrpc</code> for gRPC. All three support cross-node replication &mdash; only the wire transport changes.</p>
+    <p>Use <code>-Pjsonrpc</code> for JSON-RPC transport (recommended for this exercise), <code>-Prest</code> for REST, or <code>-Pgrpc</code> for gRPC. Choose one profile. Stop both nodes before rebuilding and always use <code>mvn clean package</code>: a plain <code>package</code> skips provisioning when a server already exists. Both nodes deploy the same <code>common/target/ROOT.war</code>; shared agent sources and resources live in <code>server/common/src/main/</code>.</p>
 </div>
 
-<h4>Start Node A (port 8080, offset 0)</h4>
-<pre><code>cd exercises/exercise-6-enterprise/node-a
+<h4>Start Node A (port 8080, offset 0) — new terminal</h4>
+<pre><code>cd exercises/exercise-6-enterprise/server/node-a
 POSTGRESQL_USER=devconf \
 POSTGRESQL_PASSWORD=devconf \
 POSTGRESQL_DATABASE=devconf \
 ./target/wildfly/bin/standalone.sh \
+  -Djboss.tx.node.id=node-a \
   -Dmp.messaging.incoming.replicated-events-in.group.id=node-a</code></pre>
 
 <h4>Start Node B (port 9080, offset 1000) — new terminal</h4>
-<pre><code>cd exercises/exercise-6-enterprise/node-b
+<pre><code>cd exercises/exercise-6-enterprise/server/node-b
 POSTGRESQL_USER=devconf \
 POSTGRESQL_PASSWORD=devconf \
 POSTGRESQL_DATABASE=devconf \
 ./target/wildfly/bin/standalone.sh \
   -Djboss.socket.binding.port-offset=1000 \
+  -Djboss.tx.node.id=node-b \
   -Dmp.messaging.incoming.replicated-events-in.group.id=node-b</code></pre>
+
+<p><strong>For gRPC, append <code>--stability=preview</code> to both startup commands.</strong> The gRPC profile provisions preview features, which WildFly must also enable at runtime.</p>
 
 <div class="callout warning">
     <div class="callout-title">&#9888; Unique consumer group IDs are mandatory</div>
-    <p>The <code>group.id</code> must differ between nodes. Without this, Kafka assigns one partition to each consumer and each node only sees half the events. Both nodes must receive <em>every</em> event on the topic to keep their in-memory SSE subscribers up to date.</p>
+    <p>The <code>group.id</code> must differ between nodes. Without this, Kafka assigns each partition to one consumer in the group, so a node can miss the events needed by its subscribers. Both nodes must receive <em>every</em> event on the topic to keep their in-memory SSE subscribers up to date. The <code>jboss.tx.node.id</code> values must also differ for transaction recovery.</p>
 </div>
 
 <h4>Verify both nodes are up</h4>
@@ -2359,19 +2362,21 @@ curl -s http://localhost:9080/.well-known/agent-card.json \
         <span class="step-number" style="background: var(--accent-teal);">&#10003;</span>
         <span class="step-title">Cross-node demo with the Java client</span>
     </div>
-    <p>The <code>client/</code> module contains <code>EnterpriseClient</code>, which orchestrates the full cross-node scenario in four steps.</p>
+    <p>The <code>client/</code> module contains <code>EnterpriseClient</code>, which orchestrates the full cross-node scenario in five steps.</p>
 </div>
 
 <pre><code>cd exercises/exercise-6-enterprise
 
 # JSON-RPC transport (default)
-mvn exec:java -Prun-jsonrpc -pl client
+mvn compile exec:java -Prun-jsonrpc -pl client
 
 # REST transport (requires -Prest server build)
-mvn exec:java -Prun-rest -pl client
+mvn compile exec:java -Prun-rest -pl client
 
 # gRPC transport (requires -Pgrpc server build)
-mvn exec:java -Prun-grpc -pl client</code></pre>
+mvn compile exec:java -Prun-grpc -pl client</code></pre>
+
+<p>These commands compile the client before running it and greet Maya by default. Add <code>-Dattendee.name=YourName</code> to change the attendee.</p>
 
 <p>The client runs this sequence:</p>
 
@@ -2380,39 +2385,56 @@ mvn exec:java -Prun-grpc -pl client</code></pre>
                          Task ID returned to client
 
 2. Node B (:9080)   &larr; subscribeToTask(taskId)
-                         Node B has never seen this task locally
+                         Node B loads the task from the shared store
 
 3. Node A (:8080)   &larr; sendMessage(taskId=..., text="Maya")
                          Task transitions: SUBMITTED &rarr; WORKING
 
 4. Node B (:9080)   receives via Kafka:
                          WORKING event  &rarr; SSE stream
-                         COMPLETED event + artifact &rarr; SSE stream
-                         "Hello Maya"</code></pre>
+                         After 2 seconds: greeting artifact
+                         After 1 more second: progress artifact
+                         After 1 more second: summary artifact
+                         COMPLETED event &rarr; client finishes waiting
 
-<p>Expected output:</p>
-<pre><code>Created task abc-123 via Node A (:8080)
-Node B observed states (via Kafka replication): [TASK_STATE_WORKING, TASK_STATE_COMPLETED]
-Agent responds: Hello Maya</code></pre>
+5. Node A &amp; Node B   &larr; getTask(taskId) using fresh clients
+                         Both return COMPLETED and all three matching artifacts</code></pre>
+
+<p>The client prints each status and artifact as it arrives, with elapsed times, node names, and task IDs. Snapshots and replicated updates can print the same status more than once. Expected output excerpt (times and IDs vary):</p>
+<pre><code>[+1.000s] Node A (:8080) Created task abc-123 state=TASK_STATE_SUBMITTED
+[+1.100s] Node B (:9080) Task abc-123 status=TASK_STATE_SUBMITTED
+[+2.200s] Node B (:9080) Task abc-123 status=TASK_STATE_WORKING
+[+4.200s] Node B (:9080) Task abc-123 artifact=greeting id=... text=Hello Maya
+[+5.200s] Node B (:9080) Task abc-123 artifact=progress id=... text=Preparing your workshop welcome, Maya
+[+6.200s] Node B (:9080) Task abc-123 artifact=summary id=... text=Welcome to the enterprise A2A demo, Maya!
+[+6.200s] Node B (:9080) Task abc-123 status=TASK_STATE_COMPLETED
+[+6.200s] Node B (:9080) Completed stream for task abc-123 with 3 artifacts
+[+6.300s] Node A (:8080) GetTask: abc-123 state=TASK_STATE_COMPLETED artifacts=3 (all artifact IDs, names, and contents match the stream)
+[+6.400s] Node B (:9080) GetTask: abc-123 state=TASK_STATE_COMPLETED artifacts=3 (all artifact IDs, names, and contents match the stream)
+Agent responds:
+Hello Maya
+Preparing your workshop welcome, Maya
+Welcome to the enterprise A2A demo, Maya!</code></pre>
 
 <div class="callout tip">
     <div class="callout-title">&#128161; What this proves</div>
-    <p>Node B had <strong>no local record</strong> of task <code>abc-123</code>. The <code>WORKING</code> and <code>COMPLETED</code> state changes arrived purely via the Kafka <code>replicated-events</code> topic and were relayed to the subscribed client. This is what makes the system horizontally scalable: any node behind a load balancer can answer <code>GetTask</code> or serve an SSE stream for any task.</p>
+    <p>Node B loads the initial task from the shared JPA TaskStore. The initial snapshot can include <code>SUBMITTED</code>; subsequent <code>WORKING</code> and <code>COMPLETED</code> state changes and all three artifacts arrive via the Kafka <code>replicated-events</code> topic and are relayed to the subscribed client. The client waits for <code>COMPLETED</code>, then fresh clients retrieve the task from both nodes and verify the original ID, <code>COMPLETED</code> status, and all artifact IDs, names, and contents, demonstrating shared TaskStore access. Repeating these lookups after restarting both servers confirms persistence across restarts. This is what makes the system horizontally scalable: any node behind a load balancer can answer <code>GetTask</code> or serve an SSE stream for any task.</p>
 </div>
 
 <h3>Checkpoint</h3>
 
 <ul class="checklist">
-    <li>PostgreSQL, Kafka, and Grafana LGTM running via <code>podman-compose up -d</code></li>
-    <li>Node A on port 8080, Node B on port 9080 &mdash; both serving the same AgentCard</li>
+    <li>PostgreSQL and Kafka running via <code>podman-compose up -d</code></li>
+    <li>Node A on port 8080, Node B on port 9080 &mdash; both serving the same agent with their own advertised URLs</li>
     <li>JPA-backed task store: tasks persist across restarts and are visible from both nodes</li>
     <li>Kafka-replicated queue manager: <code>WORKING &rarr; COMPLETED</code> events broadcast across nodes</li>
-    <li>Client observes the full task lifecycle on Node B even though Node A did the work</li>
+    <li>Client prints every status and all three artifacts on Node B, waiting for <code>COMPLETED</code></li>
+    <li>Final <code>GetTask</code> calls on both nodes return the same completed task and all three matching artifacts</li>
 </ul>
 
 <div class="callout success">
     <div class="callout-title">&#9989; Key takeaway</div>
-    <p><strong>Drop-in enterprise extras.</strong> Adding JPA persistence and Kafka replication required zero changes to the agent logic &mdash; only the three extra dependencies in <code>pom.xml</code>. The Java A2A SDK swaps its in-memory implementations for the JPA-backed and Kafka-replicated ones automatically at deployment time via CDI.</p>
+    <p><strong>Drop-in enterprise extras.</strong> Adding JPA persistence and Kafka replication uses the enterprise dependencies and shared persistence and Kafka configuration in <code>server/common</code>. The Java A2A SDK swaps its in-memory implementations for the JPA-backed and Kafka-replicated ones automatically at deployment time via CDI.</p>
 </div>
 </section>
 
