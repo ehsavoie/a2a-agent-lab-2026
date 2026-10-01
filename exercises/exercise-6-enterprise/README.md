@@ -1,97 +1,111 @@
-# Exercise 6: Enterprise A2A across two WildFly nodes
+# Exercise 6 — Enterprise A2A: Multi-Node WildFly with JPA & Kafka (Bonus)
 
-Run one agent on two WildFly instances sharing PostgreSQL and Kafka. The client
-creates a task on Node A, subscribes to it on Node B, and sends the work to Node A.
-Node B streams every resulting state change and artifact to the client via Kafka
-replication. Finally, the client retrieves the completed task from both nodes
-and checks that its status and all artifacts match. The database keeps tasks available
-across server restarts.
+> *"The DevSphere system needs to survive a node failure and scale horizontally. Deploy the same agent WAR on two WildFly nodes sharing a PostgreSQL database and a Kafka broker, then prove that a task created and executed on Node A can be observed live on Node B through Kafka replication."*
 
-## Prerequisites
+This bonus exercise shows how the A2A Java SDK's in-memory implementations (`InMemoryTaskStore`, `InMemoryQueueManager`) can be replaced with enterprise-grade JPA and Kafka implementations — with no changes to agent logic.
 
-- JDK 21+ and Maven 3.9+; set `JAVA_HOME` to the JDK you want WildFly to use.
-- Podman with `podman-compose`, or Docker Compose.
-- Free ports: 5432 and 9092 for infrastructure, 8080 and 9080 for HTTP,
-  and 9990 and 10990 for WildFly management. gRPC also uses 9555 and 10555.
+## Architecture
 
-## Project layout
-
-```text
-exercise-6-enterprise/
-├── pom.xml
-├── podman-compose.yml
-├── client/                 Java cross-node demo
-└── server/
-    ├── pom.xml             Shared provisioning configuration
-    ├── common/             Agent classes and resources; builds ROOT.war
-    ├── node-a/             Provisions the first WildFly instance
-    └── node-b/             Provisions the second WildFly instance
+```
+              +------------------------------+
+              |     SHARED INFRASTRUCTURE    |
+              |                              |
+              |  PostgreSQL :5432            |
+              |  - JPA TaskStore             |
+              |  - JPA PNConfigStore         |
+              |                              |
+              |  Kafka :9092                 |
+              |  - replicated-events topic   |
+              +------------------------------+
+                    ^               ^
+                    |               |
+  +-----------+     |               |     +-----------+
+  |  Node A   |-----+               +-----|  Node B   |
+  |   :8080   |                          |   :9080   |
+  +-----------+                          +-----------+
+       ^                                       |
+       | 1. create task                        | 4. WORKING → COMPLETED
+       |                                       v
+  EnterpriseClient                      EnterpriseClient
+  (sends to Node A)                     (subscribed to Node B)
 ```
 
-Both nodes deploy the same `server/common/target/ROOT.war`. Their server
-directories are separate: `server/node-a/target/wildfly` and
-`server/node-b/target/wildfly`. The node modules have no agent sources.
+## Enterprise Components
 
-## Key Files
+| Component | Replaces | Purpose |
+|---|---|---|
+| **JPA-backed TaskStore** | `InMemoryTaskStore` | Tasks survive restarts and are shared across nodes via PostgreSQL |
+| **Kafka-replicated QueueManager** | `InMemoryQueueManager` | Every task state-change event is published to a Kafka topic and broadcast to all nodes |
+| **JPA PushNotificationConfigStore** | In-memory | Stores push-notification subscriptions in PostgreSQL |
 
-The shared Java classes are under `server/common/src/main/java/dev/devconf/enterprise/`.
-The shared configuration files are under `server/common/src/main/resources/META-INF/`.
+## The Agent: Conference Feedback
 
-| File | Purpose |
-| --- | --- |
-| [EnterpriseAgentExecutorProducer.java](server/common/src/main/java/dev/devconf/enterprise/EnterpriseAgentExecutorProducer.java) | Application-scoped executor; creates the task with the `init` handshake, emits three artifacts with pauses, and completes the task |
-| [EnterpriseAgentCardProducer.java](server/common/src/main/java/dev/devconf/enterprise/EnterpriseAgentCardProducer.java) | Advertises the available transports and the serving node's ports |
-| [EnterpriseClient.java](client/src/main/java/dev/devconf/enterprise/client/EnterpriseClient.java) | Creates and executes the task on Node A, prints streaming events from Node B until COMPLETED, then verifies the stored task on both nodes |
-| [microprofile-config.properties](server/common/src/main/resources/META-INF/microprofile-config.properties) | Kafka broker, replication topic, and incoming/outgoing channels; each node overrides the consumer group at startup |
-| [persistence.xml](server/common/src/main/resources/META-INF/persistence.xml) | Shared JPA persistence unit for tasks and push-notification configurations; updates the schema without recreating it on deployment |
-| [server/pom.xml](server/pom.xml) | Shared WildFly provisioning, PostgreSQL datasource, and transport profiles |
-| [server/common/pom.xml](server/common/pom.xml) | Packages the shared agent and SDK dependencies into `ROOT.war` |
-| [server/node-a/pom.xml](server/node-a/pom.xml), [server/node-b/pom.xml](server/node-b/pom.xml) | Provision separate WildFly instances that deploy the common WAR |
-| [podman-compose.yml](podman-compose.yml) | PostgreSQL and Kafka backing services, including the persistent database volume |
+The agent in this exercise collects attendee feedback for conference sessions and provides per-talk or global summaries to speakers.
 
-## Start infrastructure
+| Skill ID | Description |
+|---|---|
+| `submit-feedback` | Record a rating and comment for a speaker's session |
+| `feedback-summary` | Return aggregated feedback for a speaker, optionally per session |
 
-From the exercise directory:
+## Step 1 — Start the Infrastructure
 
 ```bash
+cd exercises/exercise-6-enterprise
 podman-compose up -d
-# Docker alternative:
-# docker compose -f podman-compose.yml up -d
+# or: docker compose -f podman-compose.yml up -d
 ```
 
-This starts PostgreSQL 17 on port 5432 and Kafka 4.1.0 on port 9092. Wait for
-PostgreSQL to accept connections and Kafka to start before starting the nodes.
-The PostgreSQL volume preserves tasks when containers are stopped.
+| Service | Port | Purpose |
+|---|---|---|
+| **PostgreSQL 17** | 5432 | JPA store: A2A tasks, push-notification configs, and `session_feedback` (seeded from `initdb/01-feedback.sql`) |
+| **Kafka 4.1** | 9092 | Broadcast task-state events across nodes (`replicated-events` topic) |
 
-## Build both servers
+> **If "No feedback found" on summary:** the `initdb/01-feedback.sql` seed only runs when the PostgreSQL volume is first created. If the `pgdata` volume already existed, recreate it: `podman-compose stop && podman-compose down -v && podman-compose up -d`
 
-From the exercise directory:
+> **Stopping containers properly:** Always stop before removing — `podman-compose stop` then `podman-compose down`. To also wipe the PostgreSQL volume: `podman-compose stop && podman-compose down -v`
+
+## Step 2 — Explore the AgentCard & AgentExecutor
+
+Open `server/common/src/.../EnterpriseAgentCardProducer.java`. The AgentCard producer reads the WildFly socket-binding port-offset at runtime so the advertised URL is always correct — whether this request was served by Node A (offset 0) or Node B (offset 1000).
+
+Open `EnterpriseAgentExecutorProducer.java` and study the **init handshake** pattern:
+
+```java
+@Override
+public void execute(RequestContext context, AgentEmitter emitter) throws A2AError {
+    boolean isNewTask = context.getTask() == null;
+    if (isNewTask) {
+        emitter.submit();  // persist task in JPA store, publish SUBMITTED event to Kafka
+    }
+
+    // Special convention: messageId "init" creates the task and returns immediately.
+    // The client can then resubscribe via a *different node* before sending the real work.
+    boolean isInitHandshake = isNewTask && "init".equals(context.getMessage().messageId());
+    if (isInitHandshake) {
+        return;  // task is SUBMITTED, open for continuation
+    }
+
+    emitter.startWork();         // publish WORKING event → broadcast to all nodes
+    // ... process feedback ...
+    emitter.complete();          // publish COMPLETED + artifact → Node B receives it via Kafka
+}
+```
+
+The init handshake proves cross-node replication: the `init` message creates the task on Node A, then the client resubscribes via Node B. When Node A sends the `WORKING → COMPLETED` transition, those events travel through Kafka and arrive at Node B's SSE stream.
+
+## Step 3 — Build & Run Node A and Node B
 
 ```bash
-cd server
+# Build the shared WAR and provision both server directories
+cd exercises/exercise-6-enterprise/server
 mvn clean package -Pjsonrpc
 ```
 
-Choose exactly one server profile:
+> Use `-Pjsonrpc` for JSON-RPC (recommended), `-Prest` for REST, or `-Pgrpc` for gRPC. Always use `mvn clean package` — a plain `package` skips provisioning when a server already exists.
 
-| Transport | Server build (from `server/`) | Client profile |
-| --- | --- | --- |
-| JSON-RPC | `mvn clean package -Pjsonrpc` | `run-jsonrpc` |
-| REST | `mvn clean package -Prest` | `run-rest` |
-| gRPC | `mvn clean package -Pgrpc` | `run-grpc` |
-
-Stop both nodes before rebuilding. Always use `clean package` so changes to the
-agent or transport profile reach the provisioned servers. `package` alone skips
-provisioning when a server already exists.
-
-## Start the nodes
-
-In two terminals, starting from the exercise directory:
-
-**Node A:**
-
+**Start Node A (port 8080) — new terminal:**
 ```bash
-cd server/node-a
+cd exercises/exercise-6-enterprise/server/node-a
 POSTGRESQL_USER=devconf \
 POSTGRESQL_PASSWORD=devconf \
 POSTGRESQL_DATABASE=devconf \
@@ -100,10 +114,9 @@ POSTGRESQL_DATABASE=devconf \
   -Dmp.messaging.incoming.replicated-events-in.group.id=node-a
 ```
 
-**Node B:**
-
+**Start Node B (port 9080) — new terminal:**
 ```bash
-cd server/node-b
+cd exercises/exercise-6-enterprise/server/node-b
 POSTGRESQL_USER=devconf \
 POSTGRESQL_PASSWORD=devconf \
 POSTGRESQL_DATABASE=devconf \
@@ -113,105 +126,87 @@ POSTGRESQL_DATABASE=devconf \
   -Dmp.messaging.incoming.replicated-events-in.group.id=node-b
 ```
 
-**For gRPC, append `--stability=preview` to both startup commands.** The gRPC
-profile provisions preview features; WildFly must also enable them at runtime.
+> **Unique consumer group IDs are mandatory.** Without this, Kafka distributes partitions between nodes and each node only receives events from its assigned partitions — breaking cross-node replication. The `jboss.tx.node.id` values must also differ for transaction recovery.
 
-The Kafka consumer groups must differ so both nodes receive every task event.
-The transaction node IDs must also differ so recovery can identify each server.
-The port offset makes Node B's AgentCard advertise its own HTTP and gRPC ports.
+> **For gRPC:** append `--stability=preview` to both startup commands.
 
-Check that both servers have deployed `ROOT.war` and serve their AgentCards:
-
+**Verify both nodes are up:**
 ```bash
-curl -fsS http://localhost:8080/.well-known/agent-card.json -H 'A2A-Version: 1.0'
-curl -fsS http://localhost:9080/.well-known/agent-card.json -H 'A2A-Version: 1.0'
+curl -s http://localhost:8080/.well-known/agent-card.json \
+  -H "A2A-Version: 1.0" | jq '{name, skills: [.skills[].id]}'
+
+curl -s http://localhost:9080/.well-known/agent-card.json \
+  -H "A2A-Version: 1.0" | jq '{name, skills: [.skills[].id]}'
 ```
 
-## Run the cross-node client
+## Step 4 — Run the Cross-Node Demo
 
-From the exercise directory, choose the client profile matching the server build:
+The `client/` module contains `EnterpriseClient`, which orchestrates the full cross-node scenario.
 
 ```bash
-mvn compile exec:java -Pjsonrpc -pl client
-# REST:
-# mvn compile exec:java -Prest -pl client
-# gRPC:
-# mvn compile exec:java -Pgrpc -pl client
+cd exercises/exercise-6-enterprise
+
+# Submit feedback via JSON-RPC
+mvn compile exec:java -Pjsonrpc -pl client \
+  -Dmessage="Feedback for Mario Fusco, session: Building Production-Ready Agentic Systems with LangChain4j and Quarkus, rating: 5, absolutely loved the live coding demo!"
+
+# Request a summary via JSON-RPC
+mvn compile exec:java -Pjsonrpc -pl client \
+  -Dmessage="Summary for Mario Fusco"
 ```
 
-The command compiles the client before running it. It greets Maya by default;
-use `-Dattendee.name=YourName` to change the name.
+The cross-node sequence:
+```
+1. Node A (:8080)   ← sendMessage(messageId="init")
+                         Task created, state: SUBMITTED
+                         Task ID returned to client
 
-The client prints elapsed times, node names, task IDs, status changes, and every
-artifact as it arrives. The executor works for about four seconds: after an
-initial two-second pause it emits a greeting, then a progress artifact and a
-summary, with one second between artifacts. The subscription waits for COMPLETED
-before checking the stored task.
+2. Node B (:9080)   ← subscribeToTask(taskId)
+                         Node B loads the task from shared JPA TaskStore
+                         (it was created on Node A — shared PostgreSQL makes it visible)
 
-Expected output excerpt (times and IDs vary):
+3. Node A (:8080)   ← sendMessage(taskId=..., "Feedback for Mario Fusco, ...")
+                         Task transitions: SUBMITTED → WORKING
 
-```text
-[+1.000s] Node A (:8080) Created task <task-id> state=TASK_STATE_SUBMITTED
-[+1.100s] Node B (:9080) Task <task-id> status=TASK_STATE_SUBMITTED
-[+2.200s] Node B (:9080) Task <task-id> status=TASK_STATE_WORKING
-[+4.200s] Node B (:9080) Task <task-id> artifact=greeting id=<artifact-id> text=Hello Maya
-[+5.200s] Node B (:9080) Task <task-id> artifact=progress id=<artifact-id> text=Preparing your workshop welcome, Maya
-[+6.200s] Node B (:9080) Task <task-id> artifact=summary id=<artifact-id> text=Welcome to the enterprise A2A demo, Maya!
-[+6.200s] Node B (:9080) Task <task-id> status=TASK_STATE_COMPLETED
-[+6.200s] Node B (:9080) Completed stream for task <task-id> with 3 artifacts
-[+6.300s] Node A (:8080) GetTask: <task-id> state=TASK_STATE_COMPLETED artifacts=3 (all artifact IDs, names, and contents match the stream)
-[+6.400s] Node B (:9080) GetTask: <task-id> state=TASK_STATE_COMPLETED artifacts=3 (all artifact IDs, names, and contents match the stream)
+4. Node B (:9080)   receives via Kafka:
+                         WORKING event  → SSE stream
+                         COMPLETED event + feedback confirmation artifact
+```
+
+Expected output:
+```
+[+0.9s] Node A (:8080) Sending init message
+[+1.3s] Node A (:8080) Created task a1b2c3d4-... state=TASK_STATE_SUBMITTED
+[+1.3s] Node B (:9080) Subscribing to task a1b2c3d4-...
+[+1.4s] Node B (:9080) Task a1b2c3d4-... status=TASK_STATE_SUBMITTED
+[+2.3s] Node A (:8080) Sending continuation text=Feedback for Mario Fusco...
+[+2.6s] Node B (:9080) Task a1b2c3d4-... status=TASK_STATE_WORKING
+[+4.6s] Node B (:9080) Task a1b2c3d4-... artifact=response text=Thank you! Feedback recorded...
+[+4.6s] Node B (:9080) Task a1b2c3d4-... status=TASK_STATE_COMPLETED
 Agent responds:
-Hello Maya
-Preparing your workshop welcome, Maya
-Welcome to the enterprise A2A demo, Maya!
+Thank you! Feedback recorded for Mario Fusco — Building Production-Ready Agentic Systems with LangChain4j and Quarkus
+★★★★★  "absolutely loved the live coding demo!"
 ```
 
-`SUBMITTED` is the initial task state; `WORKING` and `COMPLETED` are delivered
-while Node A executes the continuation. A snapshot and a replicated update can
-print the same status more than once; each received event is shown. Node B loads the initial task from the
-shared JPA task store and relays subsequent live events through Kafka. After
-closing the streaming client, two fresh clients call `GetTask` on Node A and
-Node B. Each lookup must return the original task ID, COMPLETED status, and the
-same artifact IDs, names, and contents for all three artifacts; the demo fails
-if either result differs. This confirms
-that both nodes can retrieve the completed task from the shared TaskStore.
+## Checkpoint
 
-The `init` message ID is a demo convention: the executor creates the task and
-leaves it open, giving the client time to subscribe on Node B before work starts.
-The executor producer is application scoped and shared within each node.
+- [ ] PostgreSQL and Kafka running via `podman-compose up -d` (seed feedback loaded from `initdb/01-feedback.sql`)
+- [ ] Node A on port 8080, Node B on port 9080 — both serving the Conference Feedback Agent AgentCard
+- [ ] JPA-backed task store: tasks persist across restarts and are visible from both nodes
+- [ ] Kafka-replicated queue manager: `WORKING → COMPLETED` events broadcast across nodes
+- [ ] Feedback submitted via Node A is included in summaries returned by Node B (shared PostgreSQL)
+- [ ] Task created on Node A is subscribed and observed on Node B, proving cross-node task replication
 
-To check persistence across restarts, replace `<task-id>` with the ID printed
-by the client and query both nodes:
+## Project Structure
 
-```bash
-for port in 8080 9080; do
-  curl -fsS "http://localhost:$port/" \
-    -H 'A2A-Version: 1.0' \
-    -H 'Content-Type: application/json' \
-    --data '{"jsonrpc":"2.0","id":"check","method":"GetTask","params":{"id":"<task-id>"}}'
-done
 ```
-
-Stop and restart both servers using their original startup commands, then repeat
-the request. It should return the same completed task and all three artifacts. JSON-RPC is
-available alongside REST and gRPC, so this check works with every server profile.
-
-## Stop the example
-
-Use Ctrl+C in each server terminal, then from the exercise directory:
-
-```bash
-podman-compose stop
-# Docker alternative:
-# docker compose -f podman-compose.yml stop
+exercise-6-enterprise/
+├── server/
+│   ├── common/          # Shared agent WAR sources (deployed to both nodes)
+│   ├── node-a/          # WildFly provisioned for Node A
+│   └── node-b/          # WildFly provisioned for Node B
+├── client/              # EnterpriseClient (cross-node demo runner)
+├── initdb/
+│   └── 01-feedback.sql  # PostgreSQL seed data for the feedback demo
+└── podman-compose.yml   # PostgreSQL + Kafka
 ```
-
-Stopping preserves the database volume. Restarting the servers preserves
-completed tasks, which either node can retrieve with `GetTask`.
-
-## Full Instructions
-
-See [../../docs/exercise-6.md](../../docs/exercise-6.md) for the complete
-step-by-step guide. The same exercise is also covered in the
-[HTML workshop walkthrough](../../workshop/index.html#ex6-intro).

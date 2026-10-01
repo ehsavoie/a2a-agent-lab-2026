@@ -1,110 +1,163 @@
-# Exercise 3: Cross-Language — The Travel & Logistics Agent
+# Exercise 3 — Cross-Language Travel & Logistics Agent (15 min)
 
-**Time:** 15 minutes
+> *"Maya's flight was delayed. She needs to get from Brussels Airport to Kinepolis Antwerp fast. The Travel Agent compares a Bolt rideshare (35 min, €45) vs the disrupted NMBS train (55 min, €12) and recommends the rideshare. Later, it extracts her taxi receipt for expense reporting."*
 
-> _"My plane ran late, and I am at Brussels Airport. How can I get to the convention center quickly?" The Travel & Logistics Agent compares rideshare, train, and taxi options — factoring in a transit disruption on the airport express — and recommends a Bolt rideshare for the 35-minute trip._
+Build a **Python A2A SDK** agent and prove cross-language interoperability — a Java client calling a Python agent and a Python client calling a Java agent, all with identical A2A protocol calls.
 
-## What You Build
+This exercise has two parts:
+- **`exercise-3-travel-agent-python/`** — the Python agent (this README)
+- **`exercise-3-travel-agent-java/`** — a standalone Java client that calls the Python agent
 
-A Python A2A agent using the `a2a-sdk` that provides:
-- Flight status with delay information
-- Transit route comparison (rideshare, train, taxi, shuttle) with sample disruption data
-- Hotel search with availability and pricing
-- Receipt extraction for expense reporting (cross-agent handoff to Exercise 5)
-- Restaurant recommendations and local tips
+## Context
 
-## What This Proves
+> **No LLM here.** Unlike the Java agents in Exercises 1 and 2, the Travel Agent does **not** use an LLM. It is a **rule-based agent** that pattern-matches keywords against hardcoded travel data. This is intentional: it shows that A2A agents don't need to be "AI-powered" to participate in the mesh. Any service that speaks the A2A protocol is a first-class citizen.
 
-A2A is a wire protocol — **any language, any framework**. A Python agent joins a Java mesh with zero adapters. A Java client calls the Python agent the same way it calls a Java agent.
+The `receipt-extraction` skill outputs structured data that the Expense & Compliance Agent (Exercise 4) can consume — this is the cross-agent data handoff in Maya's scenario.
 
-## Project Structure
+## What You Will Explore
 
+The Travel Agent is **fully implemented** — this exercise is about understanding the code and proving cross-language interoperability.
+
+Open `travel_agent.py` and study the six skill areas:
+
+| Skill ID | Description |
+|---|---|
+| `flight-status` | Check flight status, delays, and gate information |
+| `transit-routes` | Compare transit options from Brussels Airport to Kinepolis Antwerp |
+| `hotel-search` | Hotel recommendations near the venue |
+| `receipt-extraction` | Extract structured receipt data for expense reporting |
+| `restaurant-search` | Nearby restaurant recommendations |
+| `local-tips` | Local tips for the conference area |
+
+The `get_transit_options()` function returns a comparison:
+- **Rideshare (Bolt/Uber):** 35 min, €45 — recommended when train is disrupted
+- **Train (NMBS):** normally 35 min, €12 — currently disrupted (55 min today)
+- **Taxi (fixed fare):** 40 min, €65–75
+- **Rental car:** 40 min, €55/day
+
+The `extract_receipt()` function returns structured JSON data:
+```json
+{"vendor": "...", "amount": "...", "currency": "EUR",
+ "date": "...", "category": "...", "status": "pending_review"}
 ```
-exercise-3-travel-agent-python/
-├── pyproject.toml      # Dependencies: a2a-sdk, uvicorn, httpx
-├── travel_agent.py     # Agent implementation (AgentCard, handler, data)
-├── test_interop.py     # Cross-language test: Python → Java Schedule Agent
-└── java-client/        # Java → Python A2A interop client
-```
 
-## Prerequisites
-
-- Python 3.11+
-- `pip` or `uv`
-- Exercise 1 Schedule & Content Advisor running on port 8080 (for the cross-language test)
-- JDK 21+ and Maven 3.9+ (for the Java → Python client)
-
-## How to Run
+## Step 1 — Set Up and Start the Python Agent
 
 ```bash
 cd exercises/exercise-3-travel-agent-python
 
-# Install dependencies
+# Option A: pip
+python -m venv .venv
+source .venv/bin/activate
 pip install -e .
+
+# Option B: uv (faster)
+uv venv
+uv sync
 
 # Start the agent
 python travel_agent.py
 ```
 
-The agent starts on **http://localhost:9000**.
+The agent starts on **port 9000**.
 
-## How to Verify
+## Step 2 — Cross-Language Interoperability
 
-**1. Check the AgentCard:**
+### Python → Java (test_interop.py)
 
-```bash
-curl http://localhost:9000/.well-known/agent-card.json | python3 -m json.tool
-```
-
-You should see the agent's name, skills (`flight-status`, `transit-routes`, `hotel-search`, `receipt-extraction`, `restaurant-search`, `local-tips`), and capabilities.
-
-**2. Send a transit query:**
-
-```bash
-curl -s -X POST http://localhost:9000/message:send \
-  -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
-  -d '{
-    "message": {
-      "messageId": "msg-1",
-      "role": "ROLE_USER",
-      "parts": [{"text": "My plane ran late, and I am at Brussels Airport. How can I get to the convention center quickly?"}]
-    }
-  }' | python3 -m json.tool
-```
-
-**3. Test receipt extraction:**
-
-```bash
-curl -s -X POST http://localhost:9000/message:send \
-  -H "Content-Type: application/json" \
-  -H "A2A-Version: 1.0" \
-  -d '{
-    "message": {
-      "messageId": "msg-1",
-      "role": "ROLE_USER",
-      "parts": [{"text": "Log my taxi receipt for $42.50"}]
-    }
-  }' | python3 -m json.tool
-```
-
-## Cross-Language Test
-
-For Python → Java interop, start the [Schedule & Content Advisor](../exercise-1-schedule-advisor/README.md#quick-start) on port 8080. In another terminal, from this project directory, run:
+> **Prerequisite:** the Exercise 1 Schedule Advisor must be running on port 8080 first.
 
 ```bash
 python test_interop.py
 ```
 
-This fetches the Java agent's AgentCard and sends it a query — proving Python-to-Java A2A interop.
+This calls the Java Schedule Advisor (Quarkus, port 8080) from Python using the A2A Python SDK — proving that a Python client can talk to a Java server.
 
-For Java → Python interop, keep the Travel Agent running on port 9000 and run the client in another terminal:
+### Test transit comparison (REST transport)
 
 ```bash
-cd exercises/exercise-3-travel-agent-python/java-client
+curl -s -X POST http://localhost:9000/message:send \
+  -H "Content-Type: application/json" \
+  -H "A2A-Version: 1.0" \
+  -d '{
+    "message": {
+      "messageId": "msg-1",
+      "role": "ROLE_USER",
+      "parts": [{"text": "My flight was delayed. How do I get to Kinepolis Antwerp quickly?"}]
+    }
+  }' | python -m json.tool
+```
+
+## Step 3 — Java → Python: Build the A2A Java Client
+
+The Java client lives in `exercise-3-travel-agent-java/` (or `java-client/` inside the python exercise). It proves the reverse direction: calling the Python Travel Agent from Java using the **A2A Java SDK client**.
+
+Open `TravelAgentClient.java` and implement the three steps in `main()`:
+
+**Step 1 — Fetch the AgentCard:**
+```java
+AgentCard card = A2A.getAgentCard(PYTHON_AGENT_URL);
+// Print card.name(), card.description(), and iterate card.skills()
+```
+
+**Step 2 — Build the client:**
+```java
+Client client = Client.builder(card)
+    .withTransport(RestTransport.class, new RestTransportConfigBuilder())
+    .build();
+```
+
+**Step 3 — Send queries** (call `sendAndPrint()` three times):
+- `"How do I get from Brussels Airport to Kinepolis Antwerp?"`
+- `"What is the status of flight UA 998?"`
+- `"Log my taxi receipt for €65"`
+
+The `sendAndPrint()` helper method is already provided.
+
+```bash
+cd exercises/exercise-3-travel-agent-java
+# (or: exercises/exercise-3-travel-agent-python/java-client)
 mvn compile exec:java
 ```
 
-## Full Instructions
+Expected output:
+```
+==========================================================
+Java → Python A2A Interop Client
+==========================================================
 
-See [../../docs/exercise-3.md](../../docs/exercise-3.md) for the complete step-by-step guide.
+1. Fetching Python Travel Agent's AgentCard...
+   Agent: Travel & Logistics Agent
+   Skills:
+     - Flight Status: Check flight status, delays, and gate information.
+     - Transit Routes: Get transit options from airport to venue...
+     ...
+
+2. Sending transit query: 'How do I get from the airport to the venue quickly?'
+   Response:
+   Here are your transit options:
+   ...
+
+✓ Java → Python A2A interop successful!
+```
+
+> **Key insight:** The Java client uses the exact same `A2A.getAgentCard()` / `Client.builder(card)` / `client.sendMessage()` API it would use to call a Java agent. It doesn't know or care that the server is Python.
+
+## Checkpoint
+
+- [ ] Python Travel & Logistics Agent running on port 9000
+- [ ] Java → Python communication via the A2A Java SDK client
+- [ ] Python → Java communication via `test_interop.py`
+- [ ] Transit comparison returning Bolt rideshare recommendation
+- [ ] Receipt extraction returning structured JSON data
+
+## Agent Summary
+
+| Agent | Language | Framework | Port |
+|---|---|---|---|
+| Schedule & Content Advisor | Java | Quarkus + A2A Java SDK | 8080 |
+| Venue & On-Site Operations | Java | Spring Boot + spring-a2a | 8081 |
+| **Travel & Logistics (Python)** | **Python** | **A2A Python SDK** | **9000** |
+| Travel & Logistics (Java client) | Java | A2A Java SDK client | *(client only)* |
+
+> **Note:** In Exercise 5, the Travel agent is bundled inside the Concierge — no need to keep it running separately.
