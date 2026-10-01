@@ -8,7 +8,7 @@
 
 In this exercise you will:
 
-1. Build the **Expense & Compliance Agent** — a WildFly 41 (Jakarta EE / Java A2A SDK) agent that standardizes receipts into audit-ready expense logs
+1. Build the **Expense & Compliance Agent** — a WildFly 41 (Jakarta EE / Jakarta A2A SDK) agent that standardizes receipts into audit-ready expense logs
 2. Wire up **cross-agent data handoff** — the Travel Agent extracts receipt details, the Orchestrator routes them to the Expense Agent
 ---
 
@@ -26,7 +26,7 @@ Navigate to the exercise directory:
 cd exercises/exercise-4-expense-agent
 ```
 
-This is another **WildFly 41 + Java A2A SDK** agent — the same pattern you learned in Exercise 1 with the Schedule Advisor.
+This is a **WildFly 41 + Jakarta A2A SDK** agent — the Jakarta EE equivalent of the Quarkus pattern from Exercise 1.
 
 ### Step 1: The ExpenseTool
 

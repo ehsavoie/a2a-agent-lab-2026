@@ -1614,7 +1614,7 @@ Java &rarr; Python A2A Interop Client
 <h2><span class="badge badge-purple">Exercise 4</span> Expense &amp; Compliance Agent <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(20 min)</span></h2>
 
 
-<p><em>&ldquo;Maya uploads her taxi receipt photo. The Travel Agent extracts the fare details and the Expense &amp; Compliance Agent processes it into an audit-ready reimbursement entry. Meanwhile, the ops team watches the full trace in Grafana.&rdquo;</em></p>
+<p><em>&ldquo;Maya uploads her taxi receipt photo. The Travel Agent extracts the fare details and the Expense &amp; Compliance Agent processes it into an audit-ready reimbursement entry.&rdquo;</em></p>
 </section>
 
 
@@ -1622,7 +1622,7 @@ Java &rarr; Python A2A Interop Client
 <div class="step-box">
     <div class="step-header">
         <span class="step-number" style="background: var(--accent-purple);">1</span>
-        <span class="step-title">Build the Expense &amp; Compliance Agent (Java A2A SDK)</span>
+        <span class="step-title">Build the Expense &amp; Compliance Agent (Jakarta A2A SDK)</span>
     </div>
     <p>A Jakarta EE enterprise agent on WildFly 41 that standardizes receipts into corporate audit-ready expense logs with compliance validation. Uses LangChain4j with the OpenAI Responses API and in-memory expense tracking.</p>
 </div>
@@ -1830,7 +1830,7 @@ mvn package
 </ol>
 
 <h4>Build &amp; Run the Expense Client on port 8083</h4>
-<p>The Expense Client is a JAX-RS web application on WildFly that calls the Expense Agent via the A2A Java SDK. It serves a browser UI at the root and exposes three REST endpoints:</p>
+<p>The Expense Client is a JAX-RS web application on WildFly that calls the Expense Agent via the Jakarta A2A SDK. It serves a browser UI at the root and exposes three REST endpoints:</p>
 <ul>
     <li><code>POST /api/expense</code> &mdash; log a new expense (structured JSON fields)</li>
     <li><code>GET /api/expense/summary</code> &mdash; fetch the full expense summary from the agent</li>
