@@ -658,7 +658,7 @@
     <div class="card">
         <div class="card-icon">&#128176;</div>
         <h4>Exercise 4: Expense Agent</h4>
-        <p>WildFly Enterprise expense agent with compliance validation and cross-agent data handoff from the Travel Agent.</p>
+        <p>WildFly 41 Jakarta EE expense agent with compliance validation and cross-agent data handoff from the Travel Agent.</p>
     </div>
     <div class="card">
         <div class="card-icon">&#129504;</div>
@@ -667,8 +667,8 @@
     </div>
     <div class="card">
         <div class="card-icon">&#127981;</div>
-        <h4>Exercise 6: Enterprise (Bonus)</h4>
-        <p>Multi-node WildFly with JPA-backed task store and Kafka-replicated queue manager: prove cross-node task replication live.</p>
+        <h4>Exercise 6: Load-Balanced A2A (Bonus)</h4>
+        <p>Same agent WAR on two WildFly nodes behind a simulated load balancer — shared PostgreSQL and Kafka make any node interchangeable.</p>
     </div>
 </div>
 
@@ -700,7 +700,7 @@
     </div>
     <div class="timeline-item teal">
         <strong>Exercise 6 &mdash; Bonus</strong>
-        <p>Enterprise A2A: JPA-backed TaskStore + Kafka-replicated QueueManager, two WildFly nodes sharing PostgreSQL and Kafka</p>
+        <p>Load-balanced A2A: same agent WAR on two WildFly nodes — a client sends to Node A and observes on Node B, simulating a load balancer</p>
     </div>
 </div>
 </section>
@@ -736,7 +736,7 @@
 
 <h3>2. Start the Exercise 6 infrastructure (bonus exercise only)</h3>
 
-<p>Exercise 6 (Enterprise A2A) requires PostgreSQL and Kafka. Use Podman Compose or Docker Compose from the exercise directory:</p>
+<p>Exercise 6 (Load-Balanced A2A) requires PostgreSQL and Kafka to share state across agent instances. Use Podman Compose or Docker Compose from the exercise directory:</p>
 
 <pre><code>cd exercises/exercise-6-enterprise
 podman-compose up -d
@@ -2270,56 +2270,63 @@ mvn quarkus:dev</code></pre>
 <!-- EXERCISE 6: ENTERPRISE — MULTI-NODE WILDFLY + JPA + KAFKA    -->
 <!-- ============================================================ -->
 <section id="ex6-intro" class="section-anchor">
-<h2><span class="badge badge-teal">Exercise 6</span> Enterprise A2A &mdash; Multi-Node WildFly with JPA &amp; Kafka <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(Bonus)</span></h2>
+<h2><span class="badge badge-teal">Exercise 6</span> Load-Balanced A2A &mdash; Multiple Agent Instances Behind a Simulated Load Balancer <span style="color: var(--text-muted); font-size: 0.7em; font-weight: 400;">(Bonus)</span></h2>
 
-<p><em>&ldquo;The DevSphere system needs to survive a node failure and scale horizontally. In this bonus exercise you deploy the same agent WAR on two WildFly nodes sharing a PostgreSQL database and a Kafka broker, then prove that a task created and executed on Node&nbsp;A can be observed live on Node&nbsp;B through Kafka replication.&rdquo;</em></p>
+<p><em>&ldquo;A client sends a task to Node A. A second client, routed by the load balancer to Node B, subscribes to that same task and watches it complete — without knowing it is talking to a different instance. In this bonus exercise you deploy the same agent WAR on two WildFly nodes and prove that any node can handle any request.&rdquo;</em></p>
 
 <div class="card-grid">
     <div class="card">
+        <div class="card-icon">&#9878;</div>
+        <h4>Simulated load balancer</h4>
+        <p>Two identical agent instances on ports 8080 and 9080 — a client can send to either node and get the same result.</p>
+    </div>
+    <div class="card">
         <div class="card-icon">&#128190;</div>
-        <h4>JPA-backed TaskStore</h4>
-        <p>Replaces <code>InMemoryTaskStore</code> on the classpath — tasks survive restarts and are shared across nodes via PostgreSQL.</p>
+        <h4>Shared task state (PostgreSQL)</h4>
+        <p>JPA-backed TaskStore replaces <code>InMemoryTaskStore</code> — tasks created on Node A are immediately visible on Node B.</p>
     </div>
     <div class="card">
         <div class="card-icon">&#128268;</div>
-        <h4>Kafka-replicated QueueManager</h4>
-        <p>Replaces <code>InMemoryQueueManager</code>. Every task state-change event is published to a Kafka topic and broadcast to all nodes.</p>
-    </div>
-    <div class="card">
-        <div class="card-icon">&#128202;</div>
-        <h4>JPA PushNotificationConfigStore</h4>
-        <p>Stores push-notification subscriptions in PostgreSQL. The cross-node demo uses task subscriptions and the shared JPA TaskStore.</p>
+        <h4>Live event replication (Kafka)</h4>
+        <p>Every task state-change is published to a Kafka topic — a subscription on Node B receives <code>WORKING → COMPLETED</code> events from Node A.</p>
     </div>
     <div class="card">
         <div class="card-icon">&#128064;</div>
         <h4>Cross-node live demo</h4>
-        <p>Client creates task on Node A, subscribes via Node B, sends work back to Node A, observes <code>COMPLETED</code> on Node B via Kafka.</p>
+        <p>Client creates task on Node A, subscribes via Node B, observes <code>COMPLETED</code> — proving the two nodes are interchangeable.</p>
     </div>
 </div>
 
 <div class="arch-diagram">
 <pre>
-              +------------------------------+
-              |     SHARED INFRASTRUCTURE    |
-              |                              |
-              |  PostgreSQL :5432            |
-              |  - JPA TaskStore             |
-              |  - JPA PNConfigStore         |
-              |                              |
-              |  Kafka :9092                 |
-              |  - replicated-events topic   |
-              +------------------------------+
-                    ^               ^
-                    |               |
-  +-----------+     |               |     +-----------+
-  |  Node A   |-----+               +-----|  Node B   |
-  |   :8080   |                          |   :9080   |
-  +-----------+                          +-----------+
-       ^                                       |
-       | 1. create task                        | 4. WORKING &rarr; COMPLETED
-       |                                       v
-  EnterpriseClient                      EnterpriseClient
-  (sends to Node A)                     (subscribed to Node B)
+                       Client requests
+                            |
+              +-------------v--------------+
+              |   Simulated Load Balancer   |
+              |  (you choose the port)      |
+              +------+-------------+--------+
+                     |             |
+             port 8080             port 9080
+                     |             |
+              +------v---+   +-----v----+
+              |  Node A  |   |  Node B  |
+              +------+---+   +-----+----+
+                     |             |
+              +------v-------------v-------+
+              |     SHARED INFRASTRUCTURE  |
+              |                            |
+              |  PostgreSQL :5432          |
+              |  - JPA TaskStore           |
+              |  - JPA PNConfigStore       |
+              |                            |
+              |  Kafka :9092               |
+              |  - replicated-events topic |
+              +----------------------------+
+
+  Demo flow:
+    1. Create task  ────────────&gt; Node A (:8080)
+    2. Subscribe    ────────────&gt; Node B (:9080)
+    3. WORKING &rarr; COMPLETED arrives on Node B via Kafka
 </pre>
 </div>
 
@@ -2643,7 +2650,7 @@ Session: The Quarkus advantage: Turning build-time metaprogramming into runtime 
 
 <div class="callout success">
     <div class="callout-title">&#9989; Key takeaway</div>
-    <p><strong>Drop-in enterprise extras.</strong> Adding JPA persistence and Kafka replication uses the enterprise dependencies and shared persistence and Kafka configuration in <code>server/common</code>. The Java A2A SDK swaps its in-memory implementations for the JPA-backed and Kafka-replicated ones automatically at deployment time via CDI.</p>
+    <p><strong>Drop-in enterprise extras.</strong> Swapping from in-memory to shared storage requires only adding the enterprise dependencies and configuration in <code>server/common</code>. The Jakarta A2A SDK replaces <code>InMemoryTaskStore</code> and <code>InMemoryQueueManager</code> with the JPA-backed and Kafka-replicated implementations automatically via CDI — the agent code itself is unchanged. Any instance behind the load balancer can serve any request.</p>
 </div>
 </section>
 
@@ -2671,15 +2678,15 @@ Session: The Quarkus advantage: Turning build-time metaprogramming into runtime 
     </div>
     <div class="timeline-item purple">
         <strong>Exercise 4 &mdash; Expense &amp; Compliance Agent</strong>
-        <p>WildFly Enterprise expense agent with compliance validation and cross-agent data handoff from the Travel Agent</p>
+        <p>WildFly 41 Jakarta EE expense agent with compliance validation and cross-agent data handoff from the Travel Agent</p>
     </div>
     <div class="timeline-item red">
         <strong>Exercise 5 &mdash; Orchestrator &amp; Concierge</strong>
         <p>Quarkus REST app with <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> &mdash; LLM-driven orchestration with a web UI</p>
     </div>
     <div class="timeline-item teal">
-        <strong>Exercise 6 &mdash; Enterprise A2A (Bonus)</strong>
-        <p>Multi-node WildFly: JPA-backed TaskStore, Kafka-replicated QueueManager, cross-node task replication proved live</p>
+        <strong>Exercise 6 &mdash; Load-Balanced A2A (Bonus)</strong>
+        <p>Same agent WAR on two WildFly nodes — shared PostgreSQL and Kafka make any instance interchangeable behind a load balancer</p>
     </div>
 </div>
 
