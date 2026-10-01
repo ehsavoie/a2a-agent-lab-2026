@@ -24,7 +24,7 @@ public class VenueAgentExecutorProducer {
 
     @Produces
     @ApplicationScoped
-    @Tenant("venue")
+    // TODO: Add @Tenant("venue") to register this executor with the "venue" tenant
     public AgentExecutor agentExecutor() {
         return new AgentExecutor() {
 

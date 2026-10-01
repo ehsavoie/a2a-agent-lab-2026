@@ -51,7 +51,64 @@ The Concierge exposes separate AgentCards for its Schedule, Travel, Venue, and E
 
 ---
 
-## Step 1: Create the Orchestrator Project
+## Step 1: Wire the Concierge Tenants
+
+The Concierge hosts four specialist agents in a single Quarkus runtime. The A2A Java SDK uses CDI bean qualifiers (`@Tenant`) to associate each `AgentCard` and `AgentExecutor` with a named tenant, and routes incoming JSON-RPC requests to the right executor based on the URL path.
+
+### 1a. Add the multitenancy dependency
+
+Open `concierge/pom.xml` and uncomment (or add) the `a2a-java-extras-multitenancy` dependency. Without it the `@Tenant` qualifier is not on the classpath and the build will fail with unresolved imports:
+
+```xml
+<dependency>
+    <groupId>org.a2aproject.sdk</groupId>
+    <artifactId>a2a-java-extras-multitenancy</artifactId>
+</dependency>
+```
+
+Then open each `*AgentCardProducer` class under `concierge/src/main/java/dev/devconf/` and look for the `// TODO` comments.
+
+### 1b. Annotate the AgentCard producer
+
+Add `@Tenant` with the agent's name to the `@Produces` method so the SDK registers the card and serves it at `/.well-known/<tenant>/agent-card.json`:
+
+```java
+@Produces
+@Singleton
+@PublicAgentCard
+@Tenant("schedule")   // <-- add this
+public AgentCard agentCard() { ... }
+```
+
+### 1c. Set the tenant name in the AgentInterface transport
+
+The `AgentInterface` third argument tells the AgentCard which path suffix maps to this transport endpoint. It must match the tenant name:
+
+```java
+.supportedInterfaces(List.of(
+    new AgentInterface(
+        TransportProtocol.JSONRPC.asString(), agentUrl, "schedule") // <-- "schedule" here
+))
+```
+
+This exposes the JSONRPC transport at `http://localhost:8080/schedule`.
+
+### 1d. Annotate the AgentExecutor producer
+
+Open each `*AgentExecutorProducer` class and add the same `@Tenant` annotation to its `@Produces` method:
+
+```java
+@Produces
+@ApplicationScoped
+@Tenant("schedule")   // <-- add this
+public AgentExecutor agentExecutor() { ... }
+```
+
+Apply the same pattern for `"travel"`, `"venue"`, and `"expense"`. The tenant name must be identical across the card producer, the `AgentInterface` path suffix, and the executor producer.
+
+---
+
+## Step 2: Set Up the Orchestrator Project
 
 Navigate to the Orchestrator project directory:
 
@@ -97,11 +154,9 @@ ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier i
 
 ---
 
-## Step 2: Configure the Concierge Tenant Clients
+## Step 3: Connect the Orchestrator to the Concierge
 
-The Concierge module serves the Schedule, Travel, Venue, and Expense agents as tenants in one Quarkus runtime. Each tenant has its own AgentCard, produced by its `*AgentCardProducer` class with a `@Tenant` name.
-
-The Orchestrator's A2A client interfaces point to those tenant AgentCards. For example, `orchestrator/src/main/java/dev/devconf/orchestrator/ScheduleAdvisorA2AAgent.java` declares:
+Once the Concierge tenants are wired (Step 1), the Orchestrator's A2A client interfaces point to those tenant AgentCards. For example, `orchestrator/src/main/java/dev/devconf/orchestrator/ScheduleAdvisorA2AAgent.java` declares:
 
 ```java
 @A2AClientAgent(
@@ -125,7 +180,7 @@ curl -s http://localhost:8080/.well-known/expense/agent-card.json | jq .
 
 ---
 
-## Step 3: Orchestrator Supervisor
+## Step 4: Orchestrator Supervisor
 
 Open `orchestrator/src/main/java/dev/devconf/orchestrator/OrchestratorSupervisor.java`.
 
@@ -151,7 +206,7 @@ For Maya's request, the supervisor can use the Schedule, Travel, and Expense age
 
 ---
 
-## Step 4: A2A Client Agents
+## Step 5: A2A Client Agents
 
 Each client interface uses `@A2AClientAgent` to identify the specialist and its Concierge AgentCard. For example, `TravelA2AAgent` points to the Travel tenant and exposes an `ask` method to the supervisor:
 
@@ -172,7 +227,7 @@ The four specialist agents run as tenants in Concierge. LangChain4j uses the cli
 
 ---
 
-## Step 5: The REST Request Flow
+## Step 6: The REST Request Flow
 
 Open `orchestrator/src/main/java/dev/devconf/orchestrator/OrchestratorResource.java`.
 
@@ -201,7 +256,7 @@ The Orchestrator's public request is REST. It uses A2A JSON-RPC for its calls to
 
 ---
 
-## Step 6: Wire and Test
+## Step 7: Wire and Test
 
 ### Start the Concierge and Orchestrator
 

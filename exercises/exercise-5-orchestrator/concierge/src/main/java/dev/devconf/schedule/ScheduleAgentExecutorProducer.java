@@ -24,7 +24,7 @@ public class ScheduleAgentExecutorProducer {
 
     @Produces
     @ApplicationScoped
-    @Tenant("schedule")
+    // TODO: Add @Tenant("schedule") to register this executor with the "schedule" tenant
     public AgentExecutor agentExecutor() {
         return new AgentExecutor() {
 

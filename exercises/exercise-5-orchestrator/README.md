@@ -35,13 +35,58 @@ Browser / curl
 +------------------------------------+
 ```
 
-## What You Will Study
-
-The code is **fully implemented** — this exercise is about understanding LangChain4j's agentic orchestration patterns and running Maya's complete scenario.
+## What You Will Build
 
 This exercise has two sub-projects:
-- **`concierge/`** — multi-tenant Quarkus app hosting all four specialist agents
-- **`orchestrator/`** — Quarkus REST app with Supervisor + Web UI
+- **`concierge/`** — multi-tenant Quarkus app hosting all four specialist agents. You will wire each tenant by adding `@Tenant` to its AgentCard and AgentExecutor producers and setting the tenant name in the AgentInterface transport.
+- **`orchestrator/`** — Quarkus REST app with Supervisor + Web UI. The orchestrator code is fully implemented — study how `@SupervisorAgent` and `@A2AClientAgent` work, then run Maya's complete scenario.
+
+### Concierge: what you implement
+
+Each specialist agent (Schedule, Travel, Venue, Expense) lives as a named tenant inside the single Concierge runtime. Without the tenant wiring the A2A SDK cannot route incoming JSON-RPC requests or serve the per-tenant AgentCards.
+
+**1. Add the multitenancy dependency to `concierge/pom.xml`**
+
+```xml
+<dependency>
+    <groupId>org.a2aproject.sdk</groupId>
+    <artifactId>a2a-java-extras-multitenancy</artifactId>
+</dependency>
+```
+
+**2. Annotate the AgentCard producer with `@Tenant`**
+
+```java
+@Produces
+@Singleton
+@PublicAgentCard
+@Tenant("schedule")          // binds this AgentCard to the "schedule" tenant
+public AgentCard agentCard() { ... }
+```
+
+**3. Set the tenant name in the AgentInterface transport**
+
+The AgentCard declares how clients should reach the agent. The third argument of `AgentInterface` is the path suffix the SDK uses for the per-tenant JSON-RPC endpoint:
+
+```java
+.supportedInterfaces(List.of(
+    new AgentInterface(
+        TransportProtocol.JSONRPC.asString(), agentUrl, "schedule")
+))
+```
+
+This combination exposes the agent card at `/.well-known/schedule/agent-card.json` and accepts JSON-RPC calls at `/schedule`.
+
+**4. Annotate the AgentExecutor producer with `@Tenant`**
+
+```java
+@Produces
+@ApplicationScoped
+@Tenant("schedule")          // routes incoming tasks to this executor
+public AgentExecutor agentExecutor() { ... }
+```
+
+Repeat for `"travel"`, `"venue"`, and `"expense"`.
 
 ## Key Patterns
 

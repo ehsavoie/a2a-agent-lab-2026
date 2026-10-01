@@ -32,7 +32,7 @@ public class ScheduleAgentCardProducer {
     @Produces
     @Singleton
     @PublicAgentCard
-    @Tenant("schedule")
+    // TODO: Add @Tenant("schedule") to register this AgentCard with the "schedule" tenant
     public AgentCard agentCard() {
         return AgentCard.builder()
                 .name(agentName)
@@ -40,7 +40,8 @@ public class ScheduleAgentCardProducer {
                 .version(agentVersion)
                 .supportedInterfaces(List.of(
                     new AgentInterface(
-                        TransportProtocol.JSONRPC.asString(), agentUrl, "schedule")
+                        TransportProtocol.JSONRPC.asString(), agentUrl,
+                        "" /* TODO: set the tenant name here, e.g. "schedule" */)
                 ))
                 .capabilities(AgentCapabilities.builder()
                         .streaming(false)

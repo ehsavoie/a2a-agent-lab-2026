@@ -565,14 +565,17 @@
         <a href="#ex5-intro" class="sidebar-link">
             <span class="step-num red">0</span> Orchestrator overview
         </a>
+        <a href="#ex5-step0" class="sidebar-link">
+            <span class="step-num red">1</span> Wire Concierge Tenants
+        </a>
         <a href="#ex5-step1" class="sidebar-link">
-            <span class="step-num red">1</span> A2A Client Agents
+            <span class="step-num red">2</span> A2A Client Agents
         </a>
         <a href="#ex5-step2" class="sidebar-link">
-            <span class="step-num red">2</span> Supervisor Agent
+            <span class="step-num red">3</span> Supervisor Agent
         </a>
         <a href="#ex5-step3" class="sidebar-link">
-            <span class="step-num red">3</span> REST Endpoint &amp; Web UI
+            <span class="step-num red">4</span> REST Endpoint &amp; Web UI
         </a>
         <a href="#ex5-test" class="sidebar-link">
             <span class="step-num red">&#10003;</span> Test &amp; validate
@@ -1942,11 +1945,89 @@ extract_receipt(query)         &rarr;        processReceipt(receiptData)
 <pre><code>cd exercises/exercise-5-orchestrator</code></pre>
 </section>
 
-<!-- Step 1: A2A Client Agents -->
-<section id="ex5-step1" class="section-anchor">
+<!-- Step 0 (new Step 1): Wire Concierge Tenants -->
+<section id="ex5-step0" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
         <span class="step-number" style="background: var(--accent-red);">1</span>
+        <span class="step-title">Wire the Concierge Tenants</span>
+    </div>
+    <p>The Concierge hosts four specialist agents in one Quarkus runtime. The A2A Java SDK uses the <code>@Tenant</code> CDI qualifier to associate each <code>AgentCard</code> and <code>AgentExecutor</code> bean with a named tenant and to route incoming JSON-RPC calls to the correct executor. Look for <code>&lt;!-- TODO</code> in <code>pom.xml</code> and <code>// TODO</code> comments in each producer class.</p>
+</div>
+
+<h4>Step 1a &mdash; Add the multitenancy dependency</h4>
+<p>Open <code>concierge/pom.xml</code> and uncomment the <code>a2a-java-extras-multitenancy</code> dependency. Without it the <code>@Tenant</code> qualifier is not on the classpath and the build will fail with unresolved imports:</p>
+
+<details class="solution">
+    <summary>Show the dependency to add</summary>
+    <div class="solution-body">
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.a2aproject.sdk&lt;/groupId&gt;
+    &lt;artifactId&gt;a2a-java-extras-multitenancy&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre>
+    </div>
+</details>
+
+<h4>Step 1b &mdash; Annotate the AgentCard producer with <code>@Tenant</code></h4>
+<p>Add <code>@Tenant</code> to the <code>@Produces</code> method in each <code>*AgentCardProducer</code>. This registers the card under the right tenant path (<code>/.well-known/&lt;tenant&gt;/agent-card.json</code>):</p>
+
+<details class="solution">
+    <summary>Show ScheduleAgentCardProducer.java — @Tenant on the card</summary>
+    <div class="solution-body">
+<pre><code>@Produces
+@Singleton
+@PublicAgentCard
+@Tenant("schedule")          // binds this AgentCard to the "schedule" tenant
+public AgentCard agentCard() { ... }</code></pre>
+    <p>Repeat with <code>"travel"</code>, <code>"venue"</code>, and <code>"expense"</code> for the other three producers.</p>
+    </div>
+</details>
+
+<h4>Step 1c &mdash; Set the tenant name in the AgentInterface transport</h4>
+<p>The third argument of <code>AgentInterface</code> is the path suffix for the per-tenant JSON-RPC endpoint. It must match the <code>@Tenant</code> name:</p>
+
+<details class="solution">
+    <summary>Show the AgentInterface fix</summary>
+    <div class="solution-body">
+<pre><code>.supportedInterfaces(List.of(
+    new AgentInterface(
+        TransportProtocol.JSONRPC.asString(), agentUrl, "schedule") // tenant path suffix
+))</code></pre>
+    <p>This tells the AgentCard that the JSONRPC transport lives at <code>http://localhost:8080/schedule</code>. Apply the same fix for <code>"travel"</code>, <code>"venue"</code>, and <code>"expense"</code>.</p>
+    </div>
+</details>
+
+<h4>Step 1d &mdash; Annotate the AgentExecutor producer with <code>@Tenant</code></h4>
+<p>Open each <code>*AgentExecutorProducer</code> and add the matching <code>@Tenant</code> to its <code>@Produces</code> method:</p>
+
+<details class="solution">
+    <summary>Show ScheduleAgentExecutorProducer.java — @Tenant on the executor</summary>
+    <div class="solution-body">
+<pre><code>@Produces
+@ApplicationScoped
+@Tenant("schedule")          // routes incoming tasks to this executor
+public AgentExecutor agentExecutor() { ... }</code></pre>
+    <p>Repeat for <code>"travel"</code>, <code>"venue"</code>, and <code>"expense"</code>.</p>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; Why three places?</div>
+    <p>The <code>@Tenant</code> qualifier on the <code>AgentCard</code> producer tells the SDK which HTTP path to serve the card at. The tenant name in <code>AgentInterface</code> tells the card where clients should send JSON-RPC calls. The <code>@Tenant</code> qualifier on the <code>AgentExecutor</code> producer tells the SDK which executor to invoke when a request arrives on that path. All three must be consistent.</p>
+</div>
+
+<h4>Verify — after starting the Concierge</h4>
+<pre><code>curl http://localhost:8080/.well-known/schedule/agent-card.json | jq .
+curl http://localhost:8080/.well-known/travel/agent-card.json   | jq .
+curl http://localhost:8080/.well-known/venue/agent-card.json    | jq .
+curl http://localhost:8080/.well-known/expense/agent-card.json  | jq .</code></pre>
+</section>
+
+<!-- Step 1 (now Step 2): A2A Client Agents -->
+<section id="ex5-step1" class="section-anchor">
+<div class="step-box">
+    <div class="step-header">
+        <span class="step-number" style="background: var(--accent-red);">2</span>
         <span class="step-title">Declare A2A Client Agents</span>
     </div>
     <p>Each downstream A2A agent is wrapped as a LangChain4j sub-agent using <code>@A2AClientAgent</code>. The framework automatically fetches the AgentCard and handles A2A communication. Use the <code>@V</code> annotation on parameters to bind them as agentic scope variables.</p>
@@ -1985,11 +2066,11 @@ public interface ScheduleAdvisorA2AAgent {
 </details>
 </section>
 
-<!-- Step 2: Supervisor Agent -->
+<!-- Step 3: Supervisor Agent -->
 <section id="ex5-step2" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
-        <span class="step-number" style="background: var(--accent-red);">2</span>
+        <span class="step-number" style="background: var(--accent-red);">3</span>
         <span class="step-title">Supervisor Agent</span>
     </div>
     <p>The <code>@SupervisorAgent</code> is the brain of the orchestrator. The LLM autonomously decides which sub-agents to call based on the user&rsquo;s question, then synthesizes a unified response.</p>
@@ -2031,11 +2112,11 @@ public interface ScheduleAdvisorA2AAgent {
 </div>
 </section>
 
-<!-- Step 3: REST Endpoint -->
+<!-- Step 4: REST Endpoint -->
 <section id="ex5-step3" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
-        <span class="step-number" style="background: var(--accent-red);">3</span>
+        <span class="step-number" style="background: var(--accent-red);">4</span>
         <span class="step-title">REST Endpoint &amp; Web UI</span>
     </div>
     <p>The orchestrator is <strong>not</strong> an A2A agent itself &mdash; it&rsquo;s the user-facing entry point. A simple JAX-RS resource exposes <code>POST /api/query</code> and a built-in web UI at the root lets you chat interactively.</p>
@@ -2123,6 +2204,9 @@ mvn quarkus:dev</code></pre>
 <h3>Checkpoint</h3>
 
 <ul class="checklist">
+    <li><code>a2a-java-extras-multitenancy</code> added to <code>concierge/pom.xml</code></li>
+    <li>Each <code>*AgentCardProducer</code> annotated with <code>@Tenant</code> and tenant name set in <code>AgentInterface</code></li>
+    <li>Each <code>*AgentExecutorProducer</code> annotated with the matching <code>@Tenant</code></li>
     <li>Concierge running on port 8080 (Schedule, Venue, Travel, and Expense agents at separate <code>/.well-known/*</code> paths)</li>
     <li>Orchestrator running on port 8090 with web UI at the root</li>
     <li><code>@A2AClientAgent</code> interfaces point to each agent&rsquo;s specific AgentCard URL on the concierge</li>
@@ -2133,7 +2217,7 @@ mvn quarkus:dev</code></pre>
 
 <div class="callout success">
     <div class="callout-title">&#9989; Key takeaway</div>
-    <p><strong>LangChain4j + A2A:</strong> the <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> annotations replace hundreds of lines of manual orchestration code. The Concierge bundles all specialist agents into one Quarkus app using multi-tenancy &mdash; each with its own AgentCard path. The Orchestrator doesn&rsquo;t know how any agent is implemented; it only reads the AgentCard and communicates via A2A.</p>
+    <p><strong>LangChain4j + A2A:</strong> the <code>@SupervisorAgent</code> and <code>@A2AClientAgent</code> annotations replace hundreds of lines of manual orchestration code. The Concierge bundles all specialist agents into one Quarkus app using multi-tenancy &mdash; <code>@Tenant</code> on the card and executor producers plus the matching path suffix in <code>AgentInterface</code> are all the SDK needs to serve each agent at its own path and route requests correctly. The Orchestrator doesn&rsquo;t know how any agent is implemented; it only reads the AgentCard and communicates via A2A.</p>
 </div>
 </section>
 

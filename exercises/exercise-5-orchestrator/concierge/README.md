@@ -8,6 +8,14 @@
 
 The Concierge module is a Quarkus A2A server that hosts four tenant agents: Schedule, Travel, Venue, and Expense. The Orchestrator module calls the tenant agents through their AgentCards.
 
+Your task is to wire each tenant by:
+1. Adding the `a2a-java-extras-multitenancy` dependency to `pom.xml` — unlocks the `@Tenant` qualifier.
+2. Adding `@Tenant("name")` to each `*AgentCardProducer` — so the SDK registers the card under the correct tenant path.
+3. Setting the tenant name in the `AgentInterface` transport — so the AgentCard points clients to the right JSON-RPC endpoint.
+4. Adding `@Tenant("name")` to each `*AgentExecutorProducer` — so incoming tasks are routed to the right executor.
+
+Look for `<!-- TODO` in `pom.xml` and `// TODO` comments in each producer class.
+
 ## Architecture
 
 ```
