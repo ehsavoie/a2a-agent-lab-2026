@@ -721,60 +721,60 @@
         <tr><td><strong>JDK</strong></td><td>21+</td><td>Java development</td></tr>
         <tr><td><strong>Maven</strong></td><td>3.9+</td><td>Build tool</td></tr>
         <tr><td><strong>Python</strong></td><td>3.11+</td><td>Exercise 3 (Travel Agent)</td></tr>
-        <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>Grafana LGTM observability infrastructure</td></tr>
+        <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>PostgreSQL and Kafka for Exercise 6 (Enterprise)</td></tr>
         <tr><td><strong>OpenAI API key</strong></td><td>API billing enabled</td><td>Java LLM exercises</td></tr>
         <tr><td><strong>curl</strong></td><td>any</td><td>API testing</td></tr>
         <tr><td><strong>IDE</strong></td><td>IntelliJ / VS Code / etc.</td><td>Code editor</td></tr>
     </tbody>
 </table>
 
-<h3>1. Start the infrastructure</h3>
+<h3>1. Set up your API key</h3>
 
 <p>The Java agent examples call the OpenAI API. Set <code>OPENAI_API_KEY</code> to an API key with API billing enabled. A ChatGPT subscription does not cover API usage, and the GPT-6 Luna API Free tier is unsupported.</p>
 
-<p>Use Podman Compose (or Docker Compose) to start the database and observability containers:</p>
+<pre><code>export OPENAI_API_KEY=your-api-key-here</code></pre>
 
-<pre><code>cd exercises/exercise-5-orchestrator
-podman-compose up -d</code></pre>
+<h3>2. Start the Exercise 6 infrastructure (bonus exercise only)</h3>
 
-<p>With Docker Compose, run <code>docker compose up -d</code> from the same directory.</p>
+<p>Exercise 6 (Enterprise A2A) requires PostgreSQL and Kafka. Use Podman Compose or Docker Compose from the exercise directory:</p>
+
+<pre><code>cd exercises/exercise-6-enterprise
+podman-compose up -d
+# or: docker compose -f podman-compose.yml up -d</code></pre>
 
 <p>This starts:</p>
 <ul>
-    <li><strong>Grafana LGTM</strong> on port <code>3000</code> (Grafana UI) and <code>4317</code> (OTLP) &mdash; logs, traces, and metrics via Loki, Tempo, and Mimir</li>
+    <li><strong>PostgreSQL 17</strong> on port <code>5432</code> &mdash; JPA-backed task store shared across WildFly nodes</li>
+    <li><strong>Kafka 4.1</strong> on port <code>9092</code> &mdash; replicated queue manager for cross-node task events</li>
 </ul>
 
-<p>Once the containers are running, open Grafana at <code>http://localhost:3000</code>.</p>
-
-<h3>2. Build the A2A Java SDK</h3>
-
-<div class="callout warning">
-    <div class="callout-title">&#9888; Important</div>
-    <p>The A2A Java SDK is not yet on Maven Central. You need to build it from source and install it locally before the exercises will compile.</p>
-</div>
-
-<pre><code>git clone https://github.com/a2aproject/a2a-java.git
-cd a2a-java
-mvn install -DskipTests</code></pre>
+<p>Exercises 1–5 do not require Docker or Podman.</p>
 
 <h3>3. Project structure</h3>
 
 <pre><code>a2a-agent-lab-2026/
   pom.xml                              &larr; Root aggregator
-  conference-data/sessions.json        &larr; Shared conference data
-  exercises/                           &larr; All exercise projects
+  conference-data/sessions.json        &larr; Shared conference schedule data
+  docs/                                &larr; Step-by-step exercise guides
+  exercises/
     exercise-1-schedule-advisor/       &larr; Quarkus + A2A Java SDK
-    exercise-2-venue-agent/            &larr; Spring Boot + LangChain4j + spring-a2a
-    exercise-3-travel-agent-python/    &larr; Python A2A SDK
-    exercise-3-travel-agent-java/      &larr; Java A2A SDK (Quarkus)
-    exercise-4-expense-agent/          &larr; WildFly 41 Enterprise (Jakarta EE)
+    exercise-2-venue-agent/            &larr; Spring Boot + spring-a2a
+    exercise-3-travel-agent/           &larr; Python A2A SDK
+      travel_agent.py                  &larr; Agent implementation
+      java-client/                     &larr; Java interop test client
+    exercise-4-expense-agent/          &larr; WildFly 41 + Jakarta EE
       expense-agent/                   &larr; A2A agent (LangChain4j + compliance)
-      expense-client/                  &larr; JAX-RS web app — A2A client of the agent
+      expense-client/                  &larr; JAX-RS A2A client
     exercise-5-orchestrator/           &larr; Multi-project Quarkus Orchestrator
       concierge/                       &larr; Multi-tenant: Schedule + Venue + Travel + Expense
-      orchestrator/                    &larr; Supervisor + @A2AClientAgent + REST UI
-      podman-compose.yml               &larr; Grafana LGTM (OTel observability)
-  solutions/                           &larr; Complete solutions + scripts</code></pre>
+      orchestrator/                    &larr; @SupervisorAgent + @A2AClientAgent + REST UI
+    exercise-6-enterprise/             &larr; Multi-node WildFly + JPA + Kafka
+      node-a/  node-b/                 &larr; WildFly agent nodes
+      server/                          &larr; Shared server module
+      client/                          &larr; Cross-node test client
+      initdb/                          &larr; PostgreSQL seed scripts
+      podman-compose.yml               &larr; PostgreSQL + Kafka infrastructure
+  solutions/                           &larr; Complete reference solutions</code></pre>
 </section>
 
 <!-- ============================================================ -->
@@ -797,30 +797,35 @@ mvn install -DskipTests</code></pre>
 
 <div class="arch-diagram">
 <pre>
-                       User (Maya)
-                           |
-                +----------v-----------+
-                |  Orchestrator        |  Port 8090 (Quarkus)
-                |  @SupervisorAgent    |
-                +---+------+------+---+
-                    |      |      |
-           +--------+      |      +--------+
-           |               |               |
-+----------v-----+ +------v------+ +------v----------+
-| Schedule &amp;     | | Venue &amp;     | | Travel &amp;        |
-| Content Advisor| | On-Site Ops | | Logistics       |
-|                | |             | |                 |
-+--[Concierge :8080 (Quarkus, multi-tenant)]---------+
+  Browser / curl
+       |
+       v  POST /api/query
+  +------------------------------------+
+  |  Orchestrator (Quarkus) :8090      |
+  |  REST app + Web UI                 |
+  |                                    |
+  |  @SupervisorAgent                  |
+  |   LLM decides which agents to call |
+  |   then synthesizes the final answer|
+  |                                    |
+  |  @A2AClientAgent sub-agents        |
+  |  (all point to Concierge :8080)    |
+  |  /.well-known/schedule/agent-card  |
+  |  /.well-known/venue/agent-card     |
+  |  /.well-known/travel/agent-card    |
+  |  /.well-known/expense/agent-card   |
+  +------------------------------------+
+       |
+       v
+  +------------------------------------+
+  |  Concierge (Quarkus) :8080         |
+  |  Multi-tenant: Schedule + Venue +  |
+  |  Travel + Expense agents, each     |
+  |  at its own AgentCard path         |
+  +------------------------------------+
 
-  +------------------+
-  | Expense &amp;        |  (standalone agent,
-  | Compliance       |   not orchestrated)
-  | :8082 (WF Ent.)  |
-  +------------------+
-
-Concierge: multi-tenant Quarkus app, all specialist agents on :8080
-Orchestrator: REST app + Web UI, @A2AClientAgent per agent-card path
-All traces: OpenTelemetry &rarr; Grafana/Tempo (:3000)
+Concierge: multi-tenant Quarkus app, all four specialist agents on :8080
+Orchestrator: REST app + Web UI, @A2AClientAgent per Concierge tenant
 </pre>
 </div>
 </section>
@@ -1377,7 +1382,7 @@ curl -s http://localhost:8081/tasks/&lt;taskId&gt; \
 
 <p><em>&ldquo;Maya&rsquo;s flight was delayed. She needs to get from Brussels Airport to Kinepolis Antwerp fast. The Travel Agent compares a Bolt rideshare (35 min, &euro;45) vs the disrupted NMBS train (55 min, &euro;12) and recommends the rideshare. Later, it extracts her taxi receipt for expense reporting.&rdquo;</em></p>
 
-<pre><code>cd exercises/exercise-3-travel-agent-python</code></pre>
+<pre><code>cd exercises/exercise-3-travel-agent</code></pre>
 </section>
 
 <section id="ex3-step1" class="section-anchor">
@@ -1546,7 +1551,7 @@ def extract_receipt(query):
 </div>
 
 <h4>Run it</h4>
-<pre><code>cd exercises/exercise-3-travel-agent-python/java-client
+<pre><code>cd exercises/exercise-3-travel-agent/java-client
 mvn compile exec:java</code></pre>
 
 <p>You should see output like:</p>

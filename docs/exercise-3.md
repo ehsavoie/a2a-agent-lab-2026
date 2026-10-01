@@ -20,7 +20,7 @@ The key learning: **A2A lets agents implemented in different languages interoper
 Open a **new terminal tab** and navigate to the Python agent directory:
 
 ```bash
-cd exercises/exercise-3-travel-agent-python
+cd exercises/exercise-3-travel-agent
 ```
 
 Install the dependencies. You can use `pip` or `uv`:
@@ -249,7 +249,7 @@ You should see a structured receipt payload with vendor, amount (EUR), date, and
 
 Now let's call the Python agent from Java. The Python Travel Agent does not require `OPENAI_API_KEY`.
 
-The checked-in Java client uses the Java SDK's `Client` and REST transport. Its setup in [`TravelAgentClient.java`](../exercises/exercise-3-travel-agent-python/java-client/src/main/java/dev/devconf/travel/TravelAgentClient.java) looks like this:
+The checked-in Java client uses the Java SDK's `Client` and REST transport. Its setup in [`TravelAgentClient.java`](../exercises/exercise-3-travel-agent/java-client/src/main/java/dev/devconf/travel/TravelAgentClient.java) looks like this:
 
 ```java
 import org.a2aproject.sdk.A2A;
@@ -271,7 +271,7 @@ Message message = A2A.toUserMessage(
 The client sends messages asynchronously and handles task or message events. Run the checked-in client from the repository root:
 
 ```bash
-cd exercises/exercise-3-travel-agent-python/java-client
+cd exercises/exercise-3-travel-agent/java-client
 mvn compile exec:java
 ```
 

@@ -5,8 +5,8 @@
 Build a **Python A2A SDK** agent and prove cross-language interoperability — a Java client calling a Python agent and a Python client calling a Java agent, all with identical A2A protocol calls.
 
 This exercise has two parts:
-- **`exercise-3-travel-agent-python/`** — the Python agent (this README)
-- **`exercise-3-travel-agent-java/`** — a standalone Java client that calls the Python agent
+- **`exercise-3-travel-agent/`** — the Python agent (this README)
+- **`java-client/`** — a Java client that calls the Python agent (inside this directory)
 
 ## Context
 
@@ -44,7 +44,7 @@ The `extract_receipt()` function returns structured JSON data:
 ## Step 1 — Set Up and Start the Python Agent
 
 ```bash
-cd exercises/exercise-3-travel-agent-python
+cd exercises/exercise-3-travel-agent
 
 # Option A: pip
 python -m venv .venv
@@ -90,7 +90,7 @@ curl -s -X POST http://localhost:9000/message:send \
 
 ## Step 3 — Java → Python: Build the A2A Java Client
 
-The Java client lives in `exercise-3-travel-agent-java/` (or `java-client/` inside the python exercise). It proves the reverse direction: calling the Python Travel Agent from Java using the **A2A Java SDK client**.
+The Java client lives in `java-client/` inside this directory. It proves the reverse direction: calling the Python Travel Agent from Java using the **A2A Java SDK client**.
 
 Open `TravelAgentClient.java` and implement the three steps in `main()`:
 
@@ -115,8 +115,7 @@ Client client = Client.builder(card)
 The `sendAndPrint()` helper method is already provided.
 
 ```bash
-cd exercises/exercise-3-travel-agent-java
-# (or: exercises/exercise-3-travel-agent-python/java-client)
+cd exercises/exercise-3-travel-agent/java-client
 mvn compile exec:java
 ```
 
