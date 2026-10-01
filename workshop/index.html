@@ -2023,18 +2023,43 @@ curl http://localhost:8080/.well-known/venue/agent-card.json    | jq .
 curl http://localhost:8080/.well-known/expense/agent-card.json  | jq .</code></pre>
 </section>
 
-<!-- Step 1 (now Step 2): A2A Client Agents -->
+<!-- Step 2: A2A Client Agents -->
 <section id="ex5-step1" class="section-anchor">
 <div class="step-box">
     <div class="step-header">
         <span class="step-number" style="background: var(--accent-red);">2</span>
-        <span class="step-title">Declare A2A Client Agents</span>
+        <span class="step-title">Wire A2A Client Agents</span>
     </div>
-    <p>Each downstream A2A agent is wrapped as a LangChain4j sub-agent using <code>@A2AClientAgent</code>. The framework automatically fetches the AgentCard and handles A2A communication. Use the <code>@V</code> annotation on parameters to bind them as agentic scope variables.</p>
+    <p>Each downstream A2A agent is declared as a LangChain4j sub-agent interface using <code>@A2AClientAgent</code>. When the Concierge uses multi-tenancy, set <code>a2aServerUrl</code> to the Concierge base URL and add a <code>tenant</code> attribute — the SDK resolves the AgentCard path automatically.</p>
+    <p>Two tasks: add <code>tenant</code> to three existing interfaces, and write the full annotation for <code>TravelA2AAgent</code>.</p>
 </div>
 
+<h4>Task 2a &mdash; Add <code>tenant</code> to ScheduleAdvisorA2AAgent, VenueA2AAgent, ExpenseA2AAgent</h4>
+<p>Each file already has the <code>@A2AClientAgent</code> annotation; the <code>tenant</code> attribute is missing. Add it:</p>
+
 <details class="solution">
-    <summary>Show ScheduleAdvisorA2AAgent.java (one per remote agent)</summary>
+    <summary>Show the fix for ScheduleAdvisorA2AAgent (same pattern for Venue &amp; Expense)</summary>
+    <div class="solution-body">
+<pre><code>@A2AClientAgent(
+        a2aServerUrl = "http://localhost:8080/",
+        tenant = "schedule",    // "venue" for VenueA2AAgent, "expense" for ExpenseA2AAgent
+        name = "Schedule &amp; Content Advisor",
+        description = "Answers questions about conference sessions, schedules, speakers, and talk content",
+        outputKey = "schedule-response"
+)
+ResultWithAgenticScope&lt;String&gt; ask(
+    @V("query") String query,
+    @A2AContextId @V("contextId") String contextId,
+    @A2ATaskId @V("taskId") String taskId
+);</code></pre>
+    </div>
+</details>
+
+<h4>Task 2b &mdash; Write the full <code>@A2AClientAgent</code> annotation for TravelA2AAgent, then register it with the supervisor</h4>
+<p>Open <code>TravelA2AAgent.java</code> — the method signature is there but the annotation is entirely absent. Write it from scratch using what you know about the other three interfaces as a model:</p>
+
+<details class="solution">
+    <summary>Show TravelA2AAgent.java — complete annotation</summary>
     <div class="solution-body">
 <pre><code>import dev.langchain4j.agentic.a2a.A2AContextId;
 import dev.langchain4j.agentic.a2a.A2ATaskId;
@@ -2042,28 +2067,42 @@ import dev.langchain4j.agentic.declarative.A2AClientAgent;
 import dev.langchain4j.agentic.scope.ResultWithAgenticScope;
 import dev.langchain4j.service.V;
 
-public interface ScheduleAdvisorA2AAgent {
+public interface TravelA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8080/.well-known/schedule/agent-card.json",
-            name = "Schedule &amp; Content Advisor",
-            description = "Answers questions about conference sessions, schedules, speakers, and talk content",
-            outputKey = "schedule-response"
+            a2aServerUrl = "http://localhost:8080/",
+            tenant = "travel",
+            name = "Travel &amp; Logistics Agent",
+            description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
+            outputKey = "travel-response"
     )
     ResultWithAgenticScope&lt;String&gt; ask(
         @V("query") String query,
         @A2AContextId @V("contextId") String contextId,
         @A2ATaskId @V("taskId") String taskId
     );
-}
-
-// Similarly:
-//   VenueA2AAgent   → /.well-known/venue/agent-card.json
-//   TravelA2AAgent  → /.well-known/travel/agent-card.json
-//   ExpenseA2AAgent → /.well-known/expense/agent-card.json
-// All pointing to the Concierge on :8080</code></pre>
+}</code></pre>
     </div>
 </details>
+
+<p>Once the annotation is complete, open <code>OrchestratorSupervisor.java</code> and add <code>TravelA2AAgent.class</code> to the <code>subAgents</code> list so the LLM supervisor can use it:</p>
+
+<details class="solution">
+    <summary>Show the subAgents fix in OrchestratorSupervisor.java</summary>
+    <div class="solution-body">
+<pre><code>subAgents = {
+        ScheduleAdvisorA2AAgent.class,
+        VenueA2AAgent.class,
+        TravelA2AAgent.class,   // add this after completing the annotation
+        ExpenseA2AAgent.class
+}</code></pre>
+    </div>
+</details>
+
+<div class="callout info">
+    <div class="callout-title">&#128161; How <code>tenant</code> resolves the AgentCard</div>
+    <p>The SDK combines <code>a2aServerUrl</code> and <code>tenant</code> to build the AgentCard URL: <code>http://localhost:8080/.well-known/travel/agent-card.json</code>. This is why the Concierge must serve that card at exactly that path — which it does once you add <code>@Tenant("travel")</code> to the producer (Step 1).</p>
+</div>
 </section>
 
 <!-- Step 3: Supervisor Agent -->
@@ -2209,7 +2248,9 @@ mvn quarkus:dev</code></pre>
     <li>Each <code>*AgentExecutorProducer</code> annotated with the matching <code>@Tenant</code></li>
     <li>Concierge running on port 8080 (Schedule, Venue, Travel, and Expense agents at separate <code>/.well-known/*</code> paths)</li>
     <li>Orchestrator running on port 8090 with web UI at the root</li>
-    <li><code>@A2AClientAgent</code> interfaces point to each agent&rsquo;s specific AgentCard URL on the concierge</li>
+    <li><code>tenant</code> attribute set on <code>ScheduleAdvisorA2AAgent</code>, <code>VenueA2AAgent</code>, and <code>ExpenseA2AAgent</code></li>
+    <li>Full <code>@A2AClientAgent</code> annotation written for <code>TravelA2AAgent</code> and registered in the supervisor&rsquo;s <code>subAgents</code></li>
+    <li><code>@A2AClientAgent</code> interfaces point to each agent&rsquo;s Concierge tenant via <code>a2aServerUrl</code> + <code>tenant</code></li>
     <li><code>@SupervisorAgent</code> lets the LLM autonomously select and call agents</li>
     <li>Single unified response synthesized from multiple agent answers</li>
     <li><code>POST /api/query</code> returns a JSON response</li>

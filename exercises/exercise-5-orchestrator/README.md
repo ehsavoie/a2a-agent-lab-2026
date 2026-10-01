@@ -39,7 +39,7 @@ Browser / curl
 
 This exercise has two sub-projects:
 - **`concierge/`** — multi-tenant Quarkus app hosting all four specialist agents. You will wire each tenant by adding `@Tenant` to its AgentCard and AgentExecutor producers and setting the tenant name in the AgentInterface transport.
-- **`orchestrator/`** — Quarkus REST app with Supervisor + Web UI. The orchestrator code is fully implemented — study how `@SupervisorAgent` and `@A2AClientAgent` work, then run Maya's complete scenario.
+- **`orchestrator/`** — Quarkus REST app with Supervisor + Web UI. You will add the `tenant` attribute to `ScheduleAdvisorA2AAgent`, `VenueA2AAgent`, and `ExpenseA2AAgent`, and write the full `@A2AClientAgent` annotation for `TravelA2AAgent`.
 
 ### Concierge: what you implement
 
@@ -88,6 +88,47 @@ public AgentExecutor agentExecutor() { ... }
 
 Repeat for `"travel"`, `"venue"`, and `"expense"`.
 
+### Orchestrator: what you implement
+
+**1. Add `tenant` to `ScheduleAdvisorA2AAgent`, `VenueA2AAgent`, and `ExpenseA2AAgent`**
+
+Each annotation already has `a2aServerUrl`, `name`, `description`, and `outputKey`. Add the missing `tenant` attribute so the SDK knows which Concierge tenant to call:
+
+```java
+@A2AClientAgent(
+        a2aServerUrl = "http://localhost:8080/",
+        tenant = "schedule",   // <-- add this; use "venue" / "expense" for the other two
+        name = "Schedule & Content Advisor",
+        ...
+)
+```
+
+**2. Write the full `@A2AClientAgent` annotation for `TravelA2AAgent`, then register it with the supervisor**
+
+Open `TravelA2AAgent.java`. The method signature is there but the annotation is missing. Write the complete `@A2AClientAgent` annotation:
+
+```java
+@A2AClientAgent(
+        a2aServerUrl = "http://localhost:8080/",
+        tenant = "travel",
+        name = "Travel & Logistics Agent",
+        description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
+        outputKey = "travel-response"
+)
+ResultWithAgenticScope<String> ask(...);
+```
+
+Once the annotation is in place, open `OrchestratorSupervisor.java` and add `TravelA2AAgent.class` to the `subAgents` list:
+
+```java
+subAgents = {
+        ScheduleAdvisorA2AAgent.class,
+        VenueA2AAgent.class,
+        TravelA2AAgent.class,   // add after completing the annotation
+        ExpenseA2AAgent.class
+}
+```
+
 ## Key Patterns
 
 ### `@A2AClientAgent` — Sub-agent declaration
@@ -98,7 +139,8 @@ Each downstream A2A agent is wrapped as a LangChain4j sub-agent. The framework a
 public interface ScheduleAdvisorA2AAgent {
 
     @A2AClientAgent(
-            a2aServerUrl = "http://localhost:8080/.well-known/schedule/agent-card.json",
+            a2aServerUrl = "http://localhost:8080/",
+            tenant = "schedule",             // routes to the "schedule" Concierge tenant
             name = "Schedule & Content Advisor",
             description = "Answers questions about conference sessions, schedules, speakers, and talk content",
             outputKey = "schedule-response"
@@ -109,8 +151,8 @@ public interface ScheduleAdvisorA2AAgent {
         @A2ATaskId @V("taskId") String taskId
     );
 }
-// Similarly: VenueA2AAgent, TravelA2AAgent, ExpenseA2AAgent
-// All pointing to the Concierge on :8080
+// Similarly for VenueA2AAgent (tenant = "venue") and ExpenseA2AAgent (tenant = "expense")
+// TravelA2AAgent — you write the full @A2AClientAgent annotation (tenant = "travel")
 ```
 
 ### `@SupervisorAgent` — LLM-driven orchestration

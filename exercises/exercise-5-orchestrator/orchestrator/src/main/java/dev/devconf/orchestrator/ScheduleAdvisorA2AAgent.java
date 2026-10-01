@@ -10,7 +10,7 @@ public interface ScheduleAdvisorA2AAgent {
 
     @A2AClientAgent(
             a2aServerUrl = "http://localhost:8080/",
-            tenant = "schedule",
+            // TODO: Add tenant = "schedule" to route to the correct Concierge tenant
             name = "Schedule & Content Advisor",
             description = "Answers questions about conference sessions, schedules, speakers, and talk content",
             outputKey = "schedule-response"

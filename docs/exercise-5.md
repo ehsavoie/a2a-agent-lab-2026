@@ -156,20 +156,52 @@ ChatGPT subscriptions do not cover API usage, and the GPT-6 Luna API Free tier i
 
 ## Step 3: Connect the Orchestrator to the Concierge
 
-Once the Concierge tenants are wired (Step 1), the Orchestrator's A2A client interfaces point to those tenant AgentCards. For example, `orchestrator/src/main/java/dev/devconf/orchestrator/ScheduleAdvisorA2AAgent.java` declares:
+The Orchestrator declares one `@A2AClientAgent` interface per specialist. When the Concierge uses multi-tenancy, point `a2aServerUrl` at the Concierge base URL and set `tenant` to the name registered there. The SDK builds the AgentCard URL (`/<tenant>/agent-card.json`) automatically.
+
+### 3a. Add `tenant` to ScheduleAdvisorA2AAgent, VenueA2AAgent, and ExpenseA2AAgent
+
+Open each file — the `@A2AClientAgent` annotation is already there but the `tenant` attribute is missing. Add it:
 
 ```java
 @A2AClientAgent(
-        a2aServerUrl = "http://localhost:8080/.well-known/schedule/agent-card.json",
+        a2aServerUrl = "http://localhost:8080/",
+        tenant = "schedule",   // <-- add this; "venue" / "expense" for the other two
         name = "Schedule & Content Advisor",
         description = "Answers questions about conference sessions, schedules, speakers, and talk content",
         outputKey = "schedule-response"
 )
 ```
 
-The Travel, Venue, and Expense client interfaces use the corresponding `/travel/`, `/venue/`, and `/expense/` AgentCards on port 8080. The Exercise 1–4 standalone servers are not part of this Exercise 5 setup.
+### 3b. Write the full `@A2AClientAgent` annotation for TravelA2AAgent, then register it with the supervisor
 
-You can inspect the tenant cards after starting Concierge:
+Open `orchestrator/src/main/java/dev/devconf/orchestrator/TravelA2AAgent.java`. The method signature is present but the annotation is entirely missing. Write it from scratch:
+
+```java
+@A2AClientAgent(
+        a2aServerUrl = "http://localhost:8080/",
+        tenant = "travel",
+        name = "Travel & Logistics Agent",
+        description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
+        outputKey = "travel-response"
+)
+ResultWithAgenticScope<String> ask(
+        @V("query") String query,
+        @A2AContextId @V("contextId") String contextId,
+        @A2ATaskId @V("taskId") String taskId);
+```
+
+Once the annotation is in place, open `OrchestratorSupervisor.java` and add `TravelA2AAgent.class` to the `subAgents` list so the supervisor can use it:
+
+```java
+subAgents = {
+        ScheduleAdvisorA2AAgent.class,
+        VenueA2AAgent.class,
+        TravelA2AAgent.class,   // <-- add this after completing the annotation
+        ExpenseA2AAgent.class
+}
+```
+
+You can verify the tenant cards are reachable after starting the Concierge:
 
 ```bash
 curl -s http://localhost:8080/.well-known/schedule/agent-card.json | jq .
@@ -208,11 +240,12 @@ For Maya's request, the supervisor can use the Schedule, Travel, and Expense age
 
 ## Step 5: A2A Client Agents
 
-Each client interface uses `@A2AClientAgent` to identify the specialist and its Concierge AgentCard. For example, `TravelA2AAgent` points to the Travel tenant and exposes an `ask` method to the supervisor:
+Each client interface uses `@A2AClientAgent` to identify the specialist and its Concierge tenant. `TravelA2AAgent` is the one you write from scratch; the others already have the annotation but are missing the `tenant` attribute. Once complete, all four look like this:
 
 ```java
 @A2AClientAgent(
-        a2aServerUrl = "http://localhost:8080/.well-known/travel/agent-card.json",
+        a2aServerUrl = "http://localhost:8080/",
+        tenant = "travel",
         name = "Travel & Logistics Agent",
         description = "Provides travel tips, transportation options, and logistics information for getting to the venue",
         outputKey = "travel-response"
@@ -223,7 +256,7 @@ ResultWithAgenticScope<String> ask(
         @A2ATaskId @V("taskId") String taskId);
 ```
 
-The four specialist agents run as tenants in Concierge. LangChain4j uses the client interfaces to send each selected sub-task over A2A and return the agent responses to the supervisor.
+The four specialist agents run as tenants in Concierge. LangChain4j uses the `tenant` value to resolve the AgentCard URL and sends each selected sub-task over A2A JSON-RPC.
 
 ---
 

@@ -62,7 +62,7 @@ public interface OrchestratorSupervisor {
             subAgents = {
                     ScheduleAdvisorA2AAgent.class,
                     VenueA2AAgent.class,
-                    TravelA2AAgent.class,
+                    // TODO: Add TravelA2AAgent.class here once you have written its @A2AClientAgent annotation
                     ExpenseA2AAgent.class
             }
     )

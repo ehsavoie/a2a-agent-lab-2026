@@ -10,7 +10,7 @@ public interface ExpenseA2AAgent {
 
     @A2AClientAgent(
             a2aServerUrl = "http://localhost:8080/",
-            tenant = "expense",
+            // TODO: Add tenant = "expense" to route to the correct Concierge tenant
             name = "Expense & Compliance Agent",
             description = "Logs receipts, validates expenses against corporate compliance limits, and generates expense summaries. Use when the attendee mentions a taxi, meal, hotel, or any spending to log or check.",
             outputKey = "expense-response"
