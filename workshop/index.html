@@ -1502,22 +1502,20 @@ def extract_receipt(query):
 
 <h4>Project setup</h4>
 
-<p>The Java client lives in <code>java-client/</code> inside the exercise directory. It&rsquo;s a standalone Maven project with two dependencies:</p>
+<p>The Java client lives in <code>java-client/</code> inside the exercise directory. It inherits from the exercises parent pom, so versions are managed by the A2A SDK BOM. It has two dependencies:</p>
 
 <details class="solution">
-    <summary>Show pom.xml</summary>
+    <summary>Show pom.xml dependencies</summary>
     <div class="solution-body">
 <pre><code>&lt;dependencies&gt;
     &lt;!-- A2A Java SDK &mdash; client + REST transport --&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.a2aproject.sdk&lt;/groupId&gt;
         &lt;artifactId&gt;a2a-java-sdk-client&lt;/artifactId&gt;
-        &lt;version&gt;${a2a-sdk.version}&lt;/version&gt;
     &lt;/dependency&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.a2aproject.sdk&lt;/groupId&gt;
         &lt;artifactId&gt;a2a-java-sdk-client-transport-rest&lt;/artifactId&gt;
-        &lt;version&gt;${a2a-sdk.version}&lt;/version&gt;
     &lt;/dependency&gt;
 &lt;/dependencies&gt;</code></pre>
     </div>

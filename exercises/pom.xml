@@ -18,6 +18,7 @@
     <modules>
         <module>exercise-1-schedule-advisor</module>
         <module>exercise-2-venue-agent</module>
+        <module>exercise-3-travel-agent/java-client</module>
         <module>exercise-4-expense-agent</module>
         <module>exercise-5-orchestrator</module>
         <module>exercise-6-enterprise</module>
