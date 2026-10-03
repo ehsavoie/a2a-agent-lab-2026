@@ -609,6 +609,9 @@
         <a href="#troubleshooting" class="sidebar-link">
             <span class="icon">&#128027;</span> Troubleshooting
         </a>
+        <a href="#feedback" class="sidebar-link">
+            <span class="icon">&#11088;</span> Leave feedback
+        </a>
     </div>
 </nav>
 
@@ -731,6 +734,19 @@
 <h3>1. Set up your API key</h3>
 
 <p>The Java agent examples call the OpenAI API. Set <code>OPENAI_API_KEY</code> to an API key with API billing enabled. A ChatGPT subscription does not cover API usage, and the GPT-6 Luna API Free tier is unsupported.</p>
+
+<div class="callout info" style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px;">
+        <div class="callout-title">&#128273; Get your workshop API key</div>
+        <p style="margin: 0;">Scan the QR code or visit <a href="https://red.ht/a2a-workshop" target="_blank"><strong>red.ht/a2a-workshop</strong></a> to get an OpenAI API key pre-loaded for this workshop.</p>
+    </div>
+    <div style="flex-shrink: 0; text-align: center;">
+        <a href="https://red.ht/a2a-workshop" target="_blank">
+            <img src="A2A%20Workshop.png" alt="QR code for red.ht/a2a-workshop" style="width: 140px; height: 140px; border-radius: 8px; display: block;">
+        </a>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">red.ht/a2a-workshop</div>
+    </div>
+</div>
 
 <pre><code>export OPENAI_API_KEY=your-api-key-here</code></pre>
 
@@ -2763,6 +2779,27 @@ Session: The Quarkus advantage: Turning build-time metaprogramming into runtime 
 <div class="callout warning">
     <div class="callout-title">&#9888; Port conflict</div>
     <p>If port 8080 is already in use, check that no other agent or service is running on that port. The Schedule Advisor (Quarkus) runs on 8080 and the Expense Agent (WildFly) uses <code>-Djboss.socket.binding.port-offset=2</code> to run on 8082.</p>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FEEDBACK                                                      -->
+<!-- ============================================================ -->
+<section id="feedback" class="section-anchor">
+<h2>&#11088; Leave us your feedback!</h2>
+<p>Enjoyed the lab? Found something to improve? Your feedback helps us make it better — and it only takes 30 seconds.</p>
+<div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; margin-top: 1.5rem;">
+    <a href="https://m.devoxx.com/events/dvbe26/talks/5516/wiring-up-the-ai-mesh-building-a2a-compliant-java-agents"
+       target="_blank"
+       style="display: flex; align-items: center; gap: 0.5rem; background: var(--accent-orange); color: #000; font-weight: 700; padding: 0.75rem 1.25rem; border-radius: 8px; text-decoration: none; font-size: 1rem;">
+        &#128172; Rate this session
+    </a>
+    <span style="color: var(--text-secondary); font-size: 0.9rem;">or scan the QR code:</span>
+</div>
+<div style="margin-top: 1.5rem;">
+    <img src="wiring-up-the-ai-mesh-building-a2a-compliant-java-agents-qr.png"
+         alt="QR code — feedback for this session"
+         style="width: 220px; height: 220px; border: 4px solid var(--border); border-radius: 12px; display: block;">
 </div>
 </section>
 

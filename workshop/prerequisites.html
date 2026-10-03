@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>A2A Agent Lab — Prerequisites</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 14mm 16mm;
+    }
+
+    @media print {
+      .print-hint { display: none; }
+    }
+
+    .print-hint {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 16pt;
+      font-size: 10pt;
+      color: #555;
+    }
+    .print-hint strong { color: #333; }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.5;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      font-size: 20pt;
+      margin: 0 0 12pt 0;
+      padding-bottom: 6pt;
+      border-bottom: 2px solid #d04a00;
+      color: #d04a00;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    h2 {
+      font-size: 13pt;
+      margin: 16pt 0 6pt 0;
+      color: #222;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      page-break-after: avoid;
+    }
+
+    p { margin: 0 0 8pt 0; }
+
+    ul { margin: 4pt 0 8pt 0; padding-left: 20pt; }
+    li { margin-bottom: 3pt; }
+
+    .qr-block {
+      display: flex;
+      align-items: center;
+      gap: 16pt;
+      margin: 8pt 0 12pt 0;
+    }
+    .qr-block img {
+      width: 100pt;
+      height: 100pt;
+      flex-shrink: 0;
+    }
+    .qr-block .qr-url {
+      font-size: 10pt;
+      word-break: break-all;
+    }
+    .qr-block .qr-url strong {
+      display: block;
+      font-size: 11pt;
+      margin-bottom: 4pt;
+    }
+
+    pre {
+      background: #f4f4f4;
+      border-left: 3px solid #d04a00;
+      padding: 7pt 10pt;
+      margin: 6pt 0 10pt 0;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 8.5pt;
+      line-height: 1.4;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    code {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 9pt;
+      background: #f0f0f0;
+      padding: 1px 3px;
+      border-radius: 2px;
+    }
+
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8pt 0 12pt 0;
+      font-size: 10pt;
+    }
+    th {
+      background: #d04a00;
+      color: white;
+      padding: 5pt 8pt;
+      text-align: left;
+    }
+    td {
+      padding: 4pt 8pt;
+      border-bottom: 1px solid #ddd;
+    }
+    tr:nth-child(even) td { background: #f9f9f9; }
+  </style>
+</head>
+<body>
+
+<div class="print-hint">
+  <strong>To print:</strong> File → Print → uncheck <em>Headers and footers</em> → Save as PDF.
+</div>
+<h1>A2A Agent Lab — Prerequisites</h1>
+
+<h2>Clone the repository</h2>
+<div class="qr-block">
+  <img src="data:image/png;base64,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fGHZrbfeeskllwSvkbyeL7zwwnvvvSdstXLlSpluQqZprlq1Sli2YMGC+fPnB6/JycmROfGZZ55pbGwMXlNRUSHTau3atSkpKcFrysvLZVrJyMvLu/7664Vlzz77rLBm8uTJc+fOVTJVWVnZO++8IyyTuZfDINzLiM5AchncBY9lcJZl7d69W+bEnTt3CltJLoOTMWvWLFU38K233pI5cf/+/apOHDt2rKrrEGLLli2TuYFDhw4Vtlq+fLmq6/n444/LDN/Z2anqRIV4CggANEUAAICmCAAA0BQBAACaIgAAQFMEAABoigAAAE0RAACgKQIAADRFAACApggAANCUaVlWuGcAAIQBvwEAgKYIAADQFAEAAJoiAABAUwQAAGiKAAAATREAAKApAgAANEUAAICmCAAA0BQBAACaIgAAQFMEAABoigAAAE0RAACgKQIAADRFAACApggAANAUAQAAmiIAAEBTBAAAaIoAAABNEQAAoCkCAAA0RQAAgKYIAADQFAEAAJoiAABAUwQAAGiKAAAATREAAKApAgAANEUAAICmCAAA0BQBAACaIgAAQFMEAABoigAAAE0RAACgKQIAADRFAACApggAANAUAQAAmiIAAEBTBAAAaIoAAABNEQAAoCkCAAA0RQAAgKb+XwAAAP//IF/J+EBBT4YAAAAASUVORK5CYII=" alt="QR code for the workshop repository" />
+  <div class="qr-url">
+    <strong>https://github.com/ehsavoie/a2a-agent-lab-2026</strong>
+    Scan the QR code or visit the link above to access the repository.
+  </div>
+</div>
+<pre>git clone https://github.com/ehsavoie/a2a-agent-lab-2026
+cd a2a-agent-lab-2026</pre>
+
+<h2>Required software</h2>
+<table>
+  <thead>
+    <tr><th>Tool</th><th>Version</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>JDK</strong></td><td>21+</td><td>Java development</td></tr>
+    <tr><td><strong>Maven</strong></td><td>3.9+</td><td>Build tool</td></tr>
+    <tr><td><strong>Python</strong></td><td>3.11+</td><td>Exercise 3 (Travel Agent)</td></tr>
+    <tr><td><strong>Podman / Docker</strong></td><td>any</td><td>PostgreSQL and Kafka for Exercise 6 (Enterprise)</td></tr>
+    <tr><td><strong>OpenAI API key</strong></td><td>API billing enabled</td><td>Java LLM exercises</td></tr>
+    <tr><td><strong>curl</strong></td><td>any</td><td>API testing</td></tr>
+    <tr><td><strong>IDE</strong></td><td>IntelliJ / VS Code / etc.</td><td>Code editor</td></tr>
+  </tbody>
+</table>
+
+<h2>1. Set up your API key</h2>
+<p>The Java agent examples call the OpenAI API. Set <code>OPENAI_API_KEY</code> to an API key with API billing enabled. A ChatGPT subscription does not cover API usage, and the GPT-6 Luna API Free tier is unsupported.</p>
+<pre>export OPENAI_API_KEY=your-api-key-here</pre>
+
+<h2>2. Start the Exercise 6 infrastructure (bonus exercise only)</h2>
+<p>Exercise 6 (Load-Balanced A2A) requires PostgreSQL and Kafka to share state across agent instances. Use Podman Compose or Docker Compose from the exercise directory:</p>
+<pre>cd exercises/exercise-6-enterprise
+podman-compose up -d
+# or: docker compose -f podman-compose.yml up -d</pre>
+<p>&nbsp;</p>
+<p>This starts:</p>
+<ul>
+  <li><strong>PostgreSQL 17</strong> on port <code>5432</code> — JPA-backed task store shared across WildFly nodes</li>
+  <li><strong>Kafka 4.1</strong> on port <code>9092</code> — replicated queue manager for cross-node task events</li>
+</ul>
+<p>Exercises 1–5 do not require Docker or Podman.</p>
+
+<h2>3. Project structure</h2>
+<pre>a2a-agent-lab-2026/
+  pom.xml                              ← Root aggregator
+  conference-data/sessions.json        ← Shared conference schedule data
+  docs/                                ← Step-by-step exercise guides
+  exercises/
+    exercise-1-schedule-advisor/       ← Quarkus + A2A Java SDK
+    exercise-2-venue-agent/            ← Spring Boot + spring-a2a
+    exercise-3-travel-agent/           ← Python A2A SDK
+      travel_agent.py                  ← Agent implementation
+      java-client/                     ← Java interop test client
+    exercise-4-expense-agent/          ← WildFly 41 + Jakarta EE
+      expense-agent/                   ← A2A agent (LangChain4j + compliance)
+      expense-client/                  ← JAX-RS A2A client
+    exercise-5-orchestrator/           ← Multi-project Quarkus Orchestrator
+      concierge/                       ← Multi-tenant: Schedule + Venue + Travel + Expense
+      orchestrator/                    ← @SupervisorAgent + @A2AClientAgent + REST UI
+    exercise-6-enterprise/             ← Multi-node WildFly + JPA + Kafka
+      node-a/  node-b/                 ← WildFly agent nodes
+      server/                          ← Shared server module
+      client/                          ← Cross-node test client
+      initdb/                          ← PostgreSQL seed scripts
+      podman-compose.yml               ← PostgreSQL + Kafka infrastructure
+  solutions/                           ← Complete reference solutions</pre>
+
+</body>
+</html>

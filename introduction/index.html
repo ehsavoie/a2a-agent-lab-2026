@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2A Agent Lab — Introduction — Devoxx Belgium 2026</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" id="theme">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --r-background-color: #0a0a1a;
+            --r-main-font: 'Inter', sans-serif;
+            --r-heading-font: 'Inter', sans-serif;
+            --r-code-font: 'JetBrains Mono', monospace;
+            --r-main-color: #e0e0e0;
+            --r-heading-color: #ffffff;
+            --r-link-color: #64b5f6;
+            --accent-orange: #ff6b35;
+            --accent-blue: #4fc3f7;
+            --accent-green: #81c784;
+            --accent-purple: #b39ddb;
+            --accent-yellow: #ffd54f;
+        }
+
+        .reveal { font-size: 32px; }
+        .reveal h1 { font-size: 2.2em; font-weight: 900; letter-spacing: -0.02em; }
+        .reveal h2 { font-size: 1.6em; font-weight: 700; color: var(--accent-blue); }
+        .reveal h3 { font-size: 1.2em; font-weight: 600; color: var(--accent-orange); }
+        .reveal code { font-family: var(--r-code-font); font-size: 0.85em; }
+        .reveal pre { width: 95%; margin: 0.5em auto; }
+        .reveal pre code { padding: 1em; border-radius: 12px; line-height: 1.4; max-height: 520px; }
+        .reveal section img { border: none; box-shadow: none; background: none; }
+
+        .accent         { color: var(--accent-orange); font-weight: 700; }
+        .accent-blue    { color: var(--accent-blue); }
+        .accent-green   { color: var(--accent-green); }
+        .accent-purple  { color: var(--accent-purple); }
+        .small  { font-size: 0.65em; color: #999; }
+        .medium { font-size: 0.8em; }
+        .big    { font-size: 1.3em; }
+        .huge   { font-size: 2em; font-weight: 900; }
+
+        .two-col { display: flex; gap: 2em; align-items: flex-start; }
+        .two-col > * { flex: 1; }
+
+        .badge {
+            display: inline-block;
+            padding: 0.15em 0.6em;
+            border-radius: 8px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin: 0.1em;
+        }
+        .badge-orange { background: var(--accent-orange); color: #000; }
+        .badge-blue   { background: var(--accent-blue);   color: #000; }
+        .badge-green  { background: var(--accent-green);  color: #000; }
+        .badge-purple { background: var(--accent-purple); color: #000; }
+
+        .speaker-card {
+            display: flex;
+            align-items: center;
+            gap: 1.5em;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 1.2em;
+            margin: 0.5em 0;
+            border-left: 4px solid var(--accent-orange);
+        }
+        .speaker-card.emmanuel { border-left-color: var(--accent-blue); }
+        .speaker-card .avatar {
+            font-size: 3em;
+            min-width: 80px;
+            text-align: center;
+        }
+        .speaker-card .info { text-align: left; }
+        .speaker-card .info h3 { margin: 0 0 0.2em 0; font-size: 1.1em; }
+        .speaker-card .info p  { margin: 0; font-size: 0.7em; color: #bbb; }
+
+        .timeline {
+            text-align: left;
+            padding-left: 2em;
+        }
+        .timeline .step {
+            position: relative;
+            padding: 0.5em 0 0.5em 1.5em;
+            border-left: 2px solid #444;
+        }
+        .timeline .step::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 0.8em;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+        }
+        .timeline .step.blue::before   { background: var(--accent-blue); }
+        .timeline .step.green::before  { background: var(--accent-green); }
+        .timeline .step.purple::before { background: var(--accent-purple); }
+        .timeline .step.yellow::before { background: var(--accent-yellow); }
+
+        .box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1em;
+            margin: 0.5em 0;
+        }
+        .box-accent { border: 1px solid var(--accent-orange); }
+        .box-blue   { border: 1px solid var(--accent-blue); }
+
+        .agent-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8em;
+            justify-content: center;
+            margin: 0.8em 0;
+        }
+        .agent-item {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 0.7em 1em;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-align: center;
+            min-width: 140px;
+        }
+        .agent-item .port { font-size: 0.75em; color: #888; font-weight: 400; }
+
+        .arch-line {
+            font-family: var(--r-code-font);
+            font-size: 0.55em;
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 0.8em 1.2em;
+            line-height: 1.6;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+
+<!-- ============================================= -->
+<!-- SLIDE 1: Devoxx title background              -->
+<!-- ============================================= -->
+<section data-background-image="logodevoxxbe2026.jpg"
+         data-background-size="cover">
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 2: Workshop title                       -->
+<!-- ============================================= -->
+<section>
+    <p style="font-size: 0.6em; color: var(--accent-blue); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.3em;">
+        Hands-on Lab · Devoxx Belgium 2026
+    </p>
+    <h1><span class="accent">A2A</span> Agent Lab</h1>
+    <h3 style="color: var(--accent-blue); margin-top: 0.4em;">
+        Wiring Up the AI Mesh:<br>Building A2A-Compliant Java Agents
+    </h3>
+    <p class="medium" style="margin-top: 1em; color: #ccc;">
+        Java · Python · Quarkus · Spring Boot · WildFly — all talking A2A
+    </p>
+    <p class="small" style="margin-top: 1em;">
+        <span class="accent">Emmanuel Hugonnet</span> &bull;
+        <span class="accent">Mario Fusco</span> &bull;
+        <span class="accent">Kevin Dubois</span>
+    </p>
+    <aside class="notes">
+        Welcome everyone! Today you won't just watch slides — you will build a real multi-agent mesh.
+
+        Five exercises, five runtimes, one protocol. By the end you'll have agents in Quarkus, Spring Boot, Python and WildFly all talking to each other via the A2A protocol.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 3: Emmanuel                             -->
+<!-- ============================================= -->
+<section>
+    <h2>Your guide</h2>
+    <div class="speaker-card emmanuel" style="border-left-width: 6px;">
+        <div class="avatar">
+            <img src="eh.jpg" alt="Emmanuel Hugonnet"
+                 style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+        </div>
+        <div class="info">
+            <h3 style="color: var(--accent-blue);">Emmanuel Hugonnet (ehsavoie)</h3>
+            <p>25+ years in Java &bull; WildFly core developer</p>
+            <p>Co-creator of the <strong>A2A Java SDK</strong> &amp; langchain4j-cdi</p>
+            <p>
+                <span class="badge badge-blue">WildFly</span>
+                <span class="badge badge-blue">LangChain4j</span>
+                <span class="badge badge-blue">A2A Java SDK</span>
+                <span class="badge badge-blue">Apache NetBeans</span>
+            </p>
+        </div>
+    </div>
+    <div class="fragment" style="margin-top: 1.2em; text-align: center;">
+        <p style="font-size: 1.6em; font-weight: 900;">
+            &#x1F41D; <span class="accent-blue">IBM</span>
+        </p>
+        <p class="medium" style="color: #ccc; margin-top: 0.3em;">
+            The one who keeps <strong style="color: var(--accent-blue);">WildFly</strong> running so you don't have to
+        </p>
+        <p class="small" style="color: #999;">
+            <a href="https://github.com/ehsavoie" style="color: var(--accent-blue);">github.com/ehsavoie</a>
+        </p>
+    </div>
+    <aside class="notes">
+        I work at IBM on WildFly. I built the A2A Java SDK and the Jakarta EE integration that powers this lab.
+
+        I also co-created langchain4j-cdi — you may have seen that at other Devoxx talks.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 4: Mario                                -->
+<!-- ============================================= -->
+<section>
+    <h2>Your guide</h2>
+    <div class="speaker-card" style="border-left-width: 6px; border-left-color: var(--accent-orange);">
+        <div class="avatar">
+            <img src="mario.jpg" alt="Mario Fusco"
+                 style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+        </div>
+        <div class="info">
+            <h3 style="color: var(--accent-orange);">Mario Fusco</h3>
+            <p>Java Champion &bull; IBM</p>
+            <p>Co-author of <em>Modern Java in Action</em> (Manning)</p>
+            <p>Expert in functional programming, lambdas &amp; Drools</p>
+            <p>
+                <span class="badge badge-orange">Java Champion</span>
+                <span class="badge badge-orange">LangChain4j</span>
+                <span class="badge badge-orange">Agentic AI</span>
+                <span class="badge badge-orange">Drools</span>
+            </p>
+        </div>
+    </div>
+    <div class="fragment" style="margin-top: 1.2em; text-align: center;">
+        <p class="medium" style="color: #ccc; margin-top: 0.3em;">
+            The one who makes Java look like it was always meant to be functional
+        </p>
+        <p class="small" style="color: #999;">
+            <a href="https://github.com/mariofusco" style="color: var(--accent-blue);">github.com/mariofusco</a>
+        </p>
+    </div>
+    <aside class="notes">
+        Mario introduces himself.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 5: Kevin                                -->
+<!-- ============================================= -->
+<section>
+    <h2>Your guide</h2>
+    <div class="speaker-card" style="border-left-width: 6px; border-left-color: var(--accent-green);">
+        <div class="avatar">
+            <img src="kevin.jpg" alt="Kevin Dubois"
+                 style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+        </div>
+        <div class="info">
+            <h3 style="color: var(--accent-green);">Kevin Dubois</h3>
+            <p>IBM &bull; Quarkus contributor &bull; Developer advocate</p>
+            <p>
+                <span class="badge badge-green">Quarkus</span>
+                <span class="badge badge-green">LangChain4j</span>
+                <span class="badge badge-green">Agentic AI</span>
+                <span class="badge badge-green">Cloud Native</span>
+            </p>
+        </div>
+    </div>
+    <div class="fragment" style="margin-top: 1.2em; text-align: center;">
+        <p class="medium" style="color: #ccc; margin-top: 0.3em;">
+            The one who makes cloud-native Java look easy
+        </p>
+        <p class="small" style="color: #999;">
+            <a href="https://github.com/kdubois" style="color: var(--accent-blue);">github.com/kdubois</a>
+        </p>
+    </div>
+    <aside class="notes">
+        Kevin introduces himself.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 4: The story                            -->
+<!-- ============================================= -->
+<section>
+    <h2>The story</h2>
+    <p class="big" style="margin-bottom: 0.5em;">
+        DevConf 2026 — 5,000 attendees, one AI mesh
+    </p>
+    <div class="box box-accent fragment" style="font-size: 0.72em; text-align: left;">
+        <p style="color: #ccc; margin-bottom: 0.4em;">
+            &#x1F6EB; 8:15 AM &mdash; Maya lands at Brussels Airport. Her flight was delayed two hours.
+        </p>
+        <p style="color: #fff; font-style: italic; font-size: 1.05em;">
+            "My flight was delayed so I missed the morning shuttle. I'm interested in agentic AI and Java agents —
+            what talks should I catch today, how do I get to Kinepolis Antwerp quickly,
+            and can you log my taxi receipt?"
+        </p>
+    </div>
+    <div class="fragment" style="margin-top: 0.8em; font-size: 0.7em;">
+        <div class="agent-grid">
+            <div class="agent-item">&#x1F4C5; <strong>Schedule</strong><br><span class="port">sessions for Maya</span></div>
+            <div class="agent-item">&#x1F3E2; <strong>Venue</strong><br><span class="port">room capacity</span></div>
+            <div class="agent-item">&#x1F68C; <strong>Travel</strong><br><span class="port">Bolt vs NMBS</span></div>
+            <div class="agent-item">&#x1F4B3; <strong>Expense</strong><br><span class="port">log €45 taxi</span></div>
+            <div class="agent-item" style="border: 1px solid var(--accent-orange);">&#x1F9E0; <strong>Orchestrator</strong><br><span class="port">coordinates all</span></div>
+        </div>
+    </div>
+    <aside class="notes">
+        This is the scenario that runs through every exercise. Maya is your user. Each exercise adds one more specialist agent to the mesh.
+
+        By the end you'll have all five working together and Maya's question will be answered by four agents coordinated by a fifth.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 5: The A2A protocol                     -->
+<!-- ============================================= -->
+<section data-background-gradient="linear-gradient(135deg, #1a1a2e, #16213e)">
+    <h2>The glue:</h2>
+    <p class="huge"><span class="accent">A2A Protocol</span></p>
+    <p class="big" style="margin-top: 0.3em;">
+        <span class="accent-blue">Agent-to-Agent</span> — open standard
+    </p>
+    <p class="medium fragment" style="color: var(--accent-green); margin-bottom: 0.6em;">
+        &#x1F3DB;&#xFE0F; Now part of the <strong>Agentic AI Foundation</strong>
+    </p>
+    <div class="fragment" style="font-size: 0.72em;">
+        <div class="two-col">
+            <div class="box box-blue">
+                <p><strong style="color: var(--accent-blue);">&#x1F4CB; AgentCard</strong></p>
+                <p>Self-describing capability manifest at <code>/.well-known/agent.json</code></p>
+            </div>
+            <div class="box box-accent">
+                <p><strong style="color: var(--accent-orange);">&#x1F4E8; SendMessage</strong></p>
+                <p>Structured tasks with streaming &amp; async support</p>
+            </div>
+        </div>
+    </div>
+    <div class="fragment" style="margin-top: 0.6em; font-size: 0.72em;">
+        <div class="box" style="border: 1px solid var(--accent-purple);">
+            <p><strong style="color: var(--accent-purple);">&#x1F4E1; Multiple transports</strong></p>
+            <div style="display: flex; gap: 1em; justify-content: center; margin-top: 0.4em;">
+                <span class="badge badge-blue">JSON-RPC</span>
+                <span class="badge badge-orange">REST</span>
+                <span class="badge badge-purple">gRPC</span>
+            </div>
+        </div>
+    </div>
+    <p class="fragment medium" style="margin-top: 0.6em; color: #999;">
+        <em>"Any runtime, any language — if it speaks A2A, it joins the mesh"</em>
+    </p>
+    <aside class="notes">
+        A2A started as a Google-led open protocol. It's now under the Agentic AI Foundation, which gives it proper open governance.
+
+        It defines how agents advertise capabilities via an AgentCard and exchange tasks. It supports three transports: JSON-RPC, REST, and gRPC — so whatever your stack, there's a transport that fits.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 6: Architecture                         -->
+<!-- ============================================= -->
+<section>
+    <h2>The DevSphere mesh</h2>
+    <div class="arch-line" style="font-size: 0.48em;">
+                          User (Maya)
+                              │
+                   ┌──────────▼──────────┐
+                   │  Orchestrator       │  Quarkus :8090
+                   │  @SupervisorAgent   │  Exercise 5
+                   └──────────┬──────────┘
+                              │ A2A JSON-RPC
+                   ┌──────────▼──────────┐
+                   │  Concierge          │  Quarkus :8080
+                   ├─────────────────────┤
+                   │  schedule/   Ex. 1  │  @RegisterAiService + tools
+                   │  venue/      Ex. 2  │  Spring Boot + spring-a2a
+                   │  travel/     Ex. 3  │  Python A2A SDK
+                   │  expense/    Ex. 4  │  WildFly 41 + Jakarta EE
+                   └─────────────────────┘</div>
+    <p class="fragment small" style="margin-top: 0.8em; color: #777;">
+        Exercise 6 (bonus): same agent WAR on two WildFly nodes, shared PostgreSQL task store + Kafka replication
+    </p>
+    <aside class="notes">
+        Each exercise builds one layer of this architecture. By Exercise 5 you replace the four standalone agents with Concierge tenants and add the Orchestrator on top.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 7: Workshop agenda                      -->
+<!-- ============================================= -->
+<section>
+    <h2>Workshop agenda</h2>
+    <div class="timeline" style="font-size: 0.63em;">
+        <div class="step blue fragment">
+            <strong>&#x1F4AC; Exercise 1 — Your First A2A Agent</strong>
+            <span class="small"> — Quarkus + A2A Java SDK, AgentCard, AgentExecutor, <code>@RegisterAiService</code> tool calling</span>
+            <span class="small" style="color: #666;"> (30 min)</span>
+        </div>
+        <div class="step green fragment">
+            <strong>&#x1F3E2; Exercise 2 — Cross-Runtime Agents</strong>
+            <span class="small"> — Spring Boot + spring-a2a, IoT room capacity, indoor navigation</span>
+            <span class="small" style="color: #666;"> (20 min)</span>
+        </div>
+        <div class="step purple fragment">
+            <strong>&#x1F40D; Exercise 3 — Cross-Language Interop</strong>
+            <span class="small"> — Python A2A SDK, transit comparison, Java ↔ Python over A2A</span>
+            <span class="small" style="color: #666;"> (15 min)</span>
+        </div>
+        <div class="step fragment">
+            <strong>&#x1F4B3; Exercise 4 — Expense &amp; Compliance Agent</strong>
+            <span class="small"> — WildFly 41 + Jakarta EE, compliance rules, JAX-RS A2A client</span>
+            <span class="small" style="color: #666;"> (20 min)</span>
+        </div>
+        <div class="step blue fragment">
+            <strong>&#x1F9E0; Exercise 5 — The Orchestrator</strong>
+            <span class="small"> — <code>@SupervisorAgent</code>, <code>@A2AClientAgent</code>, multi-tenant Concierge, web UI</span>
+            <span class="small" style="color: #666;"> (25 min)</span>
+        </div>
+        <div class="step yellow fragment">
+            <strong>&#x1F680; Exercise 6 — Load-Balanced A2A (Bonus)</strong>
+            <span class="small"> — WildFly × 2, shared PostgreSQL task store, Kafka cross-node event replication</span>
+        </div>
+    </div>
+    <p class="fragment small" style="margin-top: 1em; color: #777;">
+        Each exercise has a <code>exercises/</code> skeleton and a <code>solutions/</code> reference — work at your own pace.
+    </p>
+    <aside class="notes">
+        Five main exercises, one bonus. Each one is self-contained — if you fall behind on one, grab the solution and move on.
+
+        The exercises are designed to be done in order: each one's output is the next one's input. By Exercise 5, all four agents are wired together.
+    </aside>
+</section>
+
+
+<!-- ============================================= -->
+<!-- SLIDE 8: Get the code                         -->
+<!-- ============================================= -->
+<section data-background-gradient="linear-gradient(135deg, #1a1a2e, #16213e)">
+    <h2>Get the code</h2>
+    <div style="display: flex; gap: 2em; align-items: center; justify-content: center; margin-top: 1em;">
+        <div style="text-align: center;">
+            <img src="a2a-repo-qr.png"
+                 alt="QR Code — GitHub repository"
+                 style="max-width: 260px; border-radius: 12px; background: white; padding: 8px;">
+            <p style="margin-top: 0.6em;">
+                <a href="https://github.com/ehsavoie/a2a-agent-lab-2026"
+                   style="color: var(--accent-blue); font-size: 0.55em; word-break: break-all;">
+                    https://github.com/ehsavoie/a2a-agent-lab-2026
+                </a>
+            </p>
+        </div>
+        <div style="text-align: center;">
+            <img src="ouvre-workshop.png"
+                 alt="Open the workshop"
+                 style="max-width: 260px; border-radius: 12px;">
+            <p class="small" style="margin-top: 0.6em; color: #ccc;">
+                Open <code>workshop/index.html</code><br>in your favourite browser.
+            </p>
+        </div>
+    </div>
+    <aside class="notes">
+        Scan the QR code or follow the link to clone the repository. Everything you need is there: these slides, the workshop guide, and all six exercises with base and solution modules.
+    </aside>
+</section>
+
+
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+    Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        transition: 'slide',
+        backgroundTransition: 'fade',
+        plugins: [ RevealHighlight, RevealNotes ]
+    });
+</script>
+</body>
+</html>
